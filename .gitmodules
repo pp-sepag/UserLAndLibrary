@@ -1,0 +1,3 @@
+[submodule "remote-desktop-clients-private"]
+	path = remote-desktop-clients-private
+	url = https://github.com/CypherpunkArmory/remote-desktop-clients-private.git
