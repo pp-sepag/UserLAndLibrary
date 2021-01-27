@@ -75,13 +75,13 @@ android {
             testCoverageEnabled true
             buildConfigField 'boolean', 'ENABLE_PLAY_SERVICES', 'false'
         }
-        beta {
-            versionNameSuffix "-beta-$defaultConfig.versionCode"
-            debuggable false
-            minifyEnabled false
-            signingConfig signingConfigs.beta
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+        //beta {
+        //    versionNameSuffix "-beta-$defaultConfig.versionCode"
+        //    debuggable false
+        //    minifyEnabled false
+        //    signingConfig signingConfigs.beta
+        //    proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        //}
         release {
             debuggable false
             minifyEnabled false
@@ -255,8 +255,6 @@ dependencies {
     def ktx_version = '1.0.2'
     def billing_version = '2.2.1'
 
-    implementation project(':terminal-term')
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_jdk_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinx_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinx_coroutines_version"
@@ -307,4 +305,11 @@ dependencies {
     }
     androidTestUtil "androidx.test:orchestrator:$androidx_test_version"
 
+    // Use the VNC viewer from BVNC
+    api 'androidx.multidex:multidex:2.0.0'
+    implementation project(':CustomVnc-app')
+    implementation project(':bVNC')
+
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
 }

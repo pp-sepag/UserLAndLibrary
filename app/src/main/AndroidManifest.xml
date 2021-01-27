@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="tech.ula">
 
+    <uses-permission tools:node="removeAll"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="com.android.vending.BILLING" />
@@ -21,7 +22,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:extractNativeLibs="true"
-        tools:replace="android:allowBackup, android:label, android:supportsRtl, android:theme">
+        tools:replace="android:allowBackup, android:label, android:supportsRtl, android:theme, android:icon">
 
         <activity android:name=".MainActivity" android:launchMode="singleTask">
             <intent-filter>
