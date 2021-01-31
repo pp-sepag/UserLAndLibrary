@@ -51,6 +51,8 @@ import tech.ula.viewmodel.* // ktlint-disable no-wildcard-imports
 import tech.ula.ui.FilesystemListFragment
 import tech.ula.model.repositories.DownloadMetadata
 import tech.ula.utils.preferences.* // ktlint-disable no-wildcard-imports
+import com.google.gson.Gson
+import tech.ula.model.entities.toServiceType
 
 class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, AppsListFragment.AppSelection, FilesystemListFragment.FilesystemListProgress {
 
@@ -142,6 +144,11 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 .get(MainActivityViewModel::class.java)
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        autoStart()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -173,6 +180,8 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         }
 
         viewModel.getState().observe(this, stateObserver)
+
+        autoStart()
     }
 
     private fun setNavStartDestination() {
@@ -220,6 +229,17 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_options, menu)
         return true
+    }
+
+    private fun autoStart() {
+        val prefs = getSharedPreferences("apps", Context.MODE_PRIVATE)
+        val json = prefs.getString("AutoApp", " ")
+        if (json != null)
+            if (json.compareTo(" ") != 0) {
+                val gson = Gson()
+                val autoApp = gson.fromJson(json, App::class.java)
+                appHasBeenSelected(autoApp,true)
+            }
     }
 
     override fun onStart() {
@@ -270,13 +290,13 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         unregisterReceiver(downloadBroadcastReceiver)
     }
 
-    override fun appHasBeenSelected(app: App) {
+    override fun appHasBeenSelected(app: App, autoStart: Boolean) {
         if (!PermissionHandler.permissionsAreGranted(this)) {
             PermissionHandler.showPermissionsNecessaryDialog(this)
             viewModel.waitForPermissions(appToContinue = app)
             return
         }
-        viewModel.submitAppSelection(app)
+        viewModel.submitAppSelection(app, autoStart)
     }
 
     override fun sessionHasBeenSelected(session: Session) {
@@ -398,10 +418,16 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 displayLowStorageDialog()
             }
             is FilesystemCredentialsRequired -> {
-                getCredentials()
+                if (BuildConfig.USE_DEFAULT_CREDS) {
+                    viewModel.submitFilesystemCredentials(BuildConfig.DEFAULT_USERNAME, BuildConfig.DEFAULT_SSH_PASSWORD, BuildConfig.DEFAULT_VNC_PASSWORD)
+                } else
+                    getCredentials()
             }
             is AppServiceTypePreferenceRequired -> {
-                getServiceTypePreference()
+                if (BuildConfig.USE_DEFAULT_SERVICE_TYPE)
+                    viewModel.submitAppServiceType(BuildConfig.DEFAULT_LAUNCH_TYPE.toServiceType())
+                else
+                    getServiceTypePreference()
             }
             is LargeDownloadRequired -> {
                 if (wifiIsEnabled()) {

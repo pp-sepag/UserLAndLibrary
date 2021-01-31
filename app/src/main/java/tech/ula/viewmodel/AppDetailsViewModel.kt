@@ -1,5 +1,7 @@
 package tech.ula.viewmodel
 
+import android.app.Activity
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.IdRes
@@ -7,7 +9,8 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import kotlinx.coroutines.* // ktlint-disable no-wildcard-imports
+import com.google.gson.Gson
+import kotlinx.coroutines.*
 import tech.ula.R
 import tech.ula.model.daos.SessionDao
 import tech.ula.model.entities.App
@@ -17,33 +20,38 @@ import tech.ula.utils.AppDetails
 import kotlin.coroutines.CoroutineContext
 
 data class AppDetailsViewState(
-    val appIconUri: Uri,
-    val appTitle: String,
-    val appDescription: String,
-    val sshEnabled: Boolean,
-    val vncEnabled: Boolean,
-    val xsdlEnabled: Boolean,
-    val describeStateHintEnabled: Boolean,
-    @StringRes val describeStateText: Int?,
-    @IdRes val selectedServiceTypeButton: Int?
+        val appIconUri: Uri,
+        val appTitle: String,
+        val appDescription: String,
+        val sshEnabled: Boolean,
+        val vncEnabled: Boolean,
+        val xsdlEnabled: Boolean,
+        val describeStateHintEnabled: Boolean,
+        @StringRes val describeStateText: Int?,
+        @IdRes val selectedServiceTypeButton: Int?,
+        val autoStartEnabled: Boolean
 )
 
 sealed class AppDetailsEvent {
     data class SubmitApp(val app: App) : AppDetailsEvent()
     data class ServiceTypeChanged(@IdRes val selectedButton: Int, val app: App) : AppDetailsEvent()
+    data class AutoStartChanged(val autoStartEnabled: Boolean, val app: App) : AppDetailsEvent()
 }
 
-class AppDetailsViewModel(private val sessionDao: SessionDao, private val appDetails: AppDetails, private val buildVersion: Int) : ViewModel(), CoroutineScope {
+class AppDetailsViewModel(private val sessionDao: SessionDao, private val appDetails: AppDetails, private val buildVersion: Int, private val activityContext: Activity) : ViewModel(), CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
     val viewState = MutableLiveData<AppDetailsViewState>()
 
+    private val prefs = activityContext.getSharedPreferences("apps", Context.MODE_PRIVATE)
+
     fun submitEvent(event: AppDetailsEvent, coroutineScope: CoroutineScope = this) = coroutineScope.launch {
         return@launch when (event) {
             is AppDetailsEvent.SubmitApp -> constructView(event.app)
             is AppDetailsEvent.ServiceTypeChanged -> handleServiceTypeChanged(event)
+            is AppDetailsEvent.AutoStartChanged -> handleAutoStartChanged(event)
         }
     }
 
@@ -79,6 +87,16 @@ class AppDetailsViewModel(private val sessionDao: SessionDao, private val appDet
             else -> null
         }
 
+        var autoAppEnabled = false
+        val gson = Gson()
+        val json = prefs.getString("AutoApp", " ")
+        if (json != null)
+            if (json.compareTo(" ") != 0) {
+                val autoApp = gson.fromJson(json, App::class.java)
+                if (autoApp.name.compareTo(appTitle) == 0)
+                    autoAppEnabled = true
+            }
+
         return AppDetailsViewState(
                 appIconUri,
                 appTitle,
@@ -88,7 +106,8 @@ class AppDetailsViewModel(private val sessionDao: SessionDao, private val appDet
                 xsdlEnabled,
                 describeStateHintEnabled,
                 describeStateText,
-                selectedServiceTypeButton
+                selectedServiceTypeButton,
+                autoAppEnabled
         )
     }
 
@@ -110,6 +129,23 @@ class AppDetailsViewModel(private val sessionDao: SessionDao, private val appDet
                     sessionDao.updateSession(appSession)
                 }
             }
+        }
+    }
+
+    private fun handleAutoStartChanged(event: AppDetailsEvent.AutoStartChanged) {
+        this.launch {
+            if (event.autoStartEnabled)
+                with(prefs.edit()) {
+                    val gson = Gson()
+                    val json= gson.toJson(event.app)
+                    putString("AutoApp", json)
+                    apply()
+                }
+            else
+                with(prefs.edit()) {
+                    remove("AutoApp")
+                    apply()
+                }
         }
     }
 
@@ -141,9 +177,9 @@ class AppDetailsViewModel(private val sessionDao: SessionDao, private val appDet
     }
 }
 
-class AppDetailsViewmodelFactory(private val sessionDao: SessionDao, private val appDetails: AppDetails, private val buildVersion: Int) : ViewModelProvider.NewInstanceFactory() {
+class AppDetailsViewmodelFactory(private val sessionDao: SessionDao, private val appDetails: AppDetails, private val buildVersion: Int, private val activityContext: Activity) : ViewModelProvider.NewInstanceFactory() {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         @Suppress("UNCHECKED_CAST")
-        return AppDetailsViewModel(sessionDao, appDetails, buildVersion) as T
+        return AppDetailsViewModel(sessionDao, appDetails, buildVersion, activityContext) as T
     }
 }
