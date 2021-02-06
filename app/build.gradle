@@ -313,7 +313,6 @@ dependencies {
 
     // Use the VNC viewer from BVNC
     api 'androidx.multidex:multidex:2.0.0'
-    implementation project(':bVNC-app')
     implementation project(':bVNC')
     implementation project(':pubkeyGenerator')
 

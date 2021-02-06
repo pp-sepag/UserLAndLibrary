@@ -6,12 +6,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.IBinder
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlinx.coroutines.* // ktlint-disable no-wildcard-imports
+import com.iiordanov.bVNC.Constants
+import com.iiordanov.bVNC.RemoteCanvasActivity
+import kotlinx.coroutines.*
 import tech.ula.model.entities.App
 import tech.ula.model.entities.ServiceType
-import tech.ula.model.repositories.UlaDatabase
 import tech.ula.model.entities.Session
-import tech.ula.utils.* // ktlint-disable no-wildcard-imports
+import tech.ula.model.repositories.UlaDatabase
+import tech.ula.utils.*
 import kotlin.coroutines.CoroutineContext
 
 class ServerService : Service(), CoroutineScope {
@@ -162,11 +164,9 @@ class ServerService : Service(), CoroutineScope {
     }
 
     private fun startVncClient(session: Session, packageName: String) {
-        val bVncIntent = Intent()
-        bVncIntent.action = Intent.ACTION_VIEW
-        bVncIntent.type = "application/vnd.vnc"
+        val bVncIntent = Intent(this, RemoteCanvasActivity::class.java)
         bVncIntent.data = Uri.parse("vnc://127.0.0.1:5951/?VncUsername=${session.username}&VncPassword=${session.vncPassword}")
-        bVncIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        bVncIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
         if (clientIsPresent(bVncIntent)) {
             this.startActivity(bVncIntent)

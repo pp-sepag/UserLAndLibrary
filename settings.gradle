@@ -1,8 +1,8 @@
 include ':app', ':terminal-view', ':terminal-emulator'
 project(':terminal-view').projectDir = new File('termux-app-private/terminal-view')
 project(':terminal-emulator').projectDir = new File('termux-app-private/terminal-emulator')
-include ':bVNC-app', ':bVNC', ':freeRDPCore', ':pubkeyGenerator', ':remoteClientLib'
-project(':bVNC-app').projectDir = new File('remote-desktop-clients-private/bVNC-app')
+
+include ':freeRDPCore', ':pubkeyGenerator', ':bVNC', ':remoteClientLib'
 project(':bVNC').projectDir = new File('remote-desktop-clients-private/bVNC')
 project(':freeRDPCore').projectDir = new File('remote-desktop-clients-private/freeRDPCore')
 project(':pubkeyGenerator').projectDir = new File('remote-desktop-clients-private/pubkeyGenerator')
