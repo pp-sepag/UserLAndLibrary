@@ -2,8 +2,6 @@ package tech.ula
 
 import android.app.AlertDialog
 import android.app.DownloadManager
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -15,44 +13,45 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
 import android.os.StatFs
-import com.google.android.material.textfield.TextInputEditText
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.appcompat.app.AppCompatActivity
 import android.util.DisplayMetrics
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.util.Log
+import android.view.*
 import android.view.animation.AlphaAnimation
 import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.NavigationUI.setupWithNavController
-import kotlinx.android.synthetic.main.activity_main.* // ktlint-disable no-wildcard-imports
+import com.google.android.material.textfield.TextInputEditText
+import com.google.gson.Gson
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tech.ula.model.entities.App
 import tech.ula.model.entities.ServiceType
 import tech.ula.model.entities.Session
+import tech.ula.model.entities.toServiceType
 import tech.ula.model.remote.GithubApiClient
 import tech.ula.model.repositories.AssetRepository
-import tech.ula.model.repositories.UlaDatabase
-import tech.ula.model.state.* // ktlint-disable no-wildcard-imports
-import tech.ula.ui.AppsListFragment
-import tech.ula.ui.SessionListFragment
-import tech.ula.utils.* // ktlint-disable no-wildcard-imports
-import tech.ula.viewmodel.* // ktlint-disable no-wildcard-imports
-import tech.ula.ui.FilesystemListFragment
 import tech.ula.model.repositories.DownloadMetadata
-import tech.ula.utils.preferences.* // ktlint-disable no-wildcard-imports
-import com.google.gson.Gson
-import tech.ula.model.entities.toServiceType
+import tech.ula.model.repositories.UlaDatabase
+import tech.ula.model.state.*
+import tech.ula.ui.AppsListFragment
+import tech.ula.ui.FilesystemListFragment
+import tech.ula.ui.SessionListFragment
+import tech.ula.utils.*
+import tech.ula.utils.preferences.*
+import tech.ula.viewmodel.*
+import java.net.InetAddress
 
 class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, AppsListFragment.AppSelection, FilesystemListFragment.FilesystemListProgress {
 
@@ -192,6 +191,12 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             else -> R.id.app_list_fragment
         }
         navController.graph = graph
+        val bottomNavView = this.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_nav_view)
+        if (defaultSharedPreferences.getBoolean("pref_hide_sessions_filesystems", false)){
+            bottomNavView.visibility = View.GONE
+        } else {
+            bottomNavView.visibility = View.VISIBLE
+        }
     }
 
     private fun setProgressDialogNavListeners() {
@@ -214,8 +219,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                     .setPositiveButton(R.string.button_ok) { dialog, _ ->
                         dialog.dismiss()
                     }
-                    .setNeutralButton(R.string.wiki) {
-                        dialog, _ ->
+                    .setNeutralButton(R.string.wiki) { dialog, _ ->
                         dialog.dismiss()
                         sendWikiIntent()
                     }
@@ -238,7 +242,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             if (json.compareTo(" ") != 0) {
                 val gson = Gson()
                 val autoApp = gson.fromJson(json, App::class.java)
-                appHasBeenSelected(autoApp,true)
+                appHasBeenSelected(autoApp, true)
             }
     }
 
@@ -291,6 +295,15 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     override fun appHasBeenSelected(app: App, autoStart: Boolean) {
+        val connectivityManager = ContextCompat.getSystemService(this, ConnectivityManager::class.java)
+        if (connectivityManager != null) {
+            val currentNetwork = connectivityManager.getActiveNetwork()
+            if (currentNetwork != null) {
+                val caps = connectivityManager.getNetworkCapabilities(currentNetwork)
+                val linkProperties = connectivityManager.getLinkProperties(currentNetwork)
+                Log.d("test", "test")
+            }
+        }
         if (!PermissionHandler.permissionsAreGranted(this)) {
             PermissionHandler.showPermissionsNecessaryDialog(this)
             viewModel.waitForPermissions(appToContinue = app)
@@ -310,16 +323,28 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     private fun handleStateUpdate(newState: State) {
         return when (newState) {
-            is WaitingForInput -> { killProgressBar() }
+            is WaitingForInput -> {
+                killProgressBar()
+            }
             is CanOnlyStartSingleSession -> {
                 showToast(R.string.single_session_supported)
                 viewModel.handleUserInputCancelled()
             }
-            is SessionCanBeStarted -> { prepareSessionForStart(newState.session) }
-            is SessionCanBeRestarted -> { restartRunningSession(newState.session) }
-            is IllegalState -> { handleIllegalState(newState) }
-            is UserInputRequiredState -> { handleUserInputState(newState) }
-            is ProgressBarUpdateState -> { handleProgressBarUpdateState(newState) }
+            is SessionCanBeStarted -> {
+                prepareSessionForStart(newState.session)
+            }
+            is SessionCanBeRestarted -> {
+                restartRunningSession(newState.session)
+            }
+            is IllegalState -> {
+                handleIllegalState(newState)
+            }
+            is UserInputRequiredState -> {
+                handleUserInputState(newState)
+            }
+            is ProgressBarUpdateState -> {
+                handleProgressBarUpdateState(newState)
+            }
         }
     }
 
@@ -449,8 +474,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         AlertDialog.Builder(this)
                 .setMessage(displayMessage)
                 .setTitle(R.string.illegal_state_title)
-                .setPositiveButton(R.string.button_ok) {
-                    dialog, _ ->
+                .setPositiveButton(R.string.button_ok) { dialog, _ ->
                     dialog.dismiss()
                 }
                 .create().show()
@@ -465,7 +489,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             }
             "playStoreMissingForClient" ->
                 displayGenericErrorDialog(R.string.alert_need_client_app_title,
-                    R.string.alert_need_client_app_message)
+                        R.string.alert_need_client_app_message)
         }
     }
 
@@ -604,20 +628,17 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         val builder = AlertDialog.Builder(this)
         builder.setMessage(R.string.alert_wifi_disabled_message)
                 .setTitle(R.string.alert_wifi_disabled_title)
-                .setPositiveButton(R.string.alert_wifi_disabled_continue_button) {
-                    dialog, _ ->
+                .setPositiveButton(R.string.alert_wifi_disabled_continue_button) { dialog, _ ->
                     dialog.dismiss()
                     viewModel.startAssetDownloads(downloadsToContinue)
                 }
-                .setNegativeButton(R.string.alert_wifi_disabled_turn_on_wifi_button) {
-                    dialog, _ ->
+                .setNegativeButton(R.string.alert_wifi_disabled_turn_on_wifi_button) { dialog, _ ->
                     dialog.dismiss()
                     startActivity(Intent(WifiManager.ACTION_PICK_WIFI_NETWORK))
                     viewModel.handleUserInputCancelled()
                     killProgressBar()
                 }
-                .setNeutralButton(R.string.alert_wifi_disabled_cancel_button) {
-                    dialog, _ ->
+                .setNeutralButton(R.string.alert_wifi_disabled_cancel_button) { dialog, _ ->
                     dialog.dismiss()
                     viewModel.handleUserInputCancelled()
                     killProgressBar()

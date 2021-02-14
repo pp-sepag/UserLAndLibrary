@@ -1,15 +1,20 @@
 package tech.ula.ui
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import tech.ula.R
-import androidx.preference.PreferenceFragmentCompat
+import android.view.View
+import androidx.navigation.fragment.findNavController
+import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import tech.ula.R
 import tech.ula.utils.ProotDebugLogger
 import tech.ula.utils.UlaFiles
 import tech.ula.utils.defaultSharedPreferences
+import tech.ula.utils.find
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -26,6 +31,30 @@ class SettingsFragment : PreferenceFragmentCompat() {
             prootDebugLogger.deleteLogs()
             true
         }
+
+        val clearAutoStartPreference: Preference = findPreference("pref_clear_auto_start")!!
+        clearAutoStartPreference.setOnPreferenceClickListener {
+            val prefs = activity!!.getSharedPreferences("apps", Context.MODE_PRIVATE)
+            with(prefs.edit()) {
+                remove("AutoApp")
+                apply()
+                true
+            }
+        }
+
+        val hideSessionsFilesystemsPreference: CheckBoxPreference = findPreference("pref_hide_sessions_filesystems")!!
+        hideSessionsFilesystemsPreference.setOnPreferenceChangeListener { preference, newValue ->
+            if (newValue is Boolean) {
+                val bottomNavView = activity!!.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_nav_view)
+                if (newValue) {
+                    bottomNavView.visibility = View.GONE
+                } else {
+                    bottomNavView.visibility = View.VISIBLE
+                }
+            }
+            true
+        }
+
     }
 
     override fun setDivider(divider: Drawable?) {

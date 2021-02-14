@@ -5,9 +5,9 @@ import tech.ula.model.entities.Session
 import java.io.File
 
 class LocalServerManager(
-    private val applicationFilesDirPath: String,
-    private val busyboxExecutor: BusyboxExecutor,
-    private val logger: Logger = SentryLogger()
+        private val applicationFilesDirPath: String,
+        private val busyboxExecutor: BusyboxExecutor,
+        private val logger: Logger = SentryLogger()
 ) {
 
     private val vncDisplayNumber = 51
@@ -18,6 +18,13 @@ class LocalServerManager(
                 .substringBefore(",")
                 .substringBefore("]")
                 .trim().toLong()
+    }
+
+    private fun getProperty(name: String): String {
+        var output = ""
+        val proc = Runtime.getRuntime().exec("getprop ${name}")
+        proc.inputStream.bufferedReader(Charsets.UTF_8).forEachLine { output += it }
+        return output
     }
 
     fun startServer(session: Session): Long {
@@ -87,6 +94,11 @@ class LocalServerManager(
         env["INITIAL_USERNAME"] = session.username
         env["INITIAL_VNC_PASSWORD"] = session.vncPassword
         env["DIMENSIONS"] = session.geometry
+        env["HOSTNAME"] = getProperty("net.hostname")
+        env["DNS1"] = getProperty("net.dns1")
+        env["DNS2"] = getProperty("net.dns2")
+        env["DNS3"] = getProperty("net.dns3")
+        env["DNS4"] = getProperty("net.dns4")
 
         val result = busyboxExecutor.executeProotCommand(
                 command,
