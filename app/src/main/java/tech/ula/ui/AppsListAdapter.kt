@@ -14,6 +14,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import tech.ula.R
 import tech.ula.model.entities.App
 import tech.ula.utils.AppDetails
+import tech.ula.utils.defaultSharedPreferences
 
 class AppsListAdapter(
     private val activity: Activity,
@@ -125,6 +126,8 @@ class AppsListAdapter(
     }
 
     private fun insertAppIntoView(app: App) {
+        if (activity.defaultSharedPreferences.getBoolean("pref_hide_distributions", false) && (app.category == firstDisplayCategory))
+            return
         val foundIndex = apps.binarySearch(app, compareBy(
                 // Sort the list by three criteria of descending importance
                 { it.category != firstDisplayCategory },
