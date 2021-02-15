@@ -307,5 +307,6 @@
     <!-- Advanced options -->
     <string name="desc_import_backups_should_use_same_settings">Fill out the same: \n\n\u2022 username \n\u2022 password \n\u2022 VNC password \n\u2022 distribution \n\n as the backup to ensure smooth functionality</string>
     <string name="auto_start_checkbox">Enable Auto Start</string>
+    <string name="filesystem_protected_text">Protected:</string>
 
 </resources>

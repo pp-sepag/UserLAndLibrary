@@ -104,7 +104,12 @@ class FilesystemListFragment : Fragment() {
 
     override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo)
+        val menuInfoInt = menuInfo as AdapterView.AdapterContextMenuInfo
+        val position = menuInfoInt.position
+        val filesystem = filesystemList[position]
         activityContext.menuInflater.inflate(R.menu.context_menu_filesystems, menu)
+        if (filesystem.isProtected)
+            menu.removeItem(R.id.menu_item_filesystem_delete)
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {

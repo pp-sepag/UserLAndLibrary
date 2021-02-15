@@ -18,11 +18,12 @@ data class Filesystem(
     var defaultVncPassword: String = "",
     var isAppsFilesystem: Boolean = false,
     var versionCodeUsed: String = "v0.0.0",
-    var isCreatedFromBackup: Boolean = false
+    var isCreatedFromBackup: Boolean = false,
+    var isProtected: Boolean = false
 ) : Parcelable {
     override fun toString(): String {
         return "Filesystem(id=$id, name=$name, distributionType=$distributionType, archType=" +
                 "$archType, isAppsFilesystem=$isAppsFilesystem, versionCodeUsed=$versionCodeUsed, " +
-                "isCreatedFromBackup=$isCreatedFromBackup"
+                "isCreatedFromBackup=$isCreatedFromBackup, " + "isProtected=$isProtected"
     }
 }

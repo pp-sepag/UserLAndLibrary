@@ -58,6 +58,7 @@ class FilesystemEditViewModel(private val ulaDatabase: UlaDatabase) : ViewModel(
 
             if (filesystem.name.toLowerCase(Locale.ENGLISH) == "apps") filesystem.isAppsFilesystem = true
             filesystem.isCreatedFromBackup = true
+            filesystem.isProtected = false
             val id = ulaDatabase.filesystemDao().insertFilesystem(filesystem)
 
             try {

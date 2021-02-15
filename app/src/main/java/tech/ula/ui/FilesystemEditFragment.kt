@@ -28,11 +28,7 @@ import tech.ula.utils.PermissionHandler
 import tech.ula.utils.CredentialValidator
 import tech.ula.utils.UlaFiles
 import tech.ula.utils.preferences.AppsPreferences
-import tech.ula.viewmodel.FilesystemImportStatus
-import tech.ula.viewmodel.ImportSuccess
-import tech.ula.viewmodel.ImportFailure
-import tech.ula.viewmodel.FilesystemEditViewModel
-import tech.ula.viewmodel.FilesystemEditViewmodelFactory
+import tech.ula.viewmodel.*
 import java.util.Locale
 
 class FilesystemEditFragment : Fragment() {
@@ -109,9 +105,11 @@ class FilesystemEditFragment : Fragment() {
         if (editExisting) {
             btn_show_advanced_options.visibility = View.GONE
             spinner_filesystem_type.isEnabled = false
+            filesystem_protected.isChecked = filesystem.isProtected
         } else {
             setupImportButton()
             setupAdvancedOptionButton()
+            filesystem_protected.isChecked = false
         }
         spinner_filesystem_type.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
@@ -120,6 +118,9 @@ class FilesystemEditFragment : Fragment() {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 filesystem.distributionType = parent?.getItemAtPosition(position).toString().toLowerCase(Locale.ENGLISH)
             }
+        }
+        filesystem_protected.setOnCheckedChangeListener() { _, checked ->
+            filesystem.isProtected = checked
         }
     }
 
