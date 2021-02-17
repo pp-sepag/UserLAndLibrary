@@ -2,6 +2,7 @@ package tech.ula.model.remote
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import tech.ula.BuildConfig
 import tech.ula.model.entities.App
 import tech.ula.utils.* // ktlint-disable no-wildcard-imports
 import java.io.File
@@ -10,6 +11,7 @@ import java.util.Locale
 
 class GithubAppsFetcher(
     private val filesDirPath: String,
+    private val baseUrl: String,
     private val httpStream: HttpStream = HttpStream(),
     private val logger: Logger = SentryLogger()
 ) {
@@ -17,9 +19,6 @@ class GithubAppsFetcher(
     // Allows destructing of the list of application elements
     private operator fun <T> List<T>.component6() = get(5)
     private operator fun <T> List<T>.component7() = get(6)
-
-    private val branch = "master" // Base off different support branches for testing.
-    private val baseUrl = "https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/$branch/apps"
 
     @Throws(IOException::class)
     suspend fun fetchAppsList(): List<App> = withContext(Dispatchers.IO) {

@@ -16,6 +16,7 @@ import android.view.MenuInflater
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.frag_app_list.* // ktlint-disable no-wildcard-imports
+import tech.ula.BuildConfig
 import tech.ula.MainActivity
 import tech.ula.R
 import tech.ula.ServerService
@@ -54,7 +55,10 @@ class AppsListFragment : Fragment(), AppsListAdapter.AppsClickHandler {
     private val viewModel: AppsListViewModel by lazy {
         val ulaDatabase = UlaDatabase.getInstance(activityContext)
         val appsDao = ulaDatabase.appsDao()
-        val githubFetcher = GithubAppsFetcher("${activityContext.filesDir}")
+        var appsUrl = BuildConfig.DEFAULT_APPS_URL
+        if (activityContext.defaultSharedPreferences.getBoolean("pref_custom_apps_enabled", false))
+            appsUrl = activityContext.defaultSharedPreferences.getString("pref_apps", BuildConfig.DEFAULT_APPS_URL)!!
+        val githubFetcher = GithubAppsFetcher("${activityContext.filesDir}",appsUrl)
 
         val appsRepository = AppsRepository(appsDao, githubFetcher, appsPreferences)
         ViewModelProviders.of(this, AppsListViewModelFactory(appsRepository))

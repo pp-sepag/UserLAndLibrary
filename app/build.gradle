@@ -37,6 +37,7 @@ android {
         buildConfigField "String", "DEFAULT_USERNAME", "\"userland\""
         buildConfigField 'boolean', 'USE_DEFAULT_SERVICE_TYPE', 'true'
         buildConfigField "String", "DEFAULT_LAUNCH_TYPE", "\"vnc\""
+        buildConfigField "String", "DEFAULT_APPS_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/master/apps\""
 
         // Ignore Sentry packages that cause lint failure
         lintOptions {
