@@ -145,7 +145,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        autoStart()
+        if (intent?.type.equals("settings"))
+            navController.navigate(R.id.settings_fragment)
+        else
+            autoStart()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

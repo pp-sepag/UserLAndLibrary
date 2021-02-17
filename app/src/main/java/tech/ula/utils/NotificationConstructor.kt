@@ -45,8 +45,13 @@ class NotificationConstructor(val context: Context) {
                 .getActivity(context, 0, sessionListIntent, 0)
 
         val stopSessionsIntent = Intent(context, ServerService::class.java).putExtra("type", "stopAll")
-        val stopSessionsPendingIntent = PendingIntent.getService(context, 0,
-                stopSessionsIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val stopSessionsPendingIntent = PendingIntent
+                .getService(context, 0, stopSessionsIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val settingsIntent = Intent(context, MainActivity::class.java)
+        settingsIntent.type = "settings"
+        val settingsPendingIntent = PendingIntent
+                .getActivity(context, 0, settingsIntent, 0)
 
         val builder = NotificationCompat.Builder(context, serviceNotificationChannelId)
                 .setSmallIcon(R.drawable.ic_stat_icon)
@@ -57,8 +62,8 @@ class NotificationConstructor(val context: Context) {
                 .setGroupSummary(true)
                 .setAutoCancel(false)
                 .setContentIntent(pendingSessionListIntent)
-                .addAction(R.drawable.ic_stat_icon, "Stop Sessions",
-                        stopSessionsPendingIntent)
+                .addAction(0, "Stop Sessions", stopSessionsPendingIntent)
+                .addAction(0, "Settings", settingsPendingIntent)
 
         return builder.build()
     }
