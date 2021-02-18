@@ -64,7 +64,7 @@
             android:dependency="pref_custom_apps_enabled"
             android:key="pref_apps"
             android:title="@string/pref_apps_title"
-            android:defaultValue="${DEFAULT_APPS_URL}"
+            android:defaultValue="@string/default_apps_url"
             app:iconSpaceReserved="false"/>
         <CheckBoxPreference
             android:key="pref_custom_filesystem_enabled"
