@@ -156,11 +156,9 @@
     <string name="pref_custom_hostname_enabled_title">Use Custom Hosts File</string>
     <string name="pref_custom_hostname_enabled_summary">Allows you to specify custom contents for the /etc/hosts file.</string>
     <string name="pref_hostname_title">Set Custom Hosts File Contents</string>
-    <string name="pref_hostname_default">127.0.0.1 localhost</string>
     <string name="pref_custom_dns_enabled_title">Use Custom reslov.conf File</string>
     <string name="pref_custom_dns_enabled_summary">Allows you to specify custom contents for the /etc/resolv.conf file.</string>
     <string name="pref_dns_title">Set resolv.conf File Contents</string>
-    <string name="pref_dns_default">nameserver 8.8.8.8\nnameserver 8.8.4.4</string>
     <string name="pref_custom_apps_enabled_title">Use Custom URL for Apps Server</string>
     <string name="pref_custom_apps_enabled_summary">Allows specifying a custom URL for the server which hosts the apps to list.</string>
     <string name="pref_apps_title">Set URL for Apps Server</string>

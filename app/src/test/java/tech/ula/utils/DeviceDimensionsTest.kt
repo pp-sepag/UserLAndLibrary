@@ -41,7 +41,7 @@ class DeviceDimensionsTest {
     @Test
     fun `Device dimensions that are taller in height will have the height value first`() {
         setDimensions(mockDisplayMetrics, width = 100, height = 200)
-        mockDeviceDimensions.saveDeviceDimensions(mockWindowManager, mockDisplayMetrics, Configuration.ORIENTATION_PORTRAIT)
+        mockDeviceDimensions.saveDeviceDimensions(mockWindowManager, mockDisplayMetrics, Configuration.ORIENTATION_PORTRAIT, defaultSharedPreferences)
         val geometry = mockDeviceDimensions.getScreenResolution()
         assertEquals(geometry, "200x100")
     }
@@ -49,7 +49,7 @@ class DeviceDimensionsTest {
     @Test
     fun `Device dimensions that are longer in width will have the width value first`() {
         setDimensions(mockDisplayMetrics, width = 300, height = 200)
-        mockDeviceDimensions.saveDeviceDimensions(mockWindowManager, mockDisplayMetrics, Configuration.ORIENTATION_PORTRAIT)
+        mockDeviceDimensions.saveDeviceDimensions(mockWindowManager, mockDisplayMetrics, Configuration.ORIENTATION_PORTRAIT, defaultSharedPreferences)
         val geometry = mockDeviceDimensions.getScreenResolution()
         assertEquals(geometry, "300x200")
     }

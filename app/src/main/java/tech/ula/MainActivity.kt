@@ -14,7 +14,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.StatFs
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.*
 import android.view.animation.AlphaAnimation
 import android.widget.RadioButton
@@ -51,7 +50,7 @@ import tech.ula.ui.SessionListFragment
 import tech.ula.utils.*
 import tech.ula.utils.preferences.*
 import tech.ula.viewmodel.*
-import java.net.InetAddress
+import java.util.*
 
 class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, AppsListFragment.AppSelection, FilesystemListFragment.FilesystemListProgress {
 
@@ -238,6 +237,30 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         return true
     }
 
+    private fun getNetInfo() {
+        val connectivityManager = ContextCompat.getSystemService(this, ConnectivityManager::class.java)
+        if (connectivityManager != null) {
+            val currentNetwork = connectivityManager.getActiveNetwork()
+            if (currentNetwork != null) {
+                val linkProperties = connectivityManager.getLinkProperties(currentNetwork)
+                val dnsServers = linkProperties.dnsServers
+                with(defaultSharedPreferences.edit()) {
+                    if (dnsServers.size > 0)
+                        putString("current_dns0",dnsServers[0].toString())
+                    if (dnsServers.size > 1)
+                        putString("current_dns1",dnsServers[1].toString())
+                    apply()
+                }
+            }
+        }
+        if (!defaultSharedPreferences.contains("unique_id")) {
+            with(defaultSharedPreferences.edit()) {
+                putString("unique_id",UUID.randomUUID().toString())
+                apply()
+            }
+        }
+    }
+
     private fun autoStart() {
         val prefs = getSharedPreferences("apps", Context.MODE_PRIVATE)
         val json = prefs.getString("AutoApp", " ")
@@ -298,15 +321,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     override fun appHasBeenSelected(app: App, autoStart: Boolean) {
-        val connectivityManager = ContextCompat.getSystemService(this, ConnectivityManager::class.java)
-        if (connectivityManager != null) {
-            val currentNetwork = connectivityManager.getActiveNetwork()
-            if (currentNetwork != null) {
-                val caps = connectivityManager.getNetworkCapabilities(currentNetwork)
-                val linkProperties = connectivityManager.getLinkProperties(currentNetwork)
-                Log.d("test", "test")
-            }
-        }
+        getNetInfo()
         if (!PermissionHandler.permissionsAreGranted(this)) {
             PermissionHandler.showPermissionsNecessaryDialog(this)
             viewModel.waitForPermissions(appToContinue = app)
@@ -316,6 +331,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     override fun sessionHasBeenSelected(session: Session) {
+        getNetInfo()
         if (!PermissionHandler.permissionsAreGranted(this)) {
             PermissionHandler.showPermissionsNecessaryDialog(this)
             viewModel.waitForPermissions(sessionToContinue = session)
@@ -380,7 +396,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         val windowManager = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         val orientation = applicationContext.resources.configuration.orientation
-        deviceDimensions.saveDeviceDimensions(windowManager, DisplayMetrics(), orientation)
+        deviceDimensions.saveDeviceDimensions(windowManager, DisplayMetrics(), orientation, defaultSharedPreferences)
         session.geometry = deviceDimensions.getScreenResolution()
     }
 

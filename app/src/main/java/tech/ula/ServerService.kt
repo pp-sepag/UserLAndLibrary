@@ -41,7 +41,7 @@ class ServerService : Service(), CoroutineScope {
     }
 
     private val localServerManager by lazy {
-        LocalServerManager(this.filesDir.path, busyboxExecutor)
+        LocalServerManager(this.filesDir.path, busyboxExecutor, this.defaultSharedPreferences)
     }
 
     override fun onCreate() {

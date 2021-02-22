@@ -39,6 +39,13 @@ android {
         buildConfigField "String", "DEFAULT_LAUNCH_TYPE", "\"vnc\""
         buildConfigField "String", "DEFAULT_APPS_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/master/apps\""
         resValue "string", "default_apps_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/master/apps\""
+        buildConfigField "String", "DEFAULT_HOSTNAME", "\"127.0.0.1 localhost\""
+        resValue "string", "pref_hostname_default", "\"127.0.0.1 localhost\""
+        buildConfigField "String", "DEFAULT_DNS", "\"nameserver 8.8.8.8\\nnameserver 8.8.4.4\""
+        resValue "string", "pref_dns_default", "\"nameserver 8.8.8.8\\nnameserver 8.8.4.4\""
+        buildConfigField 'boolean', 'FORCE_PORTRAIT_GEOMETRY', 'false'
+        buildConfigField 'int', "MAX_DIMENSION", "1000"
+        buildConfigField 'int', "MIN_DIMENSION", "360"
 
         // Ignore Sentry packages that cause lint failure
         lintOptions {

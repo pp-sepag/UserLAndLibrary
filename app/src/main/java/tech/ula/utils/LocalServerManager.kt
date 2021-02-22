@@ -1,5 +1,8 @@
 package tech.ula.utils
 
+import android.content.SharedPreferences
+import tech.ula.BuildConfig
+import tech.ula.R
 import tech.ula.model.entities.ServiceType
 import tech.ula.model.entities.Session
 import java.io.File
@@ -7,6 +10,7 @@ import java.io.File
 class LocalServerManager(
         private val applicationFilesDirPath: String,
         private val busyboxExecutor: BusyboxExecutor,
+        private val sharedPreferences: SharedPreferences,
         private val logger: Logger = SentryLogger()
 ) {
 
@@ -94,11 +98,24 @@ class LocalServerManager(
         env["INITIAL_USERNAME"] = session.username
         env["INITIAL_VNC_PASSWORD"] = session.vncPassword
         env["DIMENSIONS"] = session.geometry
-        env["HOSTNAME"] = getProperty("net.hostname")
-        env["DNS1"] = getProperty("net.dns1")
-        env["DNS2"] = getProperty("net.dns2")
-        env["DNS3"] = getProperty("net.dns3")
-        env["DNS4"] = getProperty("net.dns4")
+        if (sharedPreferences.getBoolean("pref_custom_hostname_enabled",false)) {
+            env["HOSTS"] = sharedPreferences.getString("pref_hostname", BuildConfig.DEFAULT_USERNAME)!!
+        } else {
+            if (sharedPreferences.contains("unique_id"))
+                env["HOSTS"] = "127.0.0.1 android-" + sharedPreferences.getString("unique_id", "localhost")!!
+            else
+                env["HOSTS"] = BuildConfig.DEFAULT_USERNAME
+        }
+        if (sharedPreferences.getBoolean("pref_custom_dns_enabled",false)) {
+            env["RESOLV"] = sharedPreferences.getString("pref_dns", BuildConfig.DEFAULT_DNS)!!
+        } else {
+            if (sharedPreferences.contains("current_dns0")) {
+                env["RESOLV"] = "nameserver " + sharedPreferences.getString("current_dns0", "localhost")!!.removePrefix("/")
+                if (sharedPreferences.contains("current_dns1"))
+                    env["RESOLV"] += "\nnameserver " + sharedPreferences.getString("current_dns1", "localhost")!!.removePrefix("/")
+            } else
+                env["RESOLV"] = BuildConfig.DEFAULT_DNS
+        }
 
         val result = busyboxExecutor.executeProotCommand(
                 command,
