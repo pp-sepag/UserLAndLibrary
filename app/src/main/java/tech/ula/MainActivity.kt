@@ -162,15 +162,15 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         setupWithNavController(bottom_nav_view, navController)
 
         val promptViewHolder = findViewById<ViewGroup>(R.id.layout_user_prompt_insert)
-        if (userFeedbackPrompter.viewShouldBeShown()) {
+        if (userFeedbackPrompter.viewShouldBeShown() && BuildConfig.ASK_FOR_FEEDBACK) {
             userFeedbackPrompter.showView()
         }
 
-        if (optInPrompter.viewShouldBeShown()) {
+        if (optInPrompter.viewShouldBeShown() && BuildConfig.HAS_LOGGER) {
             optInPrompter.showView()
         }
 
-        if (contributionPrompter.viewShouldBeShown()) {
+        if (contributionPrompter.viewShouldBeShown() && BuildConfig.ASK_FOR_CONTRIBUTION) {
             contributionPrompter.showView()
         }
 

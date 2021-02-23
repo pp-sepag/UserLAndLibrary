@@ -1,5 +1,6 @@
 package tech.ula.utils
 
+import android.content.SharedPreferences
 import com.nhaarman.mockitokotlin2.* // ktlint-disable no-wildcard-imports
 import org.junit.Assert.* // ktlint-disable no-wildcard-imports
 import org.junit.Before
@@ -23,6 +24,8 @@ class LocalServerManagerTest {
     @Mock lateinit var mockLogger: Logger
 
     @Mock lateinit var mockProcess: Process
+
+    @Mock lateinit var mockSharedPreferences: SharedPreferences
 
     private lateinit var sshPidFile: File
     private lateinit var vncPidFile: File
@@ -56,7 +59,7 @@ class LocalServerManagerTest {
     fun setup() {
         whenever(mockProcess.toString()).thenReturn("pid=$fakePid],")
 
-        localServerManager = LocalServerManager(tempFolder.root.path, mockBusyboxExecutor, mockLogger)
+        localServerManager = LocalServerManager(tempFolder.root.path, mockBusyboxExecutor, mockSharedPreferences, mockLogger)
     }
 
     @Test

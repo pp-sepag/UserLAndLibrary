@@ -11,6 +11,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import tech.ula.BuildConfig
 import tech.ula.model.entities.App
 import tech.ula.utils.HttpStream
 import tech.ula.utils.Logger
@@ -40,7 +41,7 @@ class GithubAppsFetcherTest {
     fun setup() {
         testFilesDir = tempFolder.root
 
-        githubAppsFetcher = GithubAppsFetcher(testFilesDir.path, mockHttpStream, logger)
+        githubAppsFetcher = GithubAppsFetcher(testFilesDir.path, BuildConfig.DEFAULT_APPS_URL, mockHttpStream, logger)
     }
 
     @Test

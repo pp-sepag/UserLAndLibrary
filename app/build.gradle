@@ -46,6 +46,9 @@ android {
         buildConfigField 'boolean', 'FORCE_PORTRAIT_GEOMETRY', 'false'
         buildConfigField 'int', "MAX_DIMENSION", "1000"
         buildConfigField 'int', "MIN_DIMENSION", "360"
+        buildConfigField 'boolean', 'HAS_LOGGER', 'false'
+        buildConfigField 'boolean', 'ASK_FOR_FEEDBACK', 'false'
+        buildConfigField 'boolean', 'ASK_FOR_CONTRIBUTION', 'false'
 
         // Ignore Sentry packages that cause lint failure
         lintOptions {

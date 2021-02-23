@@ -2,6 +2,7 @@ package tech.ula.viewmodel
 
 import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.IdRes
@@ -38,14 +39,12 @@ sealed class AppDetailsEvent {
     data class AutoStartChanged(val autoStartEnabled: Boolean, val app: App) : AppDetailsEvent()
 }
 
-class AppDetailsViewModel(private val sessionDao: SessionDao, private val appDetails: AppDetails, private val buildVersion: Int, private val activityContext: Activity) : ViewModel(), CoroutineScope {
+class AppDetailsViewModel(private val sessionDao: SessionDao, private val appDetails: AppDetails, private val buildVersion: Int, private val prefs: SharedPreferences) : ViewModel(), CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
     val viewState = MutableLiveData<AppDetailsViewState>()
-
-    private val prefs = activityContext.getSharedPreferences("apps", Context.MODE_PRIVATE)
 
     fun submitEvent(event: AppDetailsEvent, coroutineScope: CoroutineScope = this) = coroutineScope.launch {
         return@launch when (event) {
@@ -177,9 +176,9 @@ class AppDetailsViewModel(private val sessionDao: SessionDao, private val appDet
     }
 }
 
-class AppDetailsViewmodelFactory(private val sessionDao: SessionDao, private val appDetails: AppDetails, private val buildVersion: Int, private val activityContext: Activity) : ViewModelProvider.NewInstanceFactory() {
+class AppDetailsViewmodelFactory(private val sessionDao: SessionDao, private val appDetails: AppDetails, private val buildVersion: Int, private val prefs: SharedPreferences) : ViewModelProvider.NewInstanceFactory() {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         @Suppress("UNCHECKED_CAST")
-        return AppDetailsViewModel(sessionDao, appDetails, buildVersion, activityContext) as T
+        return AppDetailsViewModel(sessionDao, appDetails, buildVersion, prefs) as T
     }
 }

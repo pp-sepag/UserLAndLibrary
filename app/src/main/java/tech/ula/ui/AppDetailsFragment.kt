@@ -1,6 +1,7 @@
 package tech.ula.ui
 
 import android.app.Activity
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -31,7 +32,7 @@ class AppDetailsFragment : Fragment() {
         val sessionDao = UlaDatabase.getInstance(activityContext).sessionDao()
         val appDetails = AppDetails(activityContext.filesDir.path, activityContext.resources)
         val buildVersion = Build.VERSION.SDK_INT
-        val factory = AppDetailsViewmodelFactory(sessionDao, appDetails, buildVersion, activityContext)
+        val factory = AppDetailsViewmodelFactory(sessionDao, appDetails, buildVersion, activityContext.getSharedPreferences("apps", Context.MODE_PRIVATE))
         ViewModelProviders.of(this, factory)
                 .get(AppDetailsViewModel::class.java)
     }
