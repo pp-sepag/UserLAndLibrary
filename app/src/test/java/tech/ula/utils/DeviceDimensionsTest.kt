@@ -12,6 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import tech.ula.BuildConfig
 
 @RunWith(MockitoJUnitRunner::class)
 class DeviceDimensionsTest {
@@ -47,7 +48,11 @@ class DeviceDimensionsTest {
         setDimensions(mockDisplayMetrics, width = 100, height = 200)
         mockDeviceDimensions.saveDeviceDimensions(mockWindowManager, mockDisplayMetrics, Configuration.ORIENTATION_PORTRAIT, mockSharedPreferences)
         val geometry = mockDeviceDimensions.getScreenResolution()
-        assertEquals(geometry, "200x100")
+        if (BuildConfig.FORCE_PORTRAIT_GEOMETRY) {
+            assertEquals(geometry, "200x100")
+        } else {
+            assertEquals(geometry, "100x200")
+        }
     }
 
     @Test
