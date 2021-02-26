@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import tech.ula.BuildConfig
 import tech.ula.model.entities.Asset
 import tech.ula.model.entities.Filesystem
 import tech.ula.model.entities.Session
@@ -138,11 +139,14 @@ class SessionStartupFsm(
     private suspend fun handleRetrieveAssetLists(filesystem: Filesystem) {
         state.postValue(RetrievingAssetLists)
 
-        val assetList = assetRepository.getAssetList(filesystem.distributionType)
+        var assetList: List<Asset> = emptyList()
+        if (!BuildConfig.FILESYSTEM_ONLY_ASSET) {
+            assetList = assetRepository.getAssetList(filesystem.distributionType)
 
-        if (assetList.isEmpty()) {
-            state.postValue(AssetListsRetrievalFailed)
-            return
+            if (assetList.isEmpty()) {
+                state.postValue(AssetListsRetrievalFailed)
+                return
+            }
         }
 
         state.postValue(AssetListsRetrievalSucceeded(assetList))

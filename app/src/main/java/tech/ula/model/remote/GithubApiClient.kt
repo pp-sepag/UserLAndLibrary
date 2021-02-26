@@ -20,7 +20,7 @@ class UrlProvider {
 }
 
 class GithubApiClient(
-    private val ulaFiles: UlaFiles,
+    val ulaFiles: UlaFiles,
     private val urlProvider: UrlProvider = UrlProvider(),
     private val logger: Logger = SentryLogger()
 ) {

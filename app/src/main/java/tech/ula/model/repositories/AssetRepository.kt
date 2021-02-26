@@ -2,6 +2,7 @@ package tech.ula.model.repositories
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import tech.ula.BuildConfig
 import tech.ula.model.entities.Asset
 import tech.ula.model.entities.Filesystem
 import tech.ula.model.remote.GithubApiClient
@@ -37,14 +38,16 @@ class AssetRepository(
     ): List<DownloadMetadata> {
         val downloadRequirements = mutableListOf<DownloadMetadata>()
         // Empty lists should not have propagated this deeply.
-        if (assetList.isEmpty()) {
+        if (assetList.isEmpty() && !BuildConfig.FILESYSTEM_ONLY_ASSET) {
             val err = IllegalStateException()
             logger.addExceptionBreadcrumb(err)
             throw err
         }
 
         val repo = filesystem.distributionType
-        downloadRequirements.addAll(getRegularAssetDownloadRequirements(assetList, repo))
+        if (!BuildConfig.FILESYSTEM_ONLY_ASSET) {
+            downloadRequirements.addAll(getRegularAssetDownloadRequirements(assetList, repo))
+        }
         if (filesystemNeedsExtraction) {
             downloadRequirements.addAll(getRootFsAssetDownloadRequirements(repo))
         }
