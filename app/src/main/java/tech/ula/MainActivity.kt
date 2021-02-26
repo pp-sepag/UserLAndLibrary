@@ -302,13 +302,17 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     override fun onResume() {
         super.onResume()
-        billingManager.querySubPurchases()
-        billingManager.queryInAppPurchases()
+        if (BuildConfig.ASK_FOR_CONTRIBUTION) {
+            billingManager.querySubPurchases()
+            billingManager.queryInAppPurchases()
+        }
         viewModel.handleOnResume()
     }
 
     override fun onDestroy() {
-        billingManager.destroy()
+        if (BuildConfig.ASK_FOR_CONTRIBUTION) {
+            billingManager.destroy()
+        }
         super.onDestroy()
     }
 
