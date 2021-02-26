@@ -50,6 +50,7 @@ import tech.ula.ui.SessionListFragment
 import tech.ula.utils.*
 import tech.ula.utils.preferences.*
 import tech.ula.viewmodel.*
+import java.net.NetworkInterface
 import java.util.*
 
 class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, AppsListFragment.AppSelection, FilesystemListFragment.FilesystemListProgress {
@@ -237,6 +238,26 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         return true
     }
 
+    private fun getMacAddr(): String? {
+        try {
+            val all: List<NetworkInterface> = Collections.list(NetworkInterface.getNetworkInterfaces())
+            for (nif in all) {
+                if (!nif.getName().equals("wlan0",true)) continue
+                val macBytes: ByteArray = nif.getHardwareAddress() ?: return ""
+                val res1 = StringBuilder()
+                for (b in macBytes) {
+                    res1.append(String.format("%02X:", b))
+                }
+                if (res1.length > 0) {
+                    res1.deleteCharAt(res1.length - 1)
+                }
+                return res1.toString().replace(':','-')
+            }
+        } catch (ex: java.lang.Exception) {
+        }
+        return UUID.randomUUID().toString()
+    }
+
     private fun getNetInfo() {
         val connectivityManager = ContextCompat.getSystemService(this, ConnectivityManager::class.java)
         if (connectivityManager != null) {
@@ -246,16 +267,16 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 val dnsServers = linkProperties.dnsServers
                 with(defaultSharedPreferences.edit()) {
                     if (dnsServers.size > 0)
-                        putString("current_dns0",dnsServers[0].toString())
+                        putString("current_dns0", dnsServers[0].toString())
                     if (dnsServers.size > 1)
-                        putString("current_dns1",dnsServers[1].toString())
+                        putString("current_dns1", dnsServers[1].toString())
                     apply()
                 }
             }
         }
         if (!defaultSharedPreferences.contains("unique_id")) {
             with(defaultSharedPreferences.edit()) {
-                putString("unique_id",UUID.randomUUID().toString())
+                putString("unique_id", getMacAddr())
                 apply()
             }
         }
