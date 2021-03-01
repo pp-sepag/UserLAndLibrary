@@ -50,6 +50,7 @@ android {
         buildConfigField 'boolean', 'ASK_FOR_FEEDBACK', 'false'
         buildConfigField 'boolean', 'ASK_FOR_CONTRIBUTION', 'false'
         buildConfigField 'boolean', 'FILESYSTEM_ONLY_ASSET', 'true'
+        buildConfigField 'String', 'DEFAULT_RELEASE', "\"tags/v9.9.9\""
 
         // Ignore Sentry packages that cause lint failure
         lintOptions {

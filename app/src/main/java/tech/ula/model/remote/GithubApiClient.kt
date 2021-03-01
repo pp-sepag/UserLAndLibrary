@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import tech.ula.BuildConfig
 import tech.ula.utils.Logger
 import tech.ula.utils.SentryLogger
 import tech.ula.utils.UlaFiles
@@ -31,7 +32,7 @@ class GithubApiClient(
     private fun getReleaseToUseForRepo(repo: String): String {
         return when (repo) {
             "debian" -> "latest"
-            else -> "latest"
+            else -> BuildConfig.DEFAULT_RELEASE
         }
     }
 
