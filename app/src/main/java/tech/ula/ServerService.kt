@@ -167,8 +167,8 @@ class ServerService : Service(), CoroutineScope {
         val bVncIntent = Intent(this, RemoteCanvasActivity::class.java)
         bVncIntent.data = Uri.parse("vnc://127.0.0.1:5951/?VncUsername=${session.username}&VncPassword=${session.vncPassword}")
         bVncIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        bVncIntent.putExtra("hide_toolbar", false)
-        bVncIntent.putExtra("input_mode", "TOUCH_ZOOM_MODE")
+        bVncIntent.putExtra("hide_toolbar", true)  //seems to hide after a few seconds
+        bVncIntent.putExtra("input_mode", com.iiordanov.bVNC.input.InputHandlerTouchpad.ID)  //works perfectly
 
         if (clientIsPresent(bVncIntent)) {
             this.startActivity(bVncIntent)
