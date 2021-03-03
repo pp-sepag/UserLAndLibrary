@@ -2,6 +2,7 @@ package tech.ula.utils
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import tech.ula.BuildConfig
 import tech.ula.model.entities.Asset
 import tech.ula.model.entities.Filesystem
 import java.io.File
@@ -75,6 +76,10 @@ class FilesystemManager(
         val command = "/support/common/compressFilesystem.sh"
         val env = HashMap<String, String>()
         env["TAR_PATH"] = scopedExternalDestination.absolutePath
+        if (BuildConfig.FILESYSTEM_ONLY_ASSET)
+            env["EXCLUDE_SUPPORT"] = "--exclude support/common"
+        else
+            env["EXCLUDE_SUPPORT"] = "--exclude support"
 
         return@withContext busyboxExecutor.executeProotCommand(
                 command,
