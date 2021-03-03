@@ -39,8 +39,8 @@ android {
         buildConfigField "String", "DEFAULT_LAUNCH_TYPE", "\"vnc\""
         buildConfigField "String", "DEFAULT_APPS_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/master/apps\""
         resValue "string", "default_apps_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/master/apps\""
-        buildConfigField "String", "DEFAULT_HOSTNAME", "\"127.0.0.1 localhost\""
-        resValue "string", "pref_hostname_default", "\"127.0.0.1 localhost\""
+        buildConfigField "String", "DEFAULT_HOSTNAME", "\"android-device\""
+        resValue "string", "pref_hostname_default", "\"android-device\""
         buildConfigField "String", "DEFAULT_DNS", "\"nameserver 8.8.8.8\\nnameserver 8.8.4.4\""
         resValue "string", "pref_dns_default", "\"nameserver 8.8.8.8\\nnameserver 8.8.4.4\""
         buildConfigField 'boolean', 'FORCE_PORTRAIT_GEOMETRY', 'false'
@@ -50,7 +50,7 @@ android {
         buildConfigField 'boolean', 'ASK_FOR_FEEDBACK', 'false'
         buildConfigField 'boolean', 'ASK_FOR_CONTRIBUTION', 'false'
         buildConfigField 'boolean', 'FILESYSTEM_ONLY_ASSET', 'true'
-        buildConfigField 'String', 'DEFAULT_RELEASE', "\"tags/v9.9.9\""
+        buildConfigField 'String', 'DEFAULT_RELEASE', "\"tags/v8.8.8\""
 
         // Ignore Sentry packages that cause lint failure
         lintOptions {

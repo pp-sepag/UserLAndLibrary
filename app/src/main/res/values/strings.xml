@@ -153,9 +153,9 @@
     <string name="pref_hide_sessions_filesystems_summary">Simplifies app by hiding views that are not the default landing page.</string>
     <string name="pref_hide_distributions_title">Hide Distributions</string>
     <string name="pref_hide_distributions_summary">Do not display any app that is categorized as a distributions.</string>
-    <string name="pref_custom_hostname_enabled_title">Use Custom Hosts File</string>
-    <string name="pref_custom_hostname_enabled_summary">Allows you to specify custom contents for the /etc/hosts file.</string>
-    <string name="pref_hostname_title">Set Custom Hosts File Contents</string>
+    <string name="pref_custom_hostname_enabled_title">Use Custom Hostname</string>
+    <string name="pref_custom_hostname_enabled_summary">Allows you to specify custom hostname which will be used in /etc/hosts and /etc/hostname.</string>
+    <string name="pref_hostname_title">Set Custom Hostsname</string>
     <string name="pref_custom_dns_enabled_title">Use Custom reslov.conf File</string>
     <string name="pref_custom_dns_enabled_summary">Allows you to specify custom contents for the /etc/resolv.conf file.</string>
     <string name="pref_dns_title">Set resolv.conf File Contents</string>
