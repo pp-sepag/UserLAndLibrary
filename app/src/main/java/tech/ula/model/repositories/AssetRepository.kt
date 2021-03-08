@@ -1,5 +1,6 @@
 package tech.ula.model.repositories
 
+import android.content.SharedPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tech.ula.BuildConfig
@@ -24,7 +25,9 @@ data class DownloadMetadata(
 
 class AssetRepository(
     private val applicationFilesDirPath: String,
+    private val ulaFiles: UlaFiles,
     private val assetPreferences: AssetPreferences,
+    private val defaultSharedPreferences: SharedPreferences,
     private val githubApiClient: GithubApiClient,
     private val httpStream: HttpStream = HttpStream(),
     private val logger: Logger = SentryLogger()
@@ -142,19 +145,27 @@ class AssetRepository(
     private suspend fun getRootFsAssetDownloadRequirements(repo: String): List<DownloadMetadata> {
         val downloadRequirements = mutableListOf<DownloadMetadata>()
         val filename = "rootfs.tar.gz"
+        var versionCode = ""
+        var url = ""
 
-        val rootFsIsDownloaded = File("$applicationFilesDirPath/$repo/$filename").exists()
-        val rootFsIsUpToDate = try {
-            lastDownloadedFilesystemVersionIsUpToDate(repo)
-        } catch (err: UnknownHostException) {
-            // Allows usage of existing rootfs files in case of failing network connectivity.
-            true
+        if (defaultSharedPreferences.getBoolean("pref_custom_filesystem_enabled", false)) {
+            versionCode = "v0.0.0"
+            url = defaultSharedPreferences.getString("pref_filesystem", BuildConfig.DEFAULT_FILESYSTEM_URL)!!
+            url += "/${ulaFiles.getArchType()}-${filename}"
+        } else {
+            val rootFsIsDownloaded = File("$applicationFilesDirPath/$repo/$filename").exists()
+            val rootFsIsUpToDate = try {
+                lastDownloadedFilesystemVersionIsUpToDate(repo)
+            } catch (err: UnknownHostException) {
+                // Allows usage of existing rootfs files in case of failing network connectivity.
+                true
+            }
+            if (rootFsIsDownloaded && rootFsIsUpToDate) return downloadRequirements
+
+            // If the rootfs is not downloaded, network failures will still propagate.
+            versionCode = githubApiClient.getLatestReleaseVersion(repo)
+            url = githubApiClient.getAssetEndpoint(filename, repo)
         }
-        if (rootFsIsDownloaded && rootFsIsUpToDate) return downloadRequirements
-
-        // If the rootfs is not downloaded, network failures will still propagate.
-        val versionCode = githubApiClient.getLatestReleaseVersion(repo)
-        val url = githubApiClient.getAssetEndpoint(filename, repo)
         val downloadMetadata = DownloadMetadata(filename, repo, versionCode, url)
         return listOf(downloadMetadata)
     }

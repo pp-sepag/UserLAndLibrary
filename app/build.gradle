@@ -39,6 +39,8 @@ android {
         buildConfigField "String", "DEFAULT_LAUNCH_TYPE", "\"vnc\""
         buildConfigField "String", "DEFAULT_APPS_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/master/apps\""
         resValue "string", "default_apps_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/master/apps\""
+        buildConfigField "String", "DEFAULT_FILESYSTEM_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Ubuntu/releases/download/v9.9.9\""
+        resValue "string", "default_filesystem_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Ubuntu/releases/download/v9.9.9\""
         buildConfigField "String", "DEFAULT_HOSTNAME", "\"android-device\""
         resValue "string", "pref_hostname_default", "\"android-device\""
         buildConfigField "String", "DEFAULT_DNS", "\"nameserver 8.8.8.8\\nnameserver 8.8.4.4\""

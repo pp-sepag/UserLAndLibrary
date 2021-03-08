@@ -76,7 +76,7 @@
             android:dependency="pref_custom_filesystem_enabled"
             android:key="pref_filesystem"
             android:title="@string/pref_filesystem_title"
-            android:defaultValue=""
+            android:defaultValue="@string/default_filesystem_url"
             app:iconSpaceReserved="false"/>
         <CheckBoxPreference
             android:key="pref_custom_scaling_enabled"

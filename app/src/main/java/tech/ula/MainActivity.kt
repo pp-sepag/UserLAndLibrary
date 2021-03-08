@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
         val assetPreferences = AssetPreferences(this)
         val githubApiClient = GithubApiClient(ulaFiles)
-        val assetRepository = AssetRepository(filesDir.path, assetPreferences, githubApiClient)
+        val assetRepository = AssetRepository(filesDir.path, ulaFiles, assetPreferences, defaultSharedPreferences, githubApiClient)
 
         val filesystemManager = FilesystemManager(ulaFiles, busyboxExecutor)
         val storageCalculator = StorageCalculator(StatFs(filesDir.path))
