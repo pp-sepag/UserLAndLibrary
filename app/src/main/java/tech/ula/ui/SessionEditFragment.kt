@@ -24,6 +24,7 @@ import tech.ula.model.entities.toServiceType
 import tech.ula.model.repositories.UlaDatabase
 import tech.ula.viewmodel.SessionEditViewModel
 import tech.ula.viewmodel.SessionEditViewmodelFactory
+import java.util.*
 
 class SessionEditFragment : Fragment() {
 
@@ -114,7 +115,13 @@ class SessionEditFragment : Fragment() {
         if (session.isAppsSession) {
             text_input_session_name.isEnabled = false
         }
+
         session_protected.isChecked = session.isProtected
+
+        for (i in 0 until spinner_session_service_type.adapter.count) {
+            val item = spinner_session_service_type.adapter.getItem(i).toString().toLowerCase(Locale.ENGLISH)
+            if (item == session.serviceType.toString()) spinner_session_service_type.setSelection(i)
+        }
 
         text_input_session_name.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {

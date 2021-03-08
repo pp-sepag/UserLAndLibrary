@@ -41,6 +41,7 @@ class NotificationConstructor(val context: Context) {
 
     fun buildPersistentServiceNotification(): Notification {
         val sessionListIntent = Intent(context, MainActivity::class.java)
+        sessionListIntent.type = "sessionList"
         val pendingSessionListIntent = PendingIntent
                 .getActivity(context, 0, sessionListIntent, 0)
 

@@ -10,9 +10,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.net.wifi.WifiManager
-import android.os.Build
-import android.os.Bundle
-import android.os.StatFs
+import android.os.*
 import android.util.DisplayMetrics
 import android.view.*
 import android.view.animation.AlphaAnimation
@@ -59,6 +57,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     private var progressBarIsVisible = false
     private var currentFragmentDisplaysProgressDialog = false
+    private var autoStarted = false
 
     private val logger = SentryLogger()
     private val ulaFiles by lazy { UlaFiles(this, this.applicationInfo.nativeLibraryDir) }
@@ -183,7 +182,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
         viewModel.getState().observe(this, stateObserver)
 
-        autoStart()
+        if (intent?.type.equals("settings"))
+            navController.navigate(R.id.settings_fragment)
+        else
+            autoStart()
     }
 
     private fun setNavStartDestination() {
@@ -289,6 +291,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             if (json.compareTo(" ") != 0) {
                 val gson = Gson()
                 val autoApp = gson.fromJson(json, App::class.java)
+                autoStarted=true
                 appHasBeenSelected(autoApp, true)
             }
     }
@@ -430,6 +433,11 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 .putExtra("type", "start")
                 .putExtra("session", session)
         startService(serviceIntent)
+        if (autoStarted) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                finish()
+            }, 2000)
+        }
     }
 
     /*
