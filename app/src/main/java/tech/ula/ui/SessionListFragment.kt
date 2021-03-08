@@ -101,6 +101,8 @@ class SessionListFragment : Fragment() {
             is SessionItem -> {
                 val session = selectedItem.session
                 doCreateSessionContextMenu(session, menu)
+                if (session.isProtected)
+                    menu.removeItem(R.id.menu_item_session_delete)
             }
         }
     }

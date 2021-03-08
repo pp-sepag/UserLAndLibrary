@@ -14,6 +14,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import kotlinx.android.synthetic.main.frag_filesystem_edit.*
 import kotlinx.android.synthetic.main.frag_session_edit.* // ktlint-disable no-wildcard-imports
 import tech.ula.R
 import tech.ula.model.entities.Filesystem
@@ -113,6 +114,8 @@ class SessionEditFragment : Fragment() {
         if (session.isAppsSession) {
             text_input_session_name.isEnabled = false
         }
+        session_protected.isChecked = session.isProtected
+
         text_input_session_name.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 session.name = p0.toString()
@@ -165,6 +168,10 @@ class SessionEditFragment : Fragment() {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
+
+        session_protected.setOnCheckedChangeListener() { _, checked ->
+            session.isProtected = checked
+        }
     }
 
     private fun insertSession() {
