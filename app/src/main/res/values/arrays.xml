@@ -103,6 +103,12 @@
         <item>voice</item>
         <item>wheel</item>
         <item>www-data</item>
+    </string-array>
 
+    <string-array name="vnc_input_modes">
+        <item>@string/input_method_direct_swipe_pan</item>
+        <item>@string/input_method_direct_drag_pan</item>
+        <item>@string/input_method_touchpad</item>
+        <item>@string/input_method_single_handed</item>
     </string-array>
 </resources>

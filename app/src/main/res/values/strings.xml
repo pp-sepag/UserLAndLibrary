@@ -168,6 +168,10 @@
     <string name="pref_custom_scaling_enabled_title">Use Custom Graphical Scaling Factor</string>
     <string name="pref_custom_scaling_enabled_summary">Allows specifying a custom scaling factor to decrease the resolution of the VNC session.</string>
     <string name="pref_scaling_title">Set Custom Scaling Factor</string>
+    <string name="pref_hide_custom_toolbar_title">Hide VNC Toolbar</string>
+    <string name="pref_hide_custom_toolbar_summary">Hides the toolbar that shows up when inside a VNC session.</string>
+    <string name="pref_default_vnc_input_mode_title">Default VNC Input Mode</string>
+    <string name="pref_default_vnc_input_mode_summary">Set the default VNC Input Mode. Can be overridden from VNC session toolbar.</string>
 
     <string name="pref_proot_category">PRoot Preferences</string>
     <string name="pref_proot_debugging_enabled_title">PRoot Debugging Logs Enabled</string>
