@@ -111,9 +111,9 @@ class LocalServerManager(
             env["RESOLV"] = sharedPreferences.getString("pref_dns", BuildConfig.DEFAULT_DNS)!!
         } else {
             if (sharedPreferences.contains("current_dns0")) {
-                env["RESOLV"] = "nameserver " + sharedPreferences.getString("current_dns0", "localhost")!!.removePrefix("/")
+                env["RESOLV"] = "nameserver " + sharedPreferences.getString("current_dns0", "8.8.8.8")!!.removePrefix("/")
                 if (sharedPreferences.contains("current_dns1"))
-                    env["RESOLV"] += "\nnameserver " + sharedPreferences.getString("current_dns1", "localhost")!!.removePrefix("/")
+                    env["RESOLV"] += "\nnameserver " + sharedPreferences.getString("current_dns1", "8.8.4.4")!!.removePrefix("/")
             } else
                 env["RESOLV"] = BuildConfig.DEFAULT_DNS
         }

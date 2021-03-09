@@ -261,18 +261,26 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private fun getNetInfo() {
-        val connectivityManager = ContextCompat.getSystemService(this, ConnectivityManager::class.java)
-        if (connectivityManager != null) {
-            val currentNetwork = connectivityManager.getActiveNetwork()
-            if (currentNetwork != null) {
-                val linkProperties = connectivityManager.getLinkProperties(currentNetwork)
-                val dnsServers = linkProperties.dnsServers
-                with(defaultSharedPreferences.edit()) {
-                    if (dnsServers.size > 0)
-                        putString("current_dns0", dnsServers[0].toString())
-                    if (dnsServers.size > 1)
-                        putString("current_dns1", dnsServers[1].toString())
-                    apply()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            with(defaultSharedPreferences.edit()) {
+                putString("current_dns0", "8.8.8.8")
+                putString("current_dns1", "8.8.4.4")
+                apply()
+            }
+        } else {
+            val connectivityManager = ContextCompat.getSystemService(this, ConnectivityManager::class.java)
+            if (connectivityManager != null) {
+                val currentNetwork = connectivityManager.getActiveNetwork()
+                if (currentNetwork != null) {
+                    val linkProperties = connectivityManager.getLinkProperties(currentNetwork)
+                    val dnsServers = linkProperties.dnsServers
+                    with(defaultSharedPreferences.edit()) {
+                        if (dnsServers.size > 0)
+                            putString("current_dns0", dnsServers[0].toString())
+                        if (dnsServers.size > 1)
+                            putString("current_dns1", dnsServers[1].toString())
+                        apply()
+                    }
                 }
             }
         }
