@@ -48,6 +48,7 @@ import tech.ula.ui.SessionListFragment
 import tech.ula.utils.*
 import tech.ula.utils.preferences.*
 import tech.ula.viewmodel.*
+import java.lang.reflect.Method
 import java.net.NetworkInterface
 import java.util.*
 
@@ -244,7 +245,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         try {
             val all: List<NetworkInterface> = Collections.list(NetworkInterface.getNetworkInterfaces())
             for (nif in all) {
-                if (!nif.getName().equals("wlan0",true)) continue
+                if (!nif.getName().equals("wlan0", true)) continue
                 val macBytes: ByteArray = nif.getHardwareAddress() ?: return ""
                 val res1 = StringBuilder()
                 for (b in macBytes) {
@@ -253,7 +254,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 if (res1.length > 0) {
                     res1.deleteCharAt(res1.length - 1)
                 }
-                return res1.toString().replace(':','-')
+                return res1.toString().replace(':', '-')
             }
         } catch (ex: java.lang.Exception) {
         }
@@ -262,10 +263,20 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     private fun getNetInfo() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            with(defaultSharedPreferences.edit()) {
-                putString("current_dns0", "8.8.8.8")
-                putString("current_dns1", "8.8.4.4")
-                apply()
+            val re1 = "^\\d+(\\.\\d+){3}$".toRegex()
+            val re2 = "^[0-9a-f]+(:[0-9a-f]*)+:[0-9a-f]+$".toRegex()
+            val SystemProperties = Class.forName("android.os.SystemProperties")
+            val method: Method = SystemProperties.getMethod("get", *arrayOf<Class<*>>(String::class.java))
+            val netdns = arrayOf("net.dns1", "net.dns2")
+            for (i in netdns.indices) {
+                val args = arrayOf(netdns[i])
+                val v = method.invoke(null, netdns[i]) as String
+                if (v != null && (v.matches(re1) || v.matches(re2))) {
+                    with(defaultSharedPreferences.edit()) {
+                        putString("current_dns${i}", v)
+                        apply()
+                    }
+                }
             }
         } else {
             val connectivityManager = ContextCompat.getSystemService(this, ConnectivityManager::class.java)
