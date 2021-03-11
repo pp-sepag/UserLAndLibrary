@@ -51,6 +51,9 @@ android {
         buildConfigField 'boolean', 'HAS_LOGGER', 'false'
         buildConfigField 'boolean', 'ASK_FOR_FEEDBACK', 'false'
         buildConfigField 'boolean', 'ASK_FOR_CONTRIBUTION', 'false'
+        resValue "string", "help_enabled", "false"
+        resValue "string", "wiki_enabled", "false"
+        resValue "string", "toc_enabled", "false"
         buildConfigField 'boolean', 'FILESYSTEM_ONLY_ASSET', 'true'
         buildConfigField 'String', 'DEFAULT_RELEASE', "\"tags/v7.7.7\""
 

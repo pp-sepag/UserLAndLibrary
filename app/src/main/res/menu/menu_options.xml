@@ -14,16 +14,19 @@
     <item
         android:id="@id/help_fragment"
         android:icon="@android:drawable/ic_menu_help"
+        android:visible="@string/help_enabled"
         android:title="@string/help" />
 
     <item
         android:id="@+id/option_wiki"
         android:title="@string/wiki"
+        android:visible="@string/wiki_enabled"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/terms_and_conditions"
         android:title="@string/toc"
+        android:visible="@string/toc_enabled"
         app:showAsAction="never" />
 
 </menu>
