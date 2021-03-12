@@ -1,6 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+    <!ENTITY appname "RELAG-System®">
+    ]>
+
 <resources>                                                         <!-- Translators, pay attention to these notes! -->
-    <string name="app_name">RELAG-System®</string>
-    <string name="welcome">Witaj w UserLAnd!</string>
+    <string name="app_name">&appname;</string>
+    <string name="welcome">Witaj w &appname;!</string>
     <string name="permission_request_code">1000</string>
 
     <!-- Labels -->
@@ -81,7 +86,7 @@
         %1$s \nPracujemy nad rozwiązaniem tych problemów. Możesz nas poinformować o tym problemie w wątku
           na Github\ie, jeśli chcesz pomóc!
     </string>
-    <string name="illegal_state_title">UserLAnd wszedł w nieprawidłowy stan!</string>
+    <string name="illegal_state_title">&appname; wszedł w nieprawidłowy stan!</string>
 
     <string name="illegal_state_transition">Złe przejście do stanu: %1$s</string>
 
@@ -124,8 +129,8 @@
     <!-- Notification strings -->
     <string name="services_notification_channel_name">Usługi</string>
     <string name="services_notification_channel_description">Stałe usługi</string>
-    <string name="service_notification_title">UserLAnd</string>
-    <string name="service_notification_description">UserLAnd ma uruchomioną usługę w tle.</string>
+    <string name="service_notification_title">&appname;</string>
+    <string name="service_notification_description">&appname; ma uruchomioną usługę w tle.</string>
 
     <!-- Progress bar messages -->
     <string name="progress_start_step">Przygotowywanie rzeczy dla Ciebie&#8230;</string>
@@ -204,8 +209,8 @@
     <string name="alert_need_client_app_message">YDo wykonania tej czynności będziesz potrzebować klienta SSH, VNC lub XSDL, ale wygląda na to, że nie masz zainstalowanego sklepu Play. \n\nAby kontynuować, zainstaluj aplikację kliencką (SSH/VNC/XSDL) powiązaną z typem klienta sesji.</string>
 
     <!-- Permissions necessary alert -->
-    <string name="alert_permissions_necessary_title">UserLAnd wymaga uprawnień!</string>
-    <string name="alert_permissions_necessary_message">Aby kontynuować, włącz uprawnienia do przechowywania, aby umożliwić UserLAnd pobieranie plików i przenoszenie ich z pamięci zewnętrznej do pamięci lokalnej aplikacji.</string>
+    <string name="alert_permissions_necessary_title">&appname; wymaga uprawnień!</string>
+    <string name="alert_permissions_necessary_message">Aby kontynuować, włącz uprawnienia do przechowywania, aby umożliwić &appname; pobieranie plików i przenoszenie ich z pamięci zewnętrznej do pamięci lokalnej aplikacji.</string>
     <string name="alert_permissions_necessary_cancel_button">Anuluj</string>
 
     <!-- Network unavailable alert -->
@@ -213,7 +218,7 @@
 
     <!-- Storage capacity low alert -->
     <string name="alert_storage_low_title">Niska pojemność pamięci</string>
-    <string name="alert_storage_low_message">Aby zapewnić płynną funkcjonalność systemu plików w UserLAnd, upewnij się, że jest co najmniej 1 GB wolnego miejsca.</string>
+    <string name="alert_storage_low_message">Aby zapewnić płynną funkcjonalność systemu plików w &appname;, upewnij się, że jest co najmniej 1 GB wolnego miejsca.</string>
 
     <!-- Wifi alert -->
     <string name="alert_wifi_disabled_title">Brak wifi!</string>
@@ -225,7 +230,7 @@
     <!-- Toasts -->
     <string name="session_unique_name_required">Sesje wymagają unikalnej nazwy!</string>
     <string name="filesystem_unique_name_required">Systemy plików wymagają unikalnej nazwy!</string>
-    <string name="single_session_supported">UserLAnd obsługuje obecnie tylko jedną aktywną sesję!</string>
+    <string name="single_session_supported">&appname; obsługuje obecnie tylko jedną aktywną sesję!</string>
     <string name="debug_log_export_success">Dziennik debugowania został pomyślnie wyeksportowany!</string>
     <string name="debug_log_export_failure">Eksportowanie dziennika debugowania nie powiodło się!</string>
     <string name="debug_log_deleted">Dziennik debugowania usunięty!</string>
@@ -246,14 +251,14 @@
     <string name="no_backup_selected">Nie wybrano importu systemu plików</string>
 
     <!-- Review request -->
-    <string name="review_is_user_enjoying">Podoba Ci się UserLAnd?</string>
+    <string name="review_is_user_enjoying">Podoba Ci się &appname;?</string>
     <string name="review_ask_for_rating">Co powiesz na ocenę w Sklepie Play?</string>
     <string name="review_ask_for_feedback">Czy mógłbyś przekazać nam swoją opinię na Github\'ie?</string>
 
     <!-- Error collection opt-in -->
     <string name="opt_in_preference">Włącz raportowanie błędów</string>
-    <string name="opt_in_preference_summary">Pozwól nam zbierać raporty o błędach w celu ulepszenia UserLAnd.</string>
-    <string name="opt_in_help_prompt">Czy chcesz, aby UserLAnd stał się bardziej stabilny, wysyłając nam raporty o błędach?</string>
+    <string name="opt_in_preference_summary">Pozwól nam zbierać raporty o błędach w celu ulepszenia &appname;.</string>
+    <string name="opt_in_help_prompt">Czy chcesz, aby &appname; stał się bardziej stabilny, wysyłając nam raporty o błędach?</string>
     <string name="opt_in_error_collection_prompt">Czy włączyć usługę zbierania dzienników błędów?</string>
     <string name="opt_in_secondary_prompt">Jesteś pewny? Możesz zmienić to ustawienie później w ustawieniach.</string>
     <string name="opt_in_secondary_pos_btn">OK, włączę się.</string>
@@ -262,7 +267,7 @@
     <string name="q_warning_title">Dostęp do plików zmienił się!</string>
     <string name="q_warning_message">
          Kolejna wersja Androida, Q, wprowadza ulepszenia bezpieczeństwa, które wpływają na naszą aplikację i
-         w jaki sposób nasi użytkownicy mogą uzyskiwać i odbierać pliki z systemów plików UserLAnd. W celu zachowania zgodności
+         w jaki sposób nasi użytkownicy mogą uzyskiwać i odbierać pliki z systemów plików &appname;. W celu zachowania zgodności
          przy tych zmianach użycie \"/sdcard\" do przenoszenia plików do i z powrotem nie będzie już zachowywać się tak, jak wcześniej.
          Odwiedź naszą wiki na naszym Githubie, aby dowiedzieć się więcej.
     </string>

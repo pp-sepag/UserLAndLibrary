@@ -1,6 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+    <!ENTITY appname "RELAG-System®">
+    ]>
+
 <resources>
-    <string name="app_name">RELAG-System®</string>
-    <string name="welcome">UserLAndへようこそ!</string>
+    <string name="app_name">&appname;</string>
+    <string name="welcome">&appname;へようこそ!</string>
     <string name="permission_request_code">1000</string>
 
     <!-- Labels -->
@@ -53,8 +58,8 @@
     <!-- Notification strings -->
     <string name="services_notification_channel_name">サービス</string>
     <string name="services_notification_channel_description">続行中のサービス</string>
-    <string name="service_notification_title">UserLAnd</string>
-    <string name="service_notification_description">UserLAndはバックグラウンドでサービスを実行しています</string>
+    <string name="service_notification_title">&appname;</string>
+    <string name="service_notification_description">&appname;はバックグラウンドでサービスを実行しています</string>
 
     <!-- Progress bar messages -->
     <string name="progress_fetching_asset_lists">データ(assets)のリストを取得中です&#8230;</string>
@@ -105,8 +110,8 @@
     <string name="alert_need_client_app_message">この動作を完了するにはSSHかVNC のクライエントが必要ですが、play storeがインストールされていないようです。続行するには、SSHかVNCのアプリをインストールしてください。</string>
 
     <!-- Permissions necessary alert -->
-    <string name="alert_permissions_necessary_title">UserLAnd には権限が必要です!</string>
-    <string name="alert_permissions_necessary_message">続行するには、UserLAndに、ファイルをダウンロードして外部ストレージからアプリのローカルなストレージに移動することを許可する権限を与えてください。</string>
+    <string name="alert_permissions_necessary_title">&appname; には権限が必要です!</string>
+    <string name="alert_permissions_necessary_message">続行するには、&appname;に、ファイルをダウンロードして外部ストレージからアプリのローカルなストレージに移動することを許可する権限を与えてください。</string>
     <string name="alert_permissions_necessary_cancel_button">キャンセル</string>
 
     <!-- Network unavailable alert -->
@@ -122,7 +127,7 @@
     <!-- Toasts -->
     <string name="session_unique_name_required">他のセッションと同じ名前は使用できません。</string>
     <string name="filesystem_unique_name_required">他のファイルシステムと同じ名前は使用できません。</string>
-    <string name="single_session_supported">UserLAnd は今の所１個しかセッションを立ち上げられません!</string>
+    <string name="single_session_supported">&appname; は今の所１個しかセッションを立ち上げられません!</string>
     <string name="debug_log_deleted">デバッグ情報のログが削除されたか、存在していません!</string>
 
     <!-- Content descriptions -->

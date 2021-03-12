@@ -1,6 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+    <!ENTITY appname "RELAG-System®">
+    ]>
+
 <resources>                                                         <!-- Translators, pay attention to these notes! --> 
-    <string name="app_name">RELAG-System®</string>
-    <string name="welcome">歡迎使用 UserLAnd！</string>
+    <string name="app_name">&appname;</string>
+    <string name="welcome">歡迎使用 &appname;！</string>
     <string name="permission_request_code">1000</string>
 
     <!-- Labels -->
@@ -54,7 +59,7 @@
     <string name="error_export_execution_failure">匯出失敗。理由：%1$s</string>
 
     <!-- Illegal State Dialog -->
-    <string name="illegal_state_title">UserLAnd 已進入違規狀態！</string>
+    <string name="illegal_state_title">&appname; 已進入違規狀態！</string>
 
     <string name="illegal_state_transition">狀態轉換不良：%1$s</string>
 
@@ -97,8 +102,8 @@
     <!-- Notification strings -->
     <string name="services_notification_channel_name">服務</string>
     <string name="services_notification_channel_description">永久服務</string>
-    <string name="service_notification_title">UserLAnd</string>
-    <string name="service_notification_description">UserLAnd 正在執行背景服務。</string>
+    <string name="service_notification_title">&appname;</string>
+    <string name="service_notification_description">&appname; 正在執行背景服務。</string>
 
     <!-- Progress bar messages -->
     <string name="progress_start_step">正在為您準備東西&#8230;</string>
@@ -175,8 +180,8 @@
     <string name="alert_need_client_app_message">您將會需要 SSH 或 VNC 或 XSDL 客戶端來完成這個動作，但看起來您並未安裝 Play 商店。\n\n請安裝與工作階段類型相關的客戶端應用程式 (SSH/VNC/XSDL) 以繼續。</string>
 
     <!-- Permissions necessary alert -->
-    <string name="alert_permissions_necessary_title">UserLAnd 需要權限！</string>
-    <string name="alert_permissions_necessary_message">要繼續，請啟用儲存空間權限以允許 UserLAnd 下載檔案並將它們從外部儲存空間移動到應用程式本機儲存空間。</string>
+    <string name="alert_permissions_necessary_title">&appname; 需要權限！</string>
+    <string name="alert_permissions_necessary_message">要繼續，請啟用儲存空間權限以允許 &appname; 下載檔案並將它們從外部儲存空間移動到應用程式本機儲存空間。</string>
     <string name="alert_permissions_necessary_cancel_button">取消</string>
 
     <!-- Network unavailable alert -->
@@ -192,7 +197,7 @@
     <!-- Toasts -->
     <string name="session_unique_name_required">工作階段必須有獨一無二的名稱！</string>
     <string name="filesystem_unique_name_required">檔案系統必須有獨一無二的名稱！</string>
-    <string name="single_session_supported">UserLAnd 目前僅支援單一個作用中的工作階段！</string>
+    <string name="single_session_supported">&appname; 目前僅支援單一個作用中的工作階段！</string>
     <string name="debug_log_deleted">除錯紀錄檔已被刪除或不存在！</string>
 
     <!-- Content descriptions -->
@@ -206,7 +211,7 @@
     <string name="no_backup_selected">未選擇要匯入的檔案系統</string>
     
     <!-- Review request -->
-    <string name="review_is_user_enjoying">正在享受 UserLAnd？</string>
+    <string name="review_is_user_enjoying">正在享受 &appname;？</string>
     <string name="review_ask_for_rating">可以在 Play 上為我們評分嗎？</string>
     <string name="review_ask_for_feedback">您介意在 GitHub 上給我們一些回饋嗎？</string>
     

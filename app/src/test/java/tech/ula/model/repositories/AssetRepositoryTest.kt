@@ -1,5 +1,6 @@
 package tech.ula.model.repositories
 
+import android.content.SharedPreferences
 import com.nhaarman.mockitokotlin2.* // ktlint-disable no-wildcard-imports
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.* // ktlint-disable no-wildcard-imports
@@ -15,6 +16,7 @@ import tech.ula.model.entities.Filesystem
 import tech.ula.model.remote.GithubApiClient
 import tech.ula.utils.Logger
 import tech.ula.utils.HttpStream
+import tech.ula.utils.UlaFiles
 import tech.ula.utils.preferences.AssetPreferences
 import java.io.File
 import java.io.IOException
@@ -35,6 +37,10 @@ class AssetRepositoryTest {
     @Mock lateinit var mockHttpStream: HttpStream
 
     @Mock lateinit var mockLogger: Logger
+
+    @Mock lateinit var mockUlaFiles: UlaFiles
+
+    @Mock lateinit var mockSharedPreferences: SharedPreferences
 
     private lateinit var assetRepository: AssetRepository
 
@@ -100,7 +106,7 @@ class AssetRepositoryTest {
     fun setup() {
         applicationFilesDirPath = tempFolder.root.absolutePath
 
-        assetRepository = AssetRepository(applicationFilesDirPath, mockAssetPreferences, mockGithubApiClient, mockHttpStream, mockLogger)
+        assetRepository = AssetRepository(applicationFilesDirPath, mockUlaFiles, mockAssetPreferences, mockSharedPreferences, mockGithubApiClient, mockHttpStream, mockLogger)
     }
 
     @Test(expected = IllegalStateException::class)

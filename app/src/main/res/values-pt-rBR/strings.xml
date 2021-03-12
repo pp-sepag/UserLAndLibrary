@@ -1,6 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE resources [
+    <!ENTITY appname "RELAG-System®">
+    ]>
+
 <resources>                                                         <!-- Translators, pay attention to these notes! --> 
-    <string name="app_name">RELAG-System®</string>
-    <string name="welcome">Bem-vindo ao UserLAnd!</string>
+    <string name="app_name">&appname;</string>
+    <string name="welcome">Bem-vindo ao &appname;!</string>
     <string name="permission_request_code">1000</string>
 
     <!-- Labels -->
@@ -55,7 +60,7 @@
 
     <!-- Illegal State Dialog -->
     <string name="illegal_state_github_message">%1$s \nO aplicativo irá falhar agora para que possamos receber um log de erros. Sinta-se à vontade para também nos informar sobre o Github! Estamos trabalhando para resolver esses problemas.</string>
-    <string name="illegal_state_title">UserLAnd entrou em um estado ilegal!</string>
+    <string name="illegal_state_title">&appname; entrou em um estado ilegal!</string>
 
     <string name="illegal_state_transition">Transição de estado ruim: %1$s</string>
 
@@ -99,8 +104,8 @@
     <!-- Notification strings -->
     <string name="services_notification_channel_name">Serviços</string>
     <string name="services_notification_channel_description">Serviços persistentes</string>
-    <string name="service_notification_title">UserLAnd</string>
-    <string name="service_notification_description">UserLAnd está executando um serviço em segundo plano.</string>
+    <string name="service_notification_title">&appname;</string>
+    <string name="service_notification_description">&appname; está executando um serviço em segundo plano.</string>
 
     <!-- Progress bar messages -->
     <string name="progress_start_step">Preparando as coisas para você&#8230;</string>
@@ -178,8 +183,8 @@
     <string name="alert_need_client_app_message">Você precisará de um cliente SSH ou VNC ou XSDL para concluir essa ação, mas parece que você não tem a loja de jogos instalada. \n\nPor favor, instale o aplicativo cliente (SSH/VNC/XSDL) associado ao tipo de cliente da sessão para continuar.</string>
 
     <!-- Permissions necessary alert -->
-    <string name="alert_permissions_necessary_title">UserLAnd requer permissões!</string>
-    <string name="alert_permissions_necessary_message">Para continuar, ative as permissões de armazenamento para que o UserLAnd faça download de arquivos e mova-os do armazenamento externo para o armazenamento local do aplicativo.</string>
+    <string name="alert_permissions_necessary_title">&appname; requer permissões!</string>
+    <string name="alert_permissions_necessary_message">Para continuar, ative as permissões de armazenamento para que o &appname; faça download de arquivos e mova-os do armazenamento externo para o armazenamento local do aplicativo.</string>
     <string name="alert_permissions_necessary_cancel_button">Cancelar</string>
 
     <!-- Network unavailable alert -->
@@ -187,7 +192,7 @@
 
     <!-- Storage capacity low alert -->
     <string name="alert_storage_low_title">Baixa capacidade de armazenamento</string>
-    <string name="alert_storage_low_message">Para garantir a melhor funcionalidade de um sistema de arquivos no UserLAnd, certifique-se de que haja pelo menos 1 GB de espaço livre.</string>
+    <string name="alert_storage_low_message">Para garantir a melhor funcionalidade de um sistema de arquivos no &appname;, certifique-se de que haja pelo menos 1 GB de espaço livre.</string>
 
     <!-- Wifi alert -->
     <string name="alert_wifi_disabled_title">Sem Wifi!</string>
@@ -199,7 +204,7 @@
     <!-- Toasts -->
     <string name="session_unique_name_required">Sessões exigem um nome único!</string>
     <string name="filesystem_unique_name_required">Sistemas de Arquivos exigem um nome único!</string>
-    <string name="single_session_supported">UserLAnd atualmente suporta apenas uma única sessão ativa!</string>
+    <string name="single_session_supported">&appname; atualmente suporta apenas uma única sessão ativa!</string>
     <string name="debug_log_deleted">Log de depuração excluído ou não existe!</string>
 
     <!-- Content descriptions -->
@@ -213,7 +218,7 @@
     <string name="no_backup_selected">Nenhuma importação de sistema de arquivos selecionada</string>
     
     <!-- Review request -->
-    <string name="review_is_user_enjoying">Está gostando do UserLAnd?</string>
+    <string name="review_is_user_enjoying">Está gostando do &appname;?</string>
     <string name="review_ask_for_rating">Que tal uma classificação na Play Store, então?</string>
     <string name="review_ask_for_feedback">Você se importaria de nos dar algum feedback sobre o Github?</string>
 
