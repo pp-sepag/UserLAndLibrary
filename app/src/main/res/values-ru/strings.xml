@@ -4,7 +4,7 @@
     ]>
 
 <resources>
-    <string name="app_name">RELAG-System®</string>
+    <string name="app_name">&appname;</string>
     <string name="welcome">Добро пожаловать в &appname;!</string>
     <string name="permission_request_code">1000</string>
 
