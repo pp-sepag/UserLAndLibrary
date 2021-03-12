@@ -10,6 +10,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import tech.ula.BuildConfig
 import tech.ula.model.entities.Asset
 import tech.ula.model.entities.Filesystem
 import java.io.File
@@ -55,6 +56,10 @@ class FilesystemManagerTest {
 
         val defaultEnvironmentalVariables = hashMapOf("INITIAL_USERNAME" to "username",
                 "INITIAL_PASSWORD" to "password", "INITIAL_VNC_PASSWORD" to "vncpass")
+        if (BuildConfig.FILESYSTEM_ONLY_ASSET)
+            defaultEnvironmentalVariables["EXCLUDE_SUPPORT"] = "--exclude support/common"
+        else
+            defaultEnvironmentalVariables["EXCLUDE_SUPPORT"] = "--exclude support"
         whenever(mockBusyboxExecutor.executeProotCommand(
                 eq(command),
                 eq(filesystemDirName),
@@ -92,6 +97,10 @@ class FilesystemManagerTest {
 
         val defaultEnvironmentalVariables = hashMapOf("INITIAL_USERNAME" to "username",
                 "INITIAL_PASSWORD" to "password", "INITIAL_VNC_PASSWORD" to "vncpass")
+        if (BuildConfig.FILESYSTEM_ONLY_ASSET)
+            defaultEnvironmentalVariables["EXCLUDE_SUPPORT"] = "--exclude support/common"
+        else
+            defaultEnvironmentalVariables["EXCLUDE_SUPPORT"] = "--exclude support"
 
         val failureReason = "reason"
         whenever(mockBusyboxExecutor.executeProotCommand(
@@ -118,6 +127,10 @@ class FilesystemManagerTest {
         val destinationName = "rootfs.tar.gz"
         val destinationPath = "${externalStorageDirectory.absolutePath}/$destinationName"
         val expectedEnv = hashMapOf("TAR_PATH" to destinationPath)
+        if (BuildConfig.FILESYSTEM_ONLY_ASSET)
+            expectedEnv["EXCLUDE_SUPPORT"] = "--exclude support/common"
+        else
+            expectedEnv["EXCLUDE_SUPPORT"] = "--exclude support"
 
         whenever(mockBusyboxExecutor.executeProotCommand(
                 eq(command),
@@ -152,6 +165,10 @@ class FilesystemManagerTest {
         val destinationName = "rootfs.tar.gz"
         val destinationPath = "${externalStorageDirectory.absolutePath}/$destinationName"
         val expectedEnv = hashMapOf("TAR_PATH" to destinationPath)
+        if (BuildConfig.FILESYSTEM_ONLY_ASSET)
+            expectedEnv["EXCLUDE_SUPPORT"] = "--exclude support/common"
+        else
+            expectedEnv["EXCLUDE_SUPPORT"] = "--exclude support"
 
         val failureReason = "reason"
         whenever(mockBusyboxExecutor.executeProotCommand(

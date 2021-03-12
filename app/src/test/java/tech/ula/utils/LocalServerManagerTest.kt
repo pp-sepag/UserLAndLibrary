@@ -10,6 +10,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import tech.ula.BuildConfig
 import tech.ula.model.entities.ServiceType
 import tech.ula.model.entities.Session
 import java.io.File
@@ -114,7 +115,7 @@ class LocalServerManagerTest {
     fun `Calling startServer with a VNC session should use the appropriate command`() {
         val session = Session(0, filesystemId = filesystemId, serviceType = ServiceType.Vnc, username = "user", vncPassword = "userland", geometry = "10x10")
         val command = "/support/startVNCServer.sh"
-        val env = hashMapOf("INITIAL_USERNAME" to "user", "INITIAL_VNC_PASSWORD" to "userland", "DIMENSIONS" to "10x10")
+        val env = hashMapOf("INITIAL_USERNAME" to "user", "INITIAL_VNC_PASSWORD" to "userland", "DIMENSIONS" to "10x10", "HOSTNAME" to BuildConfig.DEFAULT_HOSTNAME, "HOSTS" to "127.0.0.1 localhost\n127.0.0.1 ${BuildConfig.DEFAULT_HOSTNAME}", "RESOLV" to BuildConfig.DEFAULT_DNS)
 
         whenever(mockBusyboxExecutor.executeProotCommand(
                 eq(command),
@@ -139,7 +140,7 @@ class LocalServerManagerTest {
     fun `If starting a vnc server fails, an error is logged and -1 is returned`() {
         val session = Session(0, filesystemId = filesystemId, serviceType = ServiceType.Vnc, username = "user", vncPassword = "userland", geometry = "10x10")
         val command = "/support/startVNCServer.sh"
-        val env = hashMapOf("INITIAL_USERNAME" to "user", "INITIAL_VNC_PASSWORD" to "userland", "DIMENSIONS" to "10x10")
+        val env = hashMapOf("INITIAL_USERNAME" to "user", "INITIAL_VNC_PASSWORD" to "userland", "DIMENSIONS" to "10x10", "HOSTNAME" to BuildConfig.DEFAULT_HOSTNAME, "HOSTS" to "127.0.0.1 localhost\n127.0.0.1 ${BuildConfig.DEFAULT_HOSTNAME}", "RESOLV" to BuildConfig.DEFAULT_DNS)
 
         val reason = "reason"
         whenever(mockBusyboxExecutor.executeProotCommand(

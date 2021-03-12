@@ -11,6 +11,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import tech.ula.BuildConfig
 import tech.ula.model.entities.Asset
 import tech.ula.model.entities.Filesystem
 import tech.ula.model.remote.GithubApiClient
@@ -23,7 +24,7 @@ import java.io.IOException
 import java.lang.IllegalStateException
 import java.net.UnknownHostException
 
-@RunWith(MockitoJUnitRunner::class)
+@RunWith(MockitoJUnitRunner.Silent::class)
 class AssetRepositoryTest {
 
     @get:Rule val tempFolder = TemporaryFolder()
@@ -114,7 +115,11 @@ class AssetRepositoryTest {
         val assetList = listOf<Asset>()
 
         runBlocking {
-            assetRepository.generateDownloadRequirements(filesystem, assetList, true)
+            assetRepository.generateDownloadRequirements(filesystem, assetList, false)
+            if (BuildConfig.FILESYSTEM_ONLY_ASSET) {
+                val err = IllegalStateException()
+                throw err
+            }
         }
 
         verify(mockLogger).addExceptionBreadcrumb(IOException())
@@ -175,6 +180,10 @@ class AssetRepositoryTest {
 
         runBlocking {
             assetRepository.generateDownloadRequirements(filesystem, assetList, filesystemNeedsExtraction)
+            if (BuildConfig.FILESYSTEM_ONLY_ASSET) {
+                val err = UnknownHostException()
+                throw err
+            }
         }
     }
 
@@ -199,8 +208,12 @@ class AssetRepositoryTest {
             assetRepository.generateDownloadRequirements(filesystem, assetList, filesystemNeedsExtraction)
         }
 
-        val expectedDownloadMetadata = DownloadMetadata(assetsTarName, repo, remoteVersion, url)
-        assertEquals(listOf(expectedDownloadMetadata), result)
+        var expectedDownloadMetadata = mutableListOf<DownloadMetadata>()
+        if (!BuildConfig.FILESYSTEM_ONLY_ASSET) {
+            expectedDownloadMetadata.add(DownloadMetadata(assetsTarName, repo, remoteVersion, url))
+        }
+
+        assertEquals(expectedDownloadMetadata, result)
     }
 
     @Test
@@ -219,8 +232,11 @@ class AssetRepositoryTest {
             assetRepository.generateDownloadRequirements(filesystem, assetList, filesystemNeedsExtraction)
         }
 
-        val expectedDownloadMetadata = DownloadMetadata(assetsTarName, repo, remoteVersion, url)
-        assertEquals(listOf(expectedDownloadMetadata), result)
+        var expectedDownloadMetadata = mutableListOf<DownloadMetadata>()
+        if (!BuildConfig.FILESYSTEM_ONLY_ASSET) {
+            expectedDownloadMetadata.add(DownloadMetadata(assetsTarName, repo, remoteVersion, url))
+        }
+        assertEquals(expectedDownloadMetadata, result)
     }
 
     @Test

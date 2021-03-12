@@ -15,6 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import tech.ula.BuildConfig
 import tech.ula.utils.Logger
 import tech.ula.utils.UlaFiles
 import java.io.IOException
@@ -35,7 +36,7 @@ class GithubApiClientTest {
     private lateinit var githubApiClient: GithubApiClient
 
     private val testRepo = "repo"
-    private val testReleaseToUse = "latest"
+    private val testReleaseToUse = BuildConfig.DEFAULT_RELEASE
     private val testEndpoint = "/repos/CypherpunkArmory/UserLAnd-Assets-$testRepo/releases/$testReleaseToUse"
 
     private val testArch = "arch"

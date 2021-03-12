@@ -13,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import tech.ula.BuildConfig
 import tech.ula.model.daos.FilesystemDao
 import tech.ula.model.daos.SessionDao
 import tech.ula.model.entities.Asset
@@ -25,7 +26,7 @@ import tech.ula.utils.* // ktlint-disable no-wildcard-imports
 import java.io.IOException
 import kotlin.Exception
 
-@RunWith(MockitoJUnitRunner::class)
+@RunWith(MockitoJUnitRunner.Silent::class)
 class SessionStartupFsmTest {
 
     @get:Rule val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -265,7 +266,11 @@ class SessionStartupFsmTest {
             sessionFsm.submitEvent(RetrieveAssetLists(filesystem), this) }
 
         verify(mockStateObserver).onChanged(RetrievingAssetLists)
-        verify(mockStateObserver).onChanged(AssetListsRetrievalSucceeded(assetList))
+        if (!BuildConfig.FILESYSTEM_ONLY_ASSET) {
+            verify(mockStateObserver).onChanged(AssetListsRetrievalSucceeded(assetList))
+        } else {
+            verify(mockStateObserver).onChanged(AssetListsRetrievalSucceeded(emptyList()))
+        }
     }
 
     @Test
@@ -280,7 +285,11 @@ class SessionStartupFsmTest {
         }
 
         verify(mockStateObserver).onChanged(RetrievingAssetLists)
-        verify(mockStateObserver).onChanged(AssetListsRetrievalFailed)
+        if (!BuildConfig.FILESYSTEM_ONLY_ASSET) {
+            verify(mockStateObserver).onChanged(AssetListsRetrievalFailed)
+        } else {
+            verify(mockStateObserver).onChanged(AssetListsRetrievalSucceeded(emptyList()))
+        }
     }
 
     @Test

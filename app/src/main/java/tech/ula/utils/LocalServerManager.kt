@@ -99,12 +99,12 @@ class LocalServerManager(
         env["INITIAL_VNC_PASSWORD"] = session.vncPassword
         env["DIMENSIONS"] = session.geometry
         if (sharedPreferences.getBoolean("pref_custom_hostname_enabled",false)) {
-            env["HOSTNAME"] = sharedPreferences.getString("pref_hostname", BuildConfig.DEFAULT_USERNAME)!!
+            env["HOSTNAME"] = sharedPreferences.getString("pref_hostname", BuildConfig.DEFAULT_HOSTNAME)!!
         } else {
             if (sharedPreferences.contains("unique_id"))
                 env["HOSTNAME"] = "android-" + sharedPreferences.getString("unique_id", "localhost")!!
             else
-                env["HOSTNAME"] = BuildConfig.DEFAULT_USERNAME
+                env["HOSTNAME"] = BuildConfig.DEFAULT_HOSTNAME
         }
         env["HOSTS"] = "127.0.0.1 localhost\n127.0.0.1 ${env["HOSTNAME"]}"
         if (sharedPreferences.getBoolean("pref_custom_dns_enabled",false)) {
