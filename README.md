@@ -1,32 +1,32 @@
-![UserLAnd Feature Graphic](https://raw.githubusercontent.com/CypherpunkArmory/UserLAnd/master/fastlane/metadata/android/en-US/images/featureGraphic.png)
 
-# Welcome to UserLAnd
+# Welcome to RELAG-System®
 
-The easiest way to run a Linux distribution or application on Android.   
-Features: 
-* Run full linux distros or specific applications on top of Android.
-* Install and uninstall like a regular app.
-* No root required.
+A customized version of UserLAnd made specifically for SEP LOGISTIK AG
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-    alt="Get it on F-Droid"
-    height="80">](https://f-droid.org/packages/tech.ula)
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=tech.ula)
-     
-## Have a bug report or a feature request?
-You can see our templates by visiting our [issue center](https://github.com/CypherpunkArmory/UserLAnd/issues).
+## Building
 
-## Want to contribute?
-See our [CONTRIBUTING](https://github.com/CypherpunkArmory/UserLAnd/blob/master/CONTRIBUTING.md) document.
+Note: I do all this on the latest 
 
-## Start using UserLAnd
-See our [Getting Started](https://github.com/CypherpunkArmory/UserLAnd/wiki/Getting-Started-in-UserLAnd) page.
+1) Clone the repo including sub repos.
 
-## UserLAnd assets
-The assets that UserLAnd depends on and the scripts that build them are contained in other repositories.  
+`git clone --recurse-submodules https://github.com/CypherpunkArmory/UserLAnd-Private.git`
 
-The common assets that are used for all distros and application are found at [CypherpunkArmory/UserLAnd-Assets-Support](https://github.com/CypherpunkArmory/UserLAnd-Assets-Support).  
+3) Download extract the binary assets needed by bVNC
+```
+cd UserLAnd-Private/remote-desktop-clients-private/`
+wget https://github.com/CypherpunkArmory/remote-desktop-clients-private/releases/download/dependencies2/remote-desktop-clients-libs-1.tar.gz
+./download-prebuilt-dependencies.sh
+```
 
-Distribution or application specific assets are found under CypherpunkArmory/UserLAnd-Assets-(__Distribution/App__). For example, our Debian specific assets can be found at [CypherpunkArmory/UserLAnd-Assets-Debian](https://github.com/CypherpunkArmory/UserLAnd-Assets-Debian)
+4) Open Android Studio 
+I am using Android Studio 4.2 Beta 3 specifically
+
+5) Build the app as normal
+It will require you to download a variety of packages via the SDK Manager
+
+## Setting Up your Production Environment
+
+1) Setup assets server
+2) Setup filesystem server
+3) Install app
+4) Customize settings
