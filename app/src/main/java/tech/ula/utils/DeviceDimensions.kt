@@ -1,10 +1,11 @@
 package tech.ula.utils
 
 import android.content.SharedPreferences
-import android.graphics.Point
+import android.os.Build
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import tech.ula.BuildConfig
+
 
 class DeviceDimensions {
     private var height = 720f
@@ -12,21 +13,19 @@ class DeviceDimensions {
     private var scaling = 1f
 
     fun saveDeviceDimensions(windowManager: WindowManager, displayMetrics: DisplayMetrics, orientation: Int, sharedPreferences: SharedPreferences) {
-        val navBarSize = getNavigationBarSize(windowManager)
         var scalingMin = 1f
         var scalingMax = 1f
         windowManager.defaultDisplay.getRealMetrics(displayMetrics)
         height = displayMetrics.heightPixels.toFloat()
         width = displayMetrics.widthPixels.toFloat()
 
-        /*
-        if (navBarSize.y > (24 * displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)) {
-            height -= navBarSize.y - (24 * displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val displayCutout = windowManager.defaultDisplay.cutout
+            if (displayCutout != null) {
+                height -= displayCutout.safeInsetBottom + displayCutout.safeInsetTop
+                width -= displayCutout.safeInsetLeft + displayCutout.safeInsetRight
+            }
         }
-        if (navBarSize.x > (24 * displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)) {
-            width -= navBarSize.x - (24 * displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)
-        }
-         */
 
         if (sharedPreferences.getBoolean("pref_custom_scaling_enabled", false)) {
             scaling = sharedPreferences.getString("pref_scaling", "1.0")!!.toFloat()
@@ -58,15 +57,5 @@ class DeviceDimensions {
             true -> "${height.toInt()}x${width.toInt()}"
             false -> "${width.toInt()}x${height.toInt()}"
         }
-    }
-
-    private fun getNavigationBarSize(windowManager: WindowManager): Point {
-        val display = windowManager.defaultDisplay
-        val appSize = Point()
-        val screenSize = Point()
-        display.getSize(appSize)
-        display.getRealSize(screenSize)
-
-        return Point(screenSize.x - appSize.x, screenSize.y - appSize.y)
     }
 }
