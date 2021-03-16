@@ -55,6 +55,7 @@ android {
         resValue "string", "help_enabled", "false"
         resValue "string", "wiki_enabled", "false"
         resValue "string", "toc_enabled", "false"
+        resValue "string", "clear_support_files_enabled", "false"
         buildConfigField 'boolean', 'FILESYSTEM_ONLY_ASSET', 'true'
         buildConfigField 'String', 'DEFAULT_RELEASE', "\"tags/v7.7.7\""
 
