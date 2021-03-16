@@ -254,7 +254,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 if (res1.length > 0) {
                     res1.deleteCharAt(res1.length - 1)
                 }
-                return res1.toString().replace(':', '-')
+                return res1.toString().replace(":", "")
             }
         } catch (ex: java.lang.Exception) {
         }
@@ -267,14 +267,30 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             val re2 = "^[0-9a-f]+(:[0-9a-f]*)+:[0-9a-f]+$".toRegex()
             val SystemProperties = Class.forName("android.os.SystemProperties")
             val method: Method = SystemProperties.getMethod("get", *arrayOf<Class<*>>(String::class.java))
-            val netdns = arrayOf("net.dns1", "net.dns2")
-            for (i in netdns.indices) {
-                val args = arrayOf(netdns[i])
-                val v = method.invoke(null, netdns[i]) as String
-                if (v != null && (v.matches(re1) || v.matches(re2))) {
+            val props = arrayOf("net.dns1", "net.dns2", "dhcp.wlan0.domain", "net.hostname")
+            for (i in props.indices) {
+                val v = method.invoke(null, props[i]) as String
+                if (i < 2) {
+                    if (v != null && (v.matches(re1) || v.matches(re2))) {
+                        with(defaultSharedPreferences.edit()) {
+                            putString("current_dns${i}", v)
+                            apply()
+                        }
+                    }
+                } else if ((i == 2) && (v != null && !v.trim().isEmpty())) {
                     with(defaultSharedPreferences.edit()) {
-                        putString("current_dns${i}", v)
+                        putString("search_domains", v.replace(","," "))
                         apply()
+                    }
+                } else if (i == 3) {
+                    if (!defaultSharedPreferences.contains("unique_id")) {
+                        with(defaultSharedPreferences.edit()) {
+                            if (v != null && !v.trim().isEmpty())
+                                putString("unique_id", v)
+                            else
+                                putString("unique_id", "android-" + UUID.randomUUID().toString())
+                            apply()
+                        }
                     }
                 }
             }
@@ -285,20 +301,23 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 if (currentNetwork != null) {
                     val linkProperties = connectivityManager.getLinkProperties(currentNetwork)
                     val dnsServers = linkProperties.dnsServers
+                    val searchDomains = linkProperties.domains
                     with(defaultSharedPreferences.edit()) {
                         if (dnsServers.size > 0)
                             putString("current_dns0", dnsServers[0].toString())
                         if (dnsServers.size > 1)
                             putString("current_dns1", dnsServers[1].toString())
+                        if(searchDomains != null && !searchDomains.trim().isEmpty())
+                            putString("search_domains",searchDomains.replace(","," "))
                         apply()
                     }
                 }
             }
-        }
-        if (!defaultSharedPreferences.contains("unique_id")) {
-            with(defaultSharedPreferences.edit()) {
-                putString("unique_id", getMacAddr())
-                apply()
+            if (!defaultSharedPreferences.contains("unique_id")) {
+                with(defaultSharedPreferences.edit()) {
+                    putString("unique_id", "android-" + getMacAddr())
+                    apply()
+                }
             }
         }
     }

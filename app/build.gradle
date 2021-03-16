@@ -43,8 +43,9 @@ android {
         resValue "string", "default_filesystem_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Ubuntu/releases/download/v7.7.7\""
         buildConfigField "String", "DEFAULT_HOSTNAME", "\"android-device\""
         resValue "string", "pref_hostname_default", "\"android-device\""
-        buildConfigField "String", "DEFAULT_DNS", "\"nameserver 8.8.8.8\\nnameserver 8.8.4.4\""
-        resValue "string", "pref_dns_default", "\"nameserver 8.8.8.8\\nnameserver 8.8.4.4\""
+        buildConfigField "String", "DEFAULT_DNS_DOMAINS", "\"search Home\""
+        buildConfigField "String", "DEFAULT_DNS_NAMESERVERS", "\"nameserver 8.8.8.8\\nnameserver 8.8.4.4\""
+        resValue "string", "pref_dns_default", "\"search Home\\nnameserver 8.8.8.8\\nnameserver 8.8.4.4\""
         buildConfigField 'boolean', 'FORCE_PORTRAIT_GEOMETRY', 'false'
         buildConfigField 'int', "MAX_DIMENSION", "1000"
         buildConfigField 'int', "MIN_DIMENSION", "360"

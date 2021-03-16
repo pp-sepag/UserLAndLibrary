@@ -102,20 +102,26 @@ class LocalServerManager(
             env["HOSTNAME"] = sharedPreferences.getString("pref_hostname", BuildConfig.DEFAULT_HOSTNAME)!!
         } else {
             if (sharedPreferences.contains("unique_id"))
-                env["HOSTNAME"] = "android-" + sharedPreferences.getString("unique_id", "localhost")!!
+                env["HOSTNAME"] = sharedPreferences.getString("unique_id", "localhost")!!
             else
                 env["HOSTNAME"] = BuildConfig.DEFAULT_HOSTNAME
         }
         env["HOSTS"] = "127.0.0.1 localhost\n127.0.0.1 ${env["HOSTNAME"]}"
         if (sharedPreferences.getBoolean("pref_custom_dns_enabled",false)) {
-            env["RESOLV"] = sharedPreferences.getString("pref_dns", BuildConfig.DEFAULT_DNS)!!
+            env["RESOLV"] = sharedPreferences.getString("pref_dns", BuildConfig.DEFAULT_DNS_DOMAINS + "\n" + BuildConfig.DEFAULT_DNS_NAMESERVERS)!!
         } else {
+            env["RESOLV"] = ""
+            if (sharedPreferences.contains("search_domains")) {
+                env["RESOLV"] += "search " + sharedPreferences.getString("search_domains", "Home")
+            } else
+                env["RESOLV"] += BuildConfig.DEFAULT_DNS_DOMAINS
+
             if (sharedPreferences.contains("current_dns0")) {
-                env["RESOLV"] = "nameserver " + sharedPreferences.getString("current_dns0", "8.8.8.8")!!.removePrefix("/")
+                env["RESOLV"] += "\nnameserver " + sharedPreferences.getString("current_dns0", "8.8.8.8")!!.removePrefix("/")
                 if (sharedPreferences.contains("current_dns1"))
                     env["RESOLV"] += "\nnameserver " + sharedPreferences.getString("current_dns1", "8.8.4.4")!!.removePrefix("/")
             } else
-                env["RESOLV"] = BuildConfig.DEFAULT_DNS
+                env["RESOLV"] += "\n" + BuildConfig.DEFAULT_DNS_NAMESERVERS
         }
 
         val result = busyboxExecutor.executeProotCommand(
