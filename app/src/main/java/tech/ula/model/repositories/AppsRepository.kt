@@ -17,7 +17,8 @@ class AppsRepository(
     private val appsDao: AppsDao,
     private val remoteAppsSource: GithubAppsFetcher,
     private val appsPreferences: AppsPreferences,
-    private val logger: Logger = SentryLogger()
+    private val logger: Logger = SentryLogger(),
+    private val flush: Boolean
 ) {
     private val className = "AppsRepository"
 
@@ -39,6 +40,10 @@ class AppsRepository(
         val distributionsList = mutableSetOf<String>()
         refreshStatus.postValue(RefreshStatus.ACTIVE)
         val jobs = mutableListOf<Job>()
+
+        if (flush)
+            appsDao.deleteAllApps()
+
         try {
             remoteAppsSource.fetchAppsList().forEach { app ->
                 jobs.add(scope.launch {

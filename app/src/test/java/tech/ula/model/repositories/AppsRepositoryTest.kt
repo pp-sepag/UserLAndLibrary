@@ -56,7 +56,8 @@ class AppsRepositoryTest {
                 mockAppsDao,
                 mockGithubAppsFetcher,
                 mockAppsPreferences,
-                mockLogger
+                mockLogger,
+                false
         )
     }
 

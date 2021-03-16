@@ -58,9 +58,19 @@ class AppsListFragment : Fragment(), AppsListAdapter.AppsClickHandler {
         var appsUrl = BuildConfig.DEFAULT_APPS_URL
         if (activityContext.defaultSharedPreferences.getBoolean("pref_custom_apps_enabled", false))
             appsUrl = activityContext.defaultSharedPreferences.getString("pref_apps", BuildConfig.DEFAULT_APPS_URL)!!
+        var flush = false
+        if (activityContext.defaultSharedPreferences.contains("prev_pref_apps")) {
+            if (!appsUrl.equals(activityContext.defaultSharedPreferences.getString("prev_pref_apps", BuildConfig.DEFAULT_APPS_URL))) {
+                flush = true
+            }
+        }
+        with(activityContext.defaultSharedPreferences.edit()) {
+            putString("prev_pref_apps", appsUrl)
+            apply()
+        }
         val githubFetcher = GithubAppsFetcher("${activityContext.filesDir}",appsUrl)
 
-        val appsRepository = AppsRepository(appsDao, githubFetcher, appsPreferences)
+        val appsRepository = AppsRepository(appsDao, githubFetcher, appsPreferences, flush = flush)
         ViewModelProviders.of(this, AppsListViewModelFactory(appsRepository))
                 .get(AppsListViewModel::class.java)
     }
