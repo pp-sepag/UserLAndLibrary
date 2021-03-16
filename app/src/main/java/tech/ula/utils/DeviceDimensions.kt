@@ -1,7 +1,6 @@
 package tech.ula.utils
 
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import android.graphics.Point
 import android.util.DisplayMetrics
 import android.view.WindowManager
@@ -19,16 +18,18 @@ class DeviceDimensions {
         windowManager.defaultDisplay.getRealMetrics(displayMetrics)
         height = displayMetrics.heightPixels.toFloat()
         width = displayMetrics.widthPixels.toFloat()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
 
-        when (orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> if (navBarSize.y > 0) height += navBarSize.y
-            Configuration.ORIENTATION_LANDSCAPE -> if (navBarSize.x > 0) width += navBarSize.x
-            else -> return
+        /*
+        if (navBarSize.y > (24 * displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)) {
+            height -= navBarSize.y - (24 * displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)
         }
+        if (navBarSize.x > (24 * displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)) {
+            width -= navBarSize.x - (24 * displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)
+        }
+         */
 
-        if (sharedPreferences.getBoolean("pref_custom_scaling_enabled",false)) {
-            scaling = sharedPreferences.getString("pref_scaling","1.0")!!.toFloat()
+        if (sharedPreferences.getBoolean("pref_custom_scaling_enabled", false)) {
+            scaling = sharedPreferences.getString("pref_scaling", "1.0")!!.toFloat()
         } else {
             if (height > width) {
                 scalingMax = height/BuildConfig.MAX_DIMENSION
