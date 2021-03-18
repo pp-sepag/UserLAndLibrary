@@ -198,7 +198,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         }
         navController.graph = graph
         val bottomNavView = this.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_nav_view)
-        if (defaultSharedPreferences.getBoolean("pref_hide_sessions_filesystems", false)){
+        if (defaultSharedPreferences.getBoolean("pref_hide_sessions_filesystems", BuildConfig.DEFAULT_HIDE_SESSIONS_FILESYSTEMS)){
             bottomNavView.visibility = View.GONE
         } else {
             bottomNavView.visibility = View.VISIBLE

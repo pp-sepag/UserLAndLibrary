@@ -22,13 +22,13 @@
             android:key="pref_hide_sessions_filesystems"
             android:title="@string/pref_hide_sessions_filesystems_title"
             android:summary="@string/pref_hide_sessions_filesystems_summary"
-            android:defaultValue="false"
+            android:defaultValue="@string/default_hide_sessions_filesystems"
             app:iconSpaceReserved="false"/>
         <CheckBoxPreference
             android:key="pref_hide_distributions"
             android:title="@string/pref_hide_distributions_title"
             android:summary="@string/pref_hide_distributions_summary"
-            android:defaultValue="false"
+            android:defaultValue="@string/default_hide_distributions"
             app:iconSpaceReserved="false"/>
         <CheckBoxPreference
             android:key="pref_custom_hostname_enabled"
@@ -58,7 +58,7 @@
             android:key="pref_custom_apps_enabled"
             android:title="@string/pref_custom_apps_enabled_title"
             android:summary="@string/pref_custom_apps_enabled_summary"
-            android:defaultValue="false"
+            android:defaultValue="@string/default_custom_apps_enabled"
             app:iconSpaceReserved="false"/>
         <EditTextPreference
             android:dependency="pref_custom_apps_enabled"
@@ -70,7 +70,7 @@
             android:key="pref_custom_filesystem_enabled"
             android:title="@string/pref_custom_filesystem_enabled_title"
             android:summary="@string/pref_custom_filesystem_enabled_summary"
-            android:defaultValue="false"
+            android:defaultValue="@string/default_custom_filesystem_enabled"
             app:iconSpaceReserved="false"/>
         <EditTextPreference
             android:dependency="pref_custom_filesystem_enabled"
@@ -95,7 +95,7 @@
             android:key="pref_hide_vnc_toolbar"
             android:title="@string/pref_hide_custom_toolbar_title"
             android:summary="@string/pref_hide_custom_toolbar_summary"
-            android:defaultValue="false"
+            android:defaultValue="@string/default_hide_vnc_toolbar"
             app:iconSpaceReserved="false"/>
         <ListPreference
             android:key="pref_default_vnc_input_mode"
@@ -103,7 +103,7 @@
             android:summary="@string/pref_default_vnc_input_mode_summary"
             android:entries="@array/vnc_input_modes"
             android:entryValues="@array/vnc_input_modes"
-            android:defaultValue="@string/input_method_direct_swipe_pan"
+            android:defaultValue="@string/default_vnc_input_mode"
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
     <PreferenceCategory

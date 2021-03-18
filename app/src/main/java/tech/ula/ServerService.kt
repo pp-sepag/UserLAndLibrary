@@ -167,8 +167,8 @@ class ServerService : Service(), CoroutineScope {
         val bVncIntent = Intent(this, RemoteCanvasActivity::class.java)
         bVncIntent.data = Uri.parse("vnc://127.0.0.1:5951/?VncUsername=${session.username}&VncPassword=${session.vncPassword}")
         bVncIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        bVncIntent.putExtra("hide_toolbar", this.defaultSharedPreferences.getBoolean("pref_hide_vnc_toolbar",false))  //seems to hide after a few seconds
-        val inputMode = when(this.defaultSharedPreferences.getString("pref_default_vnc_input_mode",getString(R.string.input_method_direct_swipe_pan))) {
+        bVncIntent.putExtra("hide_toolbar", this.defaultSharedPreferences.getBoolean("pref_hide_vnc_toolbar",BuildConfig.DEFAULT_HIDE_VNC_TOOLBAR))  //seems to hide after a few seconds
+        val inputMode = when(this.defaultSharedPreferences.getString("pref_default_vnc_input_mode",BuildConfig.DEFAULT_VNC_INPUT_MODE)) {
             getString(R.string.input_method_direct_swipe_pan) -> com.iiordanov.bVNC.input.InputHandlerDirectSwipePan.ID
             getString(R.string.input_method_direct_drag_pan) -> com.iiordanov.bVNC.input.InputHandlerDirectDragPan.ID
             getString(R.string.input_method_touchpad) -> com.iiordanov.bVNC.input.InputHandlerTouchpad.ID

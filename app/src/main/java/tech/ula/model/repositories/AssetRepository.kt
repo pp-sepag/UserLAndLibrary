@@ -148,7 +148,7 @@ class AssetRepository(
         var versionCode = ""
         var url = ""
 
-        if (defaultSharedPreferences.getBoolean("pref_custom_filesystem_enabled", false)) {
+        if (defaultSharedPreferences.getBoolean("pref_custom_filesystem_enabled", BuildConfig.DEFAULT_CUSTOM_FILESYSTEM_ENABLED)) {
             versionCode = "v0.0.0"
             url = defaultSharedPreferences.getString("pref_filesystem", BuildConfig.DEFAULT_FILESYSTEM_URL)!!
             url += "/${ulaFiles.getArchType()}-${filename}"

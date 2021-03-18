@@ -56,7 +56,7 @@ class AppsListFragment : Fragment(), AppsListAdapter.AppsClickHandler {
         val ulaDatabase = UlaDatabase.getInstance(activityContext)
         val appsDao = ulaDatabase.appsDao()
         var appsUrl = BuildConfig.DEFAULT_APPS_URL
-        if (activityContext.defaultSharedPreferences.getBoolean("pref_custom_apps_enabled", false))
+        if (activityContext.defaultSharedPreferences.getBoolean("pref_custom_apps_enabled", BuildConfig.DEFAULT_CUSTOM_APPS_ENABLED))
             appsUrl = activityContext.defaultSharedPreferences.getString("pref_apps", BuildConfig.DEFAULT_APPS_URL)!!
         var flush = false
         if (activityContext.defaultSharedPreferences.contains("prev_pref_apps")) {

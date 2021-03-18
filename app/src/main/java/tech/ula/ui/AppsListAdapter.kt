@@ -11,6 +11,7 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import tech.ula.BuildConfig
 import tech.ula.R
 import tech.ula.model.entities.App
 import tech.ula.utils.AppDetails
@@ -126,7 +127,7 @@ class AppsListAdapter(
     }
 
     private fun insertAppIntoView(app: App) {
-        if (activity.defaultSharedPreferences.getBoolean("pref_hide_distributions", false) && (app.category == firstDisplayCategory))
+        if (activity.defaultSharedPreferences.getBoolean("pref_hide_distributions", BuildConfig.DEFAULT_HIDE_DISTRIBUTIONS) && (app.category == firstDisplayCategory))
             return
         val foundIndex = apps.binarySearch(app, compareBy(
                 // Sort the list by three criteria of descending importance
