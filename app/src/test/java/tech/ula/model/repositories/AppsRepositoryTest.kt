@@ -1,5 +1,7 @@
 package tech.ula.model.repositories
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -11,6 +13,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import tech.ula.model.daos.AppsDao
@@ -19,6 +23,7 @@ import tech.ula.model.remote.GithubAppsFetcher
 import tech.ula.utils.Logger
 import tech.ula.utils.preferences.AppsPreferences
 import java.io.IOException
+
 
 @RunWith(MockitoJUnitRunner::class)
 class AppsRepositoryTest {
@@ -37,6 +42,12 @@ class AppsRepositoryTest {
 
     @Mock lateinit var mockRefreshStatusObserver: Observer<RefreshStatus>
 
+    @Mock lateinit var mockContext: Context
+
+    @Mock lateinit var mockSharedPreferences: SharedPreferences
+
+    @Mock lateinit var mockEditor: SharedPreferences.Editor
+
     private val inactiveAppName = "inactive"
     private val inactiveApp = App(name = inactiveAppName, category = "distribution")
     private val activeAppName = "active"
@@ -50,14 +61,16 @@ class AppsRepositoryTest {
 
     @Before
     fun setup() {
+        whenever(mockSharedPreferences.edit()).thenReturn(mockEditor)
+
         appsListLiveData.postValue(appsList)
         activeAppsListLiveData.postValue(activeAppsList)
         appsRepository = AppsRepository(
                 mockAppsDao,
                 mockGithubAppsFetcher,
                 mockAppsPreferences,
-                mockLogger,
-                false
+                mockSharedPreferences,
+                mockLogger
         )
     }
 

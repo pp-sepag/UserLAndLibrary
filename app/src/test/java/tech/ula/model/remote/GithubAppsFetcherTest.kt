@@ -1,5 +1,6 @@
 package tech.ula.model.remote
 
+import android.content.SharedPreferences
 import com.nhaarman.mockitokotlin2.verifyBlocking
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.runBlocking
@@ -29,9 +30,11 @@ class GithubAppsFetcherTest {
 
     @Mock lateinit var logger: Logger
 
+    @Mock lateinit var mockSharedPreferences: SharedPreferences
+
     private lateinit var githubAppsFetcher: GithubAppsFetcher
 
-    private val baseUrl = "https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/master/apps"
+    private val baseUrl = BuildConfig.DEFAULT_APPS_URL
     private val appsListUrl = "$baseUrl/apps.txt"
 
     private val appName = "name"
@@ -41,7 +44,7 @@ class GithubAppsFetcherTest {
     fun setup() {
         testFilesDir = tempFolder.root
 
-        githubAppsFetcher = GithubAppsFetcher(testFilesDir.path, BuildConfig.DEFAULT_APPS_URL, mockHttpStream, logger)
+        githubAppsFetcher = GithubAppsFetcher(testFilesDir.path, mockSharedPreferences, mockHttpStream, logger)
     }
 
     @Test

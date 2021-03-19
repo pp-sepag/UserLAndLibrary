@@ -69,7 +69,9 @@ class AppsListAdapter(
     }
 
     fun updateApps(newApps: List<App>) {
-        val diff = newApps.minus(apps)
+        var diff = apps.minus(newApps)
+        for (app in diff) removeAppFromView(app)
+        diff = newApps.minus(apps)
         for (app in diff) insertAppIntoView(app)
     }
 
@@ -140,6 +142,14 @@ class AppsListAdapter(
         apps.add(index, app)
         notifyItemInserted(index)
         notifyItemChanged(index + 1)
+    }
+
+    private fun removeAppFromView(app: App) {
+        val index = apps.indexOf(app)
+        if (index != -1) {
+            apps.removeAt(index)
+            notifyItemRemoved(index)
+        }
     }
 
     private fun getActiveAppsDiff(newActiveApps: List<App>): List<App> {

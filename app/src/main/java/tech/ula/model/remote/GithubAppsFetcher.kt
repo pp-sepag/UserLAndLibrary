@@ -1,5 +1,6 @@
 package tech.ula.model.remote
 
+import android.content.SharedPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tech.ula.BuildConfig
@@ -11,7 +12,7 @@ import java.util.Locale
 
 class GithubAppsFetcher(
     private val filesDirPath: String,
-    private val baseUrl: String,
+    private val sharedPreferences: SharedPreferences,
     private val httpStream: HttpStream = HttpStream(),
     private val logger: Logger = SentryLogger()
 ) {
@@ -20,10 +21,17 @@ class GithubAppsFetcher(
     private operator fun <T> List<T>.component6() = get(5)
     private operator fun <T> List<T>.component7() = get(6)
 
+    private fun baseUrl(): String {
+        var appsUrl = BuildConfig.DEFAULT_APPS_URL
+        if (sharedPreferences.getBoolean("pref_custom_apps_enabled", BuildConfig.DEFAULT_CUSTOM_APPS_ENABLED))
+            appsUrl = sharedPreferences.getString("pref_apps", BuildConfig.DEFAULT_APPS_URL)!!
+        return appsUrl
+    }
+
     @Throws(IOException::class)
     suspend fun fetchAppsList(): List<App> = withContext(Dispatchers.IO) {
         return@withContext try {
-            val url = "$baseUrl/apps.txt"
+            val url = "${baseUrl()}/apps.txt"
             val numLinesToSkip = 1 // Skip first line which defines schema
             val contents: List<String> = httpStream.toLines(url)
             contents.drop(numLinesToSkip).map { line ->
@@ -58,20 +66,20 @@ class GithubAppsFetcher(
     suspend fun fetchAppIcon(app: App) = withContext(Dispatchers.IO) {
         val directoryAndFilename = "${app.name}/${app.name}.png"
         val file = File("$filesDirPath/apps/$directoryAndFilename")
-        val url = "$baseUrl/$directoryAndFilename"
+        val url = "${baseUrl()}/$directoryAndFilename"
         httpStream.toFile(url, file)
     }
 
     suspend fun fetchAppDescription(app: App) = withContext(Dispatchers.IO) {
         val directoryAndFilename = "${app.name}/${app.name}.txt"
-        val url = "$baseUrl/$directoryAndFilename"
+        val url = "${baseUrl()}/$directoryAndFilename"
         val file = File("$filesDirPath/apps/$directoryAndFilename")
         httpStream.toTextFile(url, file)
     }
 
     suspend fun fetchAppScript(app: App) = withContext(Dispatchers.IO) {
         val directoryAndFilename = "${app.name}/${app.name}.sh"
-        val url = "$baseUrl/$directoryAndFilename"
+        val url = "${baseUrl()}/$directoryAndFilename"
         val file = File("$filesDirPath/apps/$directoryAndFilename")
         httpStream.toTextFile(url, file)
     }

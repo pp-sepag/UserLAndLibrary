@@ -1,15 +1,14 @@
 package tech.ula.model.repositories
 
+import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.* // ktlint-disable no-wildcard-imports
+import tech.ula.BuildConfig
 import tech.ula.model.daos.AppsDao
 import tech.ula.model.entities.App
 import tech.ula.model.remote.GithubAppsFetcher
-import tech.ula.utils.BreadcrumbType
-import tech.ula.utils.Logger
-import tech.ula.utils.SentryLogger
-import tech.ula.utils.UlaBreadcrumb
+import tech.ula.utils.*
 import tech.ula.utils.preferences.AppsPreferences
 import java.util.Locale
 
@@ -17,8 +16,8 @@ class AppsRepository(
     private val appsDao: AppsDao,
     private val remoteAppsSource: GithubAppsFetcher,
     private val appsPreferences: AppsPreferences,
-    private val logger: Logger = SentryLogger(),
-    private val flush: Boolean
+    private val sharedPreferences: SharedPreferences,
+    private val logger: Logger = SentryLogger()
 ) {
     private val className = "AppsRepository"
 
@@ -41,8 +40,22 @@ class AppsRepository(
         refreshStatus.postValue(RefreshStatus.ACTIVE)
         val jobs = mutableListOf<Job>()
 
-        if (flush)
+        var appsUrl = BuildConfig.DEFAULT_APPS_URL
+        if (sharedPreferences.getBoolean("pref_custom_apps_enabled", BuildConfig.DEFAULT_CUSTOM_APPS_ENABLED))
+            appsUrl = sharedPreferences.getString("pref_apps", BuildConfig.DEFAULT_APPS_URL)!!
+        var flush = false
+        if (sharedPreferences.contains("prev_pref_apps_repo")) {
+            if (!appsUrl.equals(sharedPreferences.getString("prev_pref_apps_repo", BuildConfig.DEFAULT_APPS_URL))) {
+                flush = true
+            }
+        }
+        with(sharedPreferences.edit()) {
+            putString("prev_pref_apps_repo", appsUrl)
+            apply()
+        }
+        if (flush) {
             appsDao.deleteAllApps()
+        }
 
         try {
             remoteAppsSource.fetchAppsList().forEach { app ->

@@ -53,8 +53,8 @@ android {
         buildConfigField 'boolean', 'DEFAULT_CUSTOM_APPS_ENABLED', 'true'
         resValue "string", "default_custom_apps_enabled", "true"
         //this is the default custom apps url
-        buildConfigField "String", "DEFAULT_APPS_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/master/apps\""
-        resValue "string", "default_apps_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/master/apps\""
+        buildConfigField "String", "DEFAULT_APPS_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/test_sep/apps\""
+        resValue "string", "default_apps_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/test_sep/apps\""
         //this can be used to get the filesystem from a custom url
         buildConfigField 'boolean', 'DEFAULT_CUSTOM_FILESYSTEM_ENABLED', 'true'
         resValue "string", "default_custom_filesystem_enabled", "true"
