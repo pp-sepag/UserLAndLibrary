@@ -27,6 +27,18 @@ You will open project and point it at the UserLAnd-Private directory
 
 Note: It will require you to download a variety of packages via the SDK Manager
 
+## Building a Release APK
+
+1) Build->Generate Signed Bundle / APK.
+
+2) Select APK (not Anroid App Bundle), then hit next.
+
+3) Select an existing key store or create a new one, then hit next.  Never lose this file.
+
+4) Select "release" as the build variant.  Select V1 AND V2 signature versions (both are required).  Then click finish.
+
+5) The result will be under app/release.  You should probably save this and rename it with a version number at the end.  
+
 ## Setting Up your Production Environment
 
 1) Setup assets server
