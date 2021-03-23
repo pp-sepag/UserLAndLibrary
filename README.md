@@ -56,3 +56,9 @@ If you are going to be downloading filesystems, as opposed to restoring them man
 5) Customize settings
 
 You can specify the location of the servers on the network and change many other settings from the app settings.
+
+## Running Test Suites
+
+1) For running unit tests see under app/src/test
+2) For running unit tests see under app/src/androidTest
+3) In the desired directory (from 1 or 2) right click on the "java" folder and hit 'Run tests in 'java''
