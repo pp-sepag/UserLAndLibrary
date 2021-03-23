@@ -21,6 +21,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import tech.ula.BuildConfig
 import tech.ula.MainActivity
 import tech.ula.R
 import tech.ula.androidTestHelpers.* // ktlint-disable no-wildcard-imports
@@ -42,10 +43,10 @@ class MainActivityTest {
     )
 
     private lateinit var activity: MainActivity
-    private val appName = "Alpine"
-    private val username = "alpine_user"
-    private val sshPassword = "ssh"
-    private val vncPassword = "vncpass"
+    private val appName = "Test"
+    private val username = BuildConfig.DEFAULT_USERNAME
+    private val sshPassword = BuildConfig.DEFAULT_SSH_PASSWORD
+    private val vncPassword = BuildConfig.DEFAULT_VNC_PASSWORD
     private val homeLocation = "1/home/$username"
     private lateinit var homeDirectory: File
 
@@ -55,6 +56,7 @@ class MainActivityTest {
         homeDirectory = File(activity.filesDir, homeLocation)
     }
 
+    /*
     @Test
     fun test_ssh_session_can_be_started() {
         R.id.app_list_fragment.shortWaitForDisplay()
@@ -124,57 +126,30 @@ class MainActivityTest {
         assertNotDisplayed(R.id.layout_progress)
         R.id.terminal_view.shortWaitForDisplay()
     }
+    */
 
     @Test
     fun test_vnc_session_can_be_started() {
-        R.id.app_list_fragment.shortWaitForDisplay()
+        R.id.swipe_refresh.shortWaitForDisplay()
 
         R.id.swipe_refresh.waitForRefresh(activity)
 
-        // Click alpine
+        // Click Test
         assertDisplayedAtPosition(R.id.list_apps, 0, R.id.apps_name, appName)
         clickListItem(R.id.list_apps, 0)
 
-        // Set filesystem credentials
-        R.string.filesystem_credentials_reasoning.waitForDisplay()
-        writeTo(R.id.text_input_username, username)
-        writeTo(R.id.text_input_password, sshPassword)
-        writeTo(R.id.text_input_vnc_password, vncPassword)
-        clickDialogPositiveButton()
-
-        // Set session type to vnc
-        R.string.prompt_app_connection_type_preference.shortWaitForDisplay()
-        clickRadioButtonItem(R.id.radio_apps_service_type_preference, R.id.vnc_radio_button)
-        clickDialogPositiveButton()
-
         // Wait for progress dialog to complete
-        R.id.progress_bar_session_list.shortWaitForDisplay()
+        R.id.progress_bar_session_list.longWaitForDisplay()
         R.string.progress_downloading.longWaitForDisplay()
         R.string.progress_copying_downloads.extraLongWaitForDisplay()
         R.string.progress_verifying_assets.waitForDisplay()
         R.string.progress_setting_up_filesystem.waitForDisplay()
         R.string.progress_starting.longWaitForDisplay()
-        Thread.sleep(10000)
 
-        val clientIntent = Intent()
-        clientIntent.action = Intent.ACTION_VIEW
-        clientIntent.type = "application/vnd.vnc"
-        clientIntent.data = Uri.parse("vnc://127.0.0.1:5951/?VncUsername=$username&VncPassword=$vncPassword")
-        clientIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        val packageManager = activity.packageManager
-        val activities = packageManager.queryIntentActivities(clientIntent, 0)
-        if (activities.size > 0) {
-            // Match case where bVNC is present, e.g. test is running on personal device
-            intended(hasAction(Intent.ACTION_VIEW))
-            intended(hasData(Uri.parse("vnc://127.0.0.1:5951/?VncUsername=$username&VncPassword=$vncPassword")))
-            intended(hasFlag(Intent.FLAG_ACTIVITY_NEW_TASK))
-        } else {
-            // Match case where bVNC is not present on device, e.g. firebase
-            val packageName = "com.iiordanov.freebVNC"
-            intended(hasAction(Intent.ACTION_VIEW))
-            intended(hasData(Uri.parse("market://details?id=$packageName")))
-            intended(hasFlag(Intent.FLAG_ACTIVITY_NEW_TASK))
-        }
+        waitForFile(File(homeDirectory, "test.txt"), timeout = 60_000)
+
+        Thread.sleep(5000)
+
     }
 
     private fun doHappyPathTestScript(): List<File> {

@@ -300,16 +300,18 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 val currentNetwork = connectivityManager.getActiveNetwork()
                 if (currentNetwork != null) {
                     val linkProperties = connectivityManager.getLinkProperties(currentNetwork)
-                    val dnsServers = linkProperties.dnsServers
-                    val searchDomains = linkProperties.domains
-                    with(defaultSharedPreferences.edit()) {
-                        if (dnsServers.size > 0)
-                            putString("current_dns0", dnsServers[0].toString())
-                        if (dnsServers.size > 1)
-                            putString("current_dns1", dnsServers[1].toString())
-                        if(searchDomains != null && !searchDomains.trim().isEmpty())
-                            putString("search_domains",searchDomains.replace(","," "))
-                        apply()
+                    if (linkProperties != null) {
+                        val dnsServers = linkProperties.dnsServers
+                        val searchDomains = linkProperties.domains
+                        with(defaultSharedPreferences.edit()) {
+                            if (dnsServers.size > 0)
+                                putString("current_dns0", dnsServers[0].toString())
+                            if (dnsServers.size > 1)
+                                putString("current_dns1", dnsServers[1].toString())
+                            if (searchDomains != null && !searchDomains.trim().isEmpty())
+                                putString("search_domains", searchDomains.replace(",", " "))
+                            apply()
+                        }
                     }
                 }
             }
