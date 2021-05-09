@@ -19,7 +19,7 @@ class DeviceDimensions {
         height = displayMetrics.heightPixels.toFloat()
         width = displayMetrics.widthPixels.toFloat()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val displayCutout = windowManager.defaultDisplay.cutout
             if (displayCutout != null) {
                 height -= displayCutout.safeInsetBottom + displayCutout.safeInsetTop
