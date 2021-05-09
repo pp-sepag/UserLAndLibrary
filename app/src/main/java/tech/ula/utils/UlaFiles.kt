@@ -16,6 +16,7 @@ class UlaFiles(
     val supportDir: File = File(filesDir, "support")
     val emulatedScopedDir = context.getExternalFilesDir(null)!!
     val emulatedUserDir = File(emulatedScopedDir, "storage")
+    val pictureDir = File(emulatedScopedDir, "Pictures")
 
     val sdCardScopedDir: File? = resolveSdCardScopedStorage(context)
     val sdCardUserDir: File? = if (sdCardScopedDir != null) {
@@ -27,6 +28,7 @@ class UlaFiles(
 
     init {
         emulatedUserDir.mkdirs()
+        pictureDir.mkdirs()
         sdCardUserDir?.mkdirs()
 
         setupLinks()

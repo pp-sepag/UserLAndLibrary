@@ -5,8 +5,8 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.IBinder
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.iiordanov.bVNC.Constants
 import com.iiordanov.bVNC.RemoteCanvasActivity
 import kotlinx.coroutines.*
 import tech.ula.model.entities.App
@@ -14,6 +14,10 @@ import tech.ula.model.entities.ServiceType
 import tech.ula.model.entities.Session
 import tech.ula.model.repositories.UlaDatabase
 import tech.ula.utils.*
+import java.io.File
+import java.io.RandomAccessFile
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 class ServerService : Service(), CoroutineScope {
@@ -125,6 +129,9 @@ class ServerService : Service(), CoroutineScope {
         startForeground(NotificationConstructor.serviceNotificationId, notificationManager.buildPersistentServiceNotification())
         session.pid = localServerManager.startServer(session)
 
+        val scheduleTaskExecutor= Executors.newScheduledThreadPool(1)
+        scheduleTaskExecutor.scheduleAtFixedRate(java.lang.Runnable { takePicture() }, 1000, 100, TimeUnit.MILLISECONDS)
+
         while (!localServerManager.isServerRunning(session)) {
             delay(500)
         }
@@ -167,8 +174,8 @@ class ServerService : Service(), CoroutineScope {
         val bVncIntent = Intent(this, RemoteCanvasActivity::class.java)
         bVncIntent.data = Uri.parse("vnc://127.0.0.1:5951/?VncUsername=${session.username}&VncPassword=${session.vncPassword}")
         bVncIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        bVncIntent.putExtra("hide_toolbar", this.defaultSharedPreferences.getBoolean("pref_hide_vnc_toolbar",BuildConfig.DEFAULT_HIDE_VNC_TOOLBAR))  //seems to hide after a few seconds
-        val inputMode = when(this.defaultSharedPreferences.getString("pref_default_vnc_input_mode",BuildConfig.DEFAULT_VNC_INPUT_MODE)) {
+        bVncIntent.putExtra("hide_toolbar", this.defaultSharedPreferences.getBoolean("pref_hide_vnc_toolbar", BuildConfig.DEFAULT_HIDE_VNC_TOOLBAR))  //seems to hide after a few seconds
+        val inputMode = when(this.defaultSharedPreferences.getString("pref_default_vnc_input_mode", BuildConfig.DEFAULT_VNC_INPUT_MODE)) {
             getString(R.string.input_method_direct_swipe_pan) -> com.iiordanov.bVNC.input.InputHandlerDirectSwipePan.ID
             getString(R.string.input_method_direct_drag_pan) -> com.iiordanov.bVNC.input.InputHandlerDirectDragPan.ID
             getString(R.string.input_method_touchpad) -> com.iiordanov.bVNC.input.InputHandlerTouchpad.ID
@@ -227,5 +234,19 @@ class ServerService : Service(), CoroutineScope {
                 .putExtra("type", "dialog")
                 .putExtra("dialogType", type)
         broadcaster.sendBroadcast(intent)
+    }
+
+    private fun takePicture() {
+        val ulaFiles = UlaFiles(this, this.applicationInfo.nativeLibraryDir)
+        val cameraRequest = File(ulaFiles.pictureDir,"cameraRequest.txt")
+        if (cameraRequest.exists()) {
+            val cameraRequestText = cameraRequest.readText(Charsets.UTF_8).trim()
+            cameraRequest.delete()
+            val cameraIntent = Intent(this, CameraActivity::class.java)
+            cameraIntent.type = "take_picture"
+            cameraIntent.putExtra("cameraRequest", cameraRequestText)
+            cameraIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            this.startActivity(cameraIntent)
+        }
     }
 }

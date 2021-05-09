@@ -6,11 +6,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.*
+import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.view.*
 import android.view.animation.AlphaAnimation
@@ -19,6 +21,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -48,8 +51,11 @@ import tech.ula.ui.SessionListFragment
 import tech.ula.utils.*
 import tech.ula.utils.preferences.*
 import tech.ula.viewmodel.*
+import java.io.File
+import java.io.IOException
 import java.lang.reflect.Method
 import java.net.NetworkInterface
+import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, AppsListFragment.AppSelection, FilesystemListFragment.FilesystemListProgress {
@@ -261,6 +267,13 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         return UUID.randomUUID().toString()
     }
 
+    private fun getCameraInfo() {
+        with(defaultSharedPreferences.edit()) {
+            putInt("camera_supported", if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) 1 else 0)
+            apply()
+        }
+    }
+
     private fun getNetInfo() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             val re1 = "^\\d+(\\.\\d+){3}$".toRegex()
@@ -390,6 +403,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     override fun appHasBeenSelected(app: App, autoStart: Boolean) {
         getNetInfo()
+        getCameraInfo()
         if (!PermissionHandler.permissionsAreGranted(this)) {
             PermissionHandler.showPermissionsNecessaryDialog(this)
             viewModel.waitForPermissions(appToContinue = app)
@@ -400,6 +414,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     override fun sessionHasBeenSelected(session: Session) {
         getNetInfo()
+        getCameraInfo()
         if (!PermissionHandler.permissionsAreGranted(this)) {
             PermissionHandler.showPermissionsNecessaryDialog(this)
             viewModel.waitForPermissions(sessionToContinue = session)
@@ -504,11 +519,11 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         data?.let {
-            val session = viewModel.lastSelectedSession
-            val result = data.getStringExtra("run") ?: ""
-            if (session.serviceType == ServiceType.Xsdl && result.isNotEmpty()) {
-                startSession(session)
-            }
+                val session = viewModel.lastSelectedSession
+                val result = data.getStringExtra("run") ?: ""
+                if (session.serviceType == ServiceType.Xsdl && result.isNotEmpty()) {
+                    startSession(session)
+                }
         }
     }
 
@@ -845,4 +860,5 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             else -> true
         }
     }
+
 }

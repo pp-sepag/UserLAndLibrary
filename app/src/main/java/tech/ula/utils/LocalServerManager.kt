@@ -1,6 +1,7 @@
 package tech.ula.utils
 
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import tech.ula.BuildConfig
 import tech.ula.R
 import tech.ula.model.entities.ServiceType
@@ -95,6 +96,7 @@ class LocalServerManager(
         deletePidFile(session)
         val command = "/support/startVNCServer.sh"
         val env = HashMap<String, String>()
+        env["HAS_CAMERA"] = sharedPreferences.getInt("camera_supported",0).toString()
         env["INITIAL_USERNAME"] = session.username
         env["INITIAL_VNC_PASSWORD"] = session.vncPassword
         env["DIMENSIONS"] = session.geometry

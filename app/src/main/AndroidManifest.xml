@@ -14,6 +14,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <uses-feature android:name="android.hardware.camera"
+        android:required="false" />
+
     <supports-screens
         android:xlargeScreens="true"
         android:largeScreens="true"
@@ -60,12 +63,26 @@
             </intent-filter>
         </provider>
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="tech.ula.provider.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+
         <activity android:screenOrientation="unspecified"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|density|screenLayout"
             android:name="com.iiordanov.bVNC.RemoteCanvasActivity"
             android:windowSoftInputMode="stateHidden|adjustResize"
             android:theme="@style/AppTheme"
             android:resizeableActivity="true">
+        </activity>
+
+        <activity android:name=".CameraActivity"
+            android:theme="@style/Theme.AppCompat.Transparent.NoActionBar">
         </activity>
 
     </application>

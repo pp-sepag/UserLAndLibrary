@@ -1,5 +1,6 @@
 package tech.ula.utils
 
+import android.os.Environment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -170,7 +171,8 @@ class BusyboxWrapper(private val ulaFiles: UlaFiles) {
         val externalStorageBinding = ulaFiles.sdCardUserDir?.run {
             "-b ${this.absolutePath}:/storage/sdcard"
         } ?: ""
-        val bindings = "$emulatedStorageBinding $externalStorageBinding"
+        val pictureBinding = "-b ${ulaFiles.pictureDir}:/Pictures"
+        val bindings = "$emulatedStorageBinding $externalStorageBinding $pictureBinding"
         return hashMapOf(
                 "LD_LIBRARY_PATH" to ulaFiles.supportDir.absolutePath,
                 "LIB_PATH" to ulaFiles.supportDir.absolutePath,
