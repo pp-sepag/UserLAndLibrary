@@ -338,6 +338,17 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private fun autoStart() {
+        if (defaultSharedPreferences.getBoolean("photo_pending", false)) {
+            val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            val resultFile = File(storageDir, ".cameraResponse.txt")
+            val finalResultFile = File(storageDir, "cameraResponse.txt")
+            resultFile.writeText("1")
+            resultFile.renameTo(finalResultFile)
+            with(defaultSharedPreferences.edit()) {
+                putBoolean("photo_pending", false)
+                apply()
+            }
+        }
         val prefs = getSharedPreferences("apps", Context.MODE_PRIVATE)
         val json = prefs.getString("AutoApp", " ")
         if (json != null)

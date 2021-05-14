@@ -1,12 +1,14 @@
 package tech.ula
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import tech.ula.utils.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
 import java.io.Serializable
@@ -79,6 +81,10 @@ class CameraActivity : AppCompatActivity() {
                         )
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                         startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+                        with(defaultSharedPreferences.edit()) {
+                            putBoolean("photo_pending", true)
+                            apply()
+                        }
                     }
                 }
             }
@@ -93,6 +99,10 @@ class CameraActivity : AppCompatActivity() {
         val finalResultFile = File(storageDir, "cameraResponse.txt")
         resultFile.writeText("$code")
         resultFile.renameTo(finalResultFile)
+        with(defaultSharedPreferences.edit()) {
+            putBoolean("photo_pending", false)
+            apply()
+        }
         finish()
     }
 }
