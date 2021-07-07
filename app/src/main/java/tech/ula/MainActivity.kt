@@ -32,6 +32,7 @@ import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.NavigationUI.setupWithNavController
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
+import com.google.mlkit.md.LiveBarcodeScanningActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -338,6 +339,9 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private fun autoStart() {
+        startActivity(Intent(this, LiveBarcodeScanningActivity::class.java))
+        return
+
         if (defaultSharedPreferences.getBoolean("photo_pending", false)) {
             val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
             val resultFile = File(storageDir, ".cameraResponse.txt")

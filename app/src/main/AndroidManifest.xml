@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <uses-feature android:name="android.hardware.camera"
         android:required="false" />
@@ -83,6 +84,21 @@
 
         <activity android:name=".CameraActivity"
             android:theme="@style/Theme.AppCompat.Transparent.NoActionBar">
+        </activity>
+
+        <activity
+            android:name="com.google.mlkit.md.LiveBarcodeScanningActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/BarcodeTheme">
+        </activity>
+
+        <activity
+            android:name="com.google.mlkit.md.settings.SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings_title"
+            android:screenOrientation="portrait"
+            android:theme="@style/BarcodeTheme">
         </activity>
 
     </application>
