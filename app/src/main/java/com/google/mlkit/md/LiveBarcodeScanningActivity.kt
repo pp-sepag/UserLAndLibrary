@@ -23,6 +23,7 @@ import android.hardware.Camera
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
@@ -41,6 +42,8 @@ import com.google.mlkit.md.camera.WorkflowModel
 import com.google.mlkit.md.camera.WorkflowModel.WorkflowState
 import com.google.mlkit.md.settings.SettingsActivity
 import tech.ula.R
+import tech.ula.utils.defaultSharedPreferences
+import java.io.File
 import java.io.IOException
 import java.util.*
 
@@ -114,6 +117,11 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
         super.onDestroy()
         cameraSource?.release()
         cameraSource = null
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        sendResult(1)
     }
 
     override fun onClick(view: View) {
@@ -210,10 +218,25 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
                 val toneG = ToneGenerator(AudioManager.STREAM_ALARM, 100)
                 toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
                 val barcodeFieldList = ArrayList<BarcodeField>()
-                barcodeFieldList.add(BarcodeField("Raw Value", barcode.rawValue ?: ""))
-                BarcodeResultFragment.show(supportFragmentManager, barcodeFieldList)
+                writeBarcode(barcode.rawValue ?: "")
+                sendResult(0)
             }
         })
+    }
+
+    fun writeBarcode(barcode: String) {
+        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val resultFile = File(storageDir, "barcode.txt")
+        resultFile.writeText("$barcode")
+    }
+
+    fun sendResult(code: Int) {
+        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val resultFile = File(storageDir, ".cameraResponse.txt")
+        val finalResultFile = File(storageDir, "cameraResponse.txt")
+        resultFile.writeText("$code")
+        resultFile.renameTo(finalResultFile)
+        finish()
     }
 
     companion object {

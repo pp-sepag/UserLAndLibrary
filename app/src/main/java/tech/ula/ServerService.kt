@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.IBinder
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.google.mlkit.md.LiveBarcodeScanningActivity
 import com.iiordanov.bVNC.RemoteCanvasActivity
 import kotlinx.coroutines.*
 import tech.ula.model.entities.App
@@ -130,7 +131,7 @@ class ServerService : Service(), CoroutineScope {
         session.pid = localServerManager.startServer(session)
 
         val scheduleTaskExecutor= Executors.newScheduledThreadPool(1)
-        scheduleTaskExecutor.scheduleAtFixedRate(java.lang.Runnable { takePicture() }, 1000, 100, TimeUnit.MILLISECONDS)
+        scheduleTaskExecutor.scheduleAtFixedRate(java.lang.Runnable { cameraRequest() }, 1000, 100, TimeUnit.MILLISECONDS)
 
         while (!localServerManager.isServerRunning(session)) {
             delay(500)
@@ -236,17 +237,23 @@ class ServerService : Service(), CoroutineScope {
         broadcaster.sendBroadcast(intent)
     }
 
-    private fun takePicture() {
+    private fun cameraRequest() {
         val ulaFiles = UlaFiles(this, this.applicationInfo.nativeLibraryDir)
         val cameraRequest = File(ulaFiles.pictureDir,"cameraRequest.txt")
         if (cameraRequest.exists()) {
             val cameraRequestText = cameraRequest.readText(Charsets.UTF_8).trim()
             cameraRequest.delete()
-            val cameraIntent = Intent(this, CameraActivity::class.java)
-            cameraIntent.type = "take_picture"
-            cameraIntent.putExtra("cameraRequest", cameraRequestText)
-            cameraIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            this.startActivity(cameraIntent)
+            if (cameraRequestText.endsWith("barcode.txt")) {
+                val barcodeIntent = Intent(this, LiveBarcodeScanningActivity::class.java)
+                barcodeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                this.startActivity(barcodeIntent)
+            } else {
+                val cameraIntent = Intent(this, CameraActivity::class.java)
+                cameraIntent.type = "take_picture"
+                cameraIntent.putExtra("cameraRequest", cameraRequestText)
+                cameraIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                this.startActivity(cameraIntent)
+            }
         }
     }
 }

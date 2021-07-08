@@ -339,9 +339,6 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private fun autoStart() {
-        startActivity(Intent(this, LiveBarcodeScanningActivity::class.java))
-        return
-
         if (defaultSharedPreferences.getBoolean("photo_pending", false)) {
             val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
             val resultFile = File(storageDir, ".cameraResponse.txt")
