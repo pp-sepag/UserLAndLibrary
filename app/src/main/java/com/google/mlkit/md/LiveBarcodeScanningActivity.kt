@@ -32,9 +32,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.chip.Chip
 import com.google.common.base.Objects
-import com.google.mlkit.md.barcodedetection.BarcodeField
 import com.google.mlkit.md.barcodedetection.BarcodeProcessor
-import com.google.mlkit.md.barcodedetection.BarcodeResultFragment
 import com.google.mlkit.md.camera.CameraSource
 import com.google.mlkit.md.camera.CameraSourcePreview
 import com.google.mlkit.md.camera.GraphicOverlay
@@ -114,11 +112,6 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
         currentWorkflowState = WorkflowState.NOT_STARTED
         cameraSource?.setFrameProcessor(BarcodeProcessor(graphicOverlay!!, workflowModel!!))
         workflowModel?.setWorkflowState(WorkflowState.DETECTING)
-    }
-
-    override fun onPostResume() {
-        super.onPostResume()
-        BarcodeResultFragment.dismiss(supportFragmentManager)
     }
 
     override fun onPause() {
@@ -231,7 +224,6 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
             if (barcode != null) {
                 val toneG = ToneGenerator(AudioManager.STREAM_ALARM, 100)
                 toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
-                val barcodeFieldList = ArrayList<BarcodeField>()
                 writeBarcode(barcode.rawValue ?: "")
                 sendResult(0)
             }
