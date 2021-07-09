@@ -61,6 +61,12 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
     private var workflowModel: WorkflowModel? = null
     private var currentWorkflowState: WorkflowState? = null
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent != null)
+            setPending(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,7 +91,15 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
             setOnClickListener(this@LiveBarcodeScanningActivity)
         }
 
+        setPending(intent)
         setUpWorkflowModel()
+    }
+
+    fun setPending(intent: Intent) {
+        with(defaultSharedPreferences.edit()) {
+            putBoolean("photo_pending", true)
+            apply()
+        }
     }
 
     override fun onResume() {
@@ -236,6 +250,10 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
         val finalResultFile = File(storageDir, "cameraResponse.txt")
         resultFile.writeText("$code")
         resultFile.renameTo(finalResultFile)
+        with(defaultSharedPreferences.edit()) {
+            putBoolean("photo_pending", false)
+            apply()
+        }
         finish()
     }
 
