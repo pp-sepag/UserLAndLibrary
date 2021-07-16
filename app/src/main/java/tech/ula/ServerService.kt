@@ -33,6 +33,8 @@ class ServerService : Service(), CoroutineScope {
 
     private val activeSessions: MutableMap<Long, Session> = mutableMapOf()
 
+    private lateinit var lastSession: Session
+
     private lateinit var broadcaster: LocalBroadcastManager
 
     private val notificationManager: NotificationConstructor by lazy {
@@ -141,6 +143,7 @@ class ServerService : Service(), CoroutineScope {
         updateSession(session)
         startClient(session)
         activeSessions[session.pid] = session
+        lastSession = session
     }
 
     private fun stopApp(app: App) {
@@ -171,11 +174,15 @@ class ServerService : Service(), CoroutineScope {
         startActivity(connectBotIntent)
     }
 
-    private fun startVncClient(session: Session, packageName: String) {
+    private fun startVncClient(session: Session, packageName: String, showKeyboard: Boolean = false, hideKeyboard: Boolean = false) {
         val bVncIntent = Intent(this, RemoteCanvasActivity::class.java)
         bVncIntent.data = Uri.parse("vnc://127.0.0.1:5951/?VncUsername=${session.username}&VncPassword=${session.vncPassword}")
         bVncIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         bVncIntent.putExtra("hide_toolbar", this.defaultSharedPreferences.getBoolean("pref_hide_vnc_toolbar", BuildConfig.DEFAULT_HIDE_VNC_TOOLBAR))  //seems to hide after a few seconds
+        if (showKeyboard)
+            bVncIntent.putExtra("show_keyboard", true)
+        if (hideKeyboard)
+            bVncIntent.putExtra("hide_keyboard", true)
         val inputMode = when(this.defaultSharedPreferences.getString("pref_default_vnc_input_mode", BuildConfig.DEFAULT_VNC_INPUT_MODE)) {
             getString(R.string.input_method_direct_swipe_pan) -> com.iiordanov.bVNC.input.InputHandlerDirectSwipePan.ID
             getString(R.string.input_method_direct_drag_pan) -> com.iiordanov.bVNC.input.InputHandlerDirectDragPan.ID
@@ -243,7 +250,11 @@ class ServerService : Service(), CoroutineScope {
         if (cameraRequest.exists()) {
             val cameraRequestText = cameraRequest.readText(Charsets.UTF_8).trim()
             cameraRequest.delete()
-            if (cameraRequestText.endsWith("barcode.txt")) {
+            if (cameraRequestText.endsWith("show_keyboard")) {
+                startVncClient(lastSession, "com.iiordanov.freebVNC", true, false)
+            } else if (cameraRequestText.endsWith("hide_keyboard")) {
+                startVncClient(lastSession, "com.iiordanov.freebVNC", false, false)
+            } else if (cameraRequestText.endsWith("barcode.txt")) {
                 val barcodeIntent = Intent(this, LiveBarcodeScanningActivity::class.java)
                 barcodeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 this.startActivity(barcodeIntent)
