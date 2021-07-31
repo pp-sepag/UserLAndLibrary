@@ -177,6 +177,8 @@
     <string name="pref_hide_custom_toolbar_summary">Hides the toolbar that shows up when inside a VNC session.</string>
     <string name="pref_default_vnc_input_mode_title">Default VNC Input Mode</string>
     <string name="pref_default_vnc_input_mode_summary">Set the default VNC Input Mode. Can be overridden from VNC session toolbar.</string>
+    <string name="pref_hide_vnc_extra_keys_title">Hide VNC Extra Keys</string>
+    <string name="pref_hide_vnc_extra_keys_summary">Hides the extra keys that get displayed with the soft keyboard.</string>
 
     <string name="pref_proot_category">PRoot Preferences</string>
     <string name="pref_proot_debugging_enabled_title">PRoot Debugging Logs Enabled</string>

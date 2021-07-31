@@ -97,6 +97,12 @@
             android:summary="@string/pref_hide_custom_toolbar_summary"
             android:defaultValue="@string/default_hide_vnc_toolbar"
             app:iconSpaceReserved="false"/>
+        <CheckBoxPreference
+            android:key="pref_hide_vnc_extra_keys"
+            android:title="@string/pref_hide_vnc_extra_keys_title"
+            android:summary="@string/pref_hide_vnc_extra_keys_summary"
+            android:defaultValue="@string/default_hide_vnc_extra_keys"
+            app:iconSpaceReserved="false"/>
         <ListPreference
             android:key="pref_default_vnc_input_mode"
             android:title="@string/pref_default_vnc_input_mode_title"

@@ -64,6 +64,9 @@ android {
         //this can be used the hide the toolbar within bVNC
         buildConfigField 'boolean', 'DEFAULT_HIDE_VNC_TOOLBAR', 'true'
         resValue "string", "default_hide_vnc_toolbar", "true"
+        //this can be used the hide the extra keys within bVNC
+        buildConfigField 'boolean', 'DEFAULT_HIDE_VNC_EXTRA_KEYS', 'true'
+        resValue "string", "default_hide_vnc_extra_keys", "true"
         //this is the default input mode in bVNC
         buildConfigField "String", 'DEFAULT_VNC_INPUT_MODE', "\"Direct, Hold Pan\""
         resValue "string", "default_vnc_input_mode", "\"Direct, Hold Pan\""
