@@ -224,7 +224,7 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
             if (barcode != null) {
                 val toneG = ToneGenerator(AudioManager.STREAM_ALARM, 100)
                 toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
-                writeBarcode(barcode.rawValue ?: "")
+                writeBarcode(barcode.displayValue ?: "")
                 sendResult(0)
             }
         })
