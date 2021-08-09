@@ -39,6 +39,7 @@ import com.google.mlkit.md.camera.GraphicOverlay
 import com.google.mlkit.md.camera.WorkflowModel
 import com.google.mlkit.md.camera.WorkflowModel.WorkflowState
 import com.google.mlkit.md.settings.SettingsActivity
+import com.google.mlkit.vision.barcode.Barcode
 import tech.ula.R
 import tech.ula.utils.defaultSharedPreferences
 import java.io.File
@@ -224,7 +225,13 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
             if (barcode != null) {
                 val toneG = ToneGenerator(AudioManager.STREAM_ALARM, 100)
                 toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200)
-                writeBarcode(barcode.displayValue ?: "")
+                var text: String = barcode.getRawValue()
+                when (barcode.getFormat()) {
+                    Barcode.FORMAT_CODE_128 -> text = text.replace("]C1", "")
+                    else -> {
+                    }
+                }
+                writeBarcode(text)
                 sendResult(0)
             }
         })
