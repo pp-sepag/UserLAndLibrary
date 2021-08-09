@@ -307,6 +307,8 @@
     <string name="pref_hide_custom_toolbar_summary">Die Symbolleiste innerhalb der VNC-Sitzung wird nicht mehr angezeigt.</string>
     <string name="pref_default_vnc_input_mode_title">Standard Eingabe Modus für VNC</string>
     <string name="pref_default_vnc_input_mode_summary">Legt den Standard Modus für die Eingabe in VNC fest. Kann über die Symbolleiste immerhalb der VNC-Sitzung übersteuert werden.</string>
+    <string name="pref_hide_vnc_extra_keys_title">VNC Zusatztasten ausblenden</string>
+    <string name="pref_hide_vnc_extra_keys_summary">Zusätzliche Steuertasten (Tab, Esc, Steuerkreuz) ausblenden, die zusammen mit der Software Tastatur angezeigt werden.</string>
     <string name="auto_start_checkbox">Autostart aktivieren</string>
     <string name="filesystem_protected_text">Schreibschutz:</string>
 
