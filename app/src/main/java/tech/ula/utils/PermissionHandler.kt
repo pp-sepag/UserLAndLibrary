@@ -15,11 +15,16 @@ class PermissionHandler {
         private const val permissionRequestCode = 1234
 
         fun permissionsAreGranted(context: Context): Boolean {
-            return (ContextCompat.checkSelfPermission(context,
-                    Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+            return (
+                        ContextCompat.checkSelfPermission(context,
+                                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
 
-                    ContextCompat.checkSelfPermission(context,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+                        ContextCompat.checkSelfPermission(context,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+
+                        ContextCompat.checkSelfPermission(context,
+                                    Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                    )
         }
 
         fun permissionsWereGranted(requestCode: Int, grantResults: IntArray): Boolean {
@@ -27,7 +32,8 @@ class PermissionHandler {
                 permissionRequestCode -> {
                     (grantResults.isNotEmpty() &&
                             grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                            grantResults[1] == PackageManager.PERMISSION_GRANTED)
+                            grantResults[1] == PackageManager.PERMISSION_GRANTED &&
+                            grantResults[2] == PackageManager.PERMISSION_GRANTED)
                 }
                 else -> false
             }
@@ -40,7 +46,7 @@ class PermissionHandler {
                     .setTitle(R.string.alert_permissions_necessary_title)
                     .setPositiveButton(R.string.button_ok) { dialog, _ ->
                         activity.requestPermissions(arrayOf(
-                                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA),
                                 permissionRequestCode)
                         dialog.dismiss()
                     }
