@@ -26,6 +26,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
+import android.view.View.INVISIBLE
 import android.view.View.OnClickListener
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -86,12 +87,50 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
         flashButton = findViewById<View>(R.id.flash_button).apply {
             setOnClickListener(this@LiveBarcodeScanningActivity)
         }
+        if (!hasFlash())
+            findViewById<View>(R.id.flash_button).visibility = INVISIBLE
+
         settingsButton = findViewById<View>(R.id.settings_button).apply {
             setOnClickListener(this@LiveBarcodeScanningActivity)
         }
 
         setPending(intent)
         setUpWorkflowModel()
+    }
+
+    fun getCameraInstance(): Camera? {
+        return try {
+            Camera.open() // attempt to get a Camera instance
+        } catch (e: Exception) {
+            // Camera is not available (in use or does not exist)
+            null // returns null if camera is unavailable
+        }
+    }
+
+    fun hasFlash(): Boolean {
+        val camera = getCameraInstance()
+
+        if (camera == null) {
+            return false
+        }
+        val parameters: Camera.Parameters
+        parameters = try {
+            camera.getParameters()
+        } catch (ignored: RuntimeException) {
+            camera.release()
+            return false
+        }
+        if (parameters.flashMode == null) {
+            camera.release()
+            return false
+        }
+        val supportedFlashModes = parameters.supportedFlashModes
+        if (supportedFlashModes == null || supportedFlashModes.isEmpty() || supportedFlashModes.size == 1 && supportedFlashModes[0] == Camera.Parameters.FLASH_MODE_OFF) {
+            camera.release()
+            return false
+        }
+        camera.release()
+        return true
     }
 
     fun setPending(intent: Intent) {
