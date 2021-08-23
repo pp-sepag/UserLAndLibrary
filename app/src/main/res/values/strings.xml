@@ -80,7 +80,8 @@
     <string name="download_failure_missing_error">Error code unknown.</string>
     <string name="download_failure_reason_not_found">Reason not available.</string>
     <string name="download_failure_finished_wrong_items">Tried to finish download process with items we did not enqueue.</string>
-    
+    <string name="download_failure_md5">Filesystem md5 checksum did not match the expected value.</string>
+
     <!-- Illegal State Dialog -->
     <string name="illegal_state_github_message">
         %1$s \nWe are working to resolve these issues. You can let us know about this issue on

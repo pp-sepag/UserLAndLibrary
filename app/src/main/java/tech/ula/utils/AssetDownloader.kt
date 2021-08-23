@@ -1,18 +1,22 @@
 package tech.ula.utils
 
 import android.app.DownloadManager
-import android.content.SharedPreferences
 import android.database.Cursor
 import android.net.Uri
+import android.text.TextUtils
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.rauschig.jarchivelib.Archiver
 import org.rauschig.jarchivelib.ArchiverFactory
+import tech.ula.BuildConfig
 import tech.ula.R
 import tech.ula.model.repositories.DownloadMetadata
 import tech.ula.utils.preferences.AssetPreferences
-import java.io.File
-import java.io.IOException
+import java.io.*
+import java.math.BigInteger
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 
 sealed class AssetDownloadState
 object CacheSyncAttemptedWhileCacheIsEmpty : AssetDownloadState()
@@ -22,9 +26,9 @@ data class CompletedDownloadsUpdate(val numCompleted: Int, val numTotal: Int) : 
 data class AssetDownloadFailure(val reason: DownloadFailureLocalizationData) : AssetDownloadState()
 
 class AssetDownloader(
-    private val assetPreferences: AssetPreferences,
-    private val downloadManagerWrapper: DownloadManagerWrapper,
-    private val ulaFiles: UlaFiles
+        private val assetPreferences: AssetPreferences,
+        private val downloadManagerWrapper: DownloadManagerWrapper,
+        private val ulaFiles: UlaFiles
 ) {
 
     private val downloadDirectory = File(ulaFiles.emulatedScopedDir, "downloads")
@@ -72,6 +76,8 @@ class AssetDownloader(
     }
 
     fun handleDownloadComplete(downloadId: Long): AssetDownloadState {
+        var md5Mismatch = false
+
         if (!downloadIsForUserland(downloadId)) return NonUserlandDownloadFound
 
         if (downloadManagerWrapper.downloadHasFailed(downloadId)) {
@@ -89,11 +95,79 @@ class AssetDownloader(
             return AssetDownloadFailure(DownloadFailureLocalizationData(R.string.download_failure_finished_wrong_items))
         }
 
+        if (BuildConfig.CHECK_FILESYSTEM_MD5) {
+            val downloadFiles = downloadDirectory.listFiles() ?: return AssetDownloadFailure(DownloadFailureLocalizationData(R.string.download_failure_md5))
+            downloadFiles.forEach {
+                if (it.name.contains("rootfs.tar.gz")) {
+                    if (!checkMD5(BuildConfig.FILESYSTEM_MD5, it)) {
+                        md5Mismatch = true
+                    }
+                }
+            }
+        }
+
+        if (md5Mismatch) {
+            return AssetDownloadFailure(DownloadFailureLocalizationData(R.string.download_failure_md5))
+        }
+
         enqueuedDownloadIds.clear()
         completedDownloadIds.clear()
         assetPreferences.setDownloadsAreInProgress(inProgress = false)
         assetPreferences.clearEnqueuedDownloadsCache()
         return AllDownloadsCompletedSuccessfully
+    }
+
+    fun checkMD5(md5: String, updateFile: File?): Boolean {
+        if (TextUtils.isEmpty(md5) || updateFile == null) {
+            Log.e("MD5", "MD5 string empty or updateFile null")
+            return false
+        }
+        val calculatedDigest = calculateMD5(updateFile)
+        if (calculatedDigest == null) {
+            Log.e("MD5", "calculatedDigest null")
+            return false
+        }
+        Log.v("MD5", "Calculated digest: $calculatedDigest")
+        Log.v("MD5", "Provided digest: $md5")
+        return calculatedDigest.equals(md5, ignoreCase = true)
+    }
+
+    fun calculateMD5(updateFile: File?): String? {
+        val digest: MessageDigest
+        digest = try {
+            MessageDigest.getInstance("MD5")
+        } catch (e: NoSuchAlgorithmException) {
+            Log.e("MD5", "Exception while getting digest", e)
+            return null
+        }
+        val `is`: InputStream
+        try {
+            `is` = FileInputStream(updateFile)
+        } catch (e: FileNotFoundException) {
+            Log.e("MD5", "Exception while getting FileInputStream", e)
+            return null
+        }
+        val buffer = ByteArray(8192)
+        var read: Int = 0
+        return try {
+            while (`is`.read(buffer).also({ read = it }) > 0) {
+                digest.update(buffer, 0, read)
+            }
+            val md5sum: ByteArray = digest.digest()
+            val bigInt = BigInteger(1, md5sum)
+            var output: String = bigInt.toString(16)
+            // Fill to 32 chars
+            output = String.format("%32s", output).replace(' ', '0')
+            output
+        } catch (e: IOException) {
+            throw RuntimeException("Unable to process file for MD5", e)
+        } finally {
+            try {
+                `is`.close()
+            } catch (e: IOException) {
+                Log.e("MD5", "Exception on closing MD5 input stream", e)
+            }
+        }
     }
 
     fun downloadIsForUserland(id: Long): Boolean {

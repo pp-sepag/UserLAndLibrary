@@ -32,6 +32,9 @@ android {
         vectorDrawables.useSupportLibrary = true
         buildConfigField 'boolean', 'ENABLE_PLAY_SERVICES', 'true'
 
+        buildConfigField 'boolean', 'CHECK_FILESYSTEM_MD5', 'true'
+        buildConfigField "String", "FILESYSTEM_MD5", "\"4015d22defe5dd72c7d0831d0e720294\""
+
         //controls whether to ask for creds or not
         buildConfigField 'boolean', 'USE_DEFAULT_CREDS', 'true'
         buildConfigField "String", "DEFAULT_SSH_PASSWORD", "\"sshpass\""
