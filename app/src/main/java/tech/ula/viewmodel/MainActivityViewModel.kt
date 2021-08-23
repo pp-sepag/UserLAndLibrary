@@ -16,6 +16,8 @@ import tech.ula.model.repositories.DownloadMetadata
 import tech.ula.model.state.* // ktlint-disable no-wildcard-imports
 import tech.ula.utils.* // ktlint-disable no-wildcard-imports
 import java.io.FileNotFoundException
+import java.util.*
+import kotlin.concurrent.timerTask
 import kotlin.coroutines.CoroutineContext
 
 class MainActivityViewModel(
@@ -49,6 +51,9 @@ class MainActivityViewModel(
     private fun postIllegalStateWithLog(newState: IllegalState) {
         logger.sendIllegalStateLog(newState)
         state.postValue(newState)
+        Timer().schedule(timerTask {
+            resetStartupState()
+        }, 100)
     }
 
     private val job = Job()
@@ -320,7 +325,9 @@ class MainActivityViewModel(
         return when (newState) {
             is DownloadingAssets -> state.postValue(DownloadProgress(newState.numCompleted, newState.numTotal))
             is DownloadsHaveSucceeded -> submitSessionStartupEvent(CopyDownloadsToLocalStorage)
-            is DownloadsHaveFailed -> postIllegalStateWithLog(DownloadsDidNotCompleteSuccessfully(newState.reason))
+            is DownloadsHaveFailed -> {
+                postIllegalStateWithLog(DownloadsDidNotCompleteSuccessfully(newState.reason))
+            }
             is AttemptedCacheAccessWhileEmpty -> {
                 postIllegalStateWithLog(DownloadCacheAccessedWhileEmpty)
             }

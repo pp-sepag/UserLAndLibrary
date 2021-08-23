@@ -80,6 +80,7 @@
     <string name="download_failure_missing_error">Fehlercode unbekannt.</string>
     <string name="download_failure_reason_not_found">Ursache nicht verfügbar.</string>
     <string name="download_failure_finished_wrong_items">Es wurde versucht, den Download mit Einträgen zu beenden, die sich nicht in der Warteschlange befinden.</string>
+    <string name="download_failure_md5">Die MD5-Prüfsumme stimmt nicht mit dem erwarteten Wert überein.</string>
 
     <!-- Illegal State Dialog -->
     <string name="illegal_state_github_message">
