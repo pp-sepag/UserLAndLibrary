@@ -253,6 +253,11 @@ class ServerService : Service(), CoroutineScope {
                 val barcodeIntent = Intent(this, LiveBarcodeScanningActivity::class.java)
                 barcodeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 this.startActivity(barcodeIntent)
+            } else if (cameraRequestText.endsWith("record_speech.txt")) {
+                val recodeSpeechIntent = Intent(this, RecordSpeechActivity::class.java)
+                recodeSpeechIntent.type = "record_speech"
+                recodeSpeechIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                this.startActivity(recodeSpeechIntent)
             } else {
                 val cameraIntent = Intent(this, CameraActivity::class.java)
                 cameraIntent.type = "take_picture"

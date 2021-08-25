@@ -23,7 +23,10 @@ class PermissionHandler {
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
 
                         ContextCompat.checkSelfPermission(context,
-                                    Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+
+                        ContextCompat.checkSelfPermission(context,
+                                Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
                     )
         }
 
@@ -33,7 +36,8 @@ class PermissionHandler {
                     (grantResults.isNotEmpty() &&
                             grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                             grantResults[1] == PackageManager.PERMISSION_GRANTED &&
-                            grantResults[2] == PackageManager.PERMISSION_GRANTED)
+                            grantResults[2] == PackageManager.PERMISSION_GRANTED &&
+                            grantResults[3] == PackageManager.PERMISSION_GRANTED)
                 }
                 else -> false
             }
@@ -46,7 +50,7 @@ class PermissionHandler {
                     .setTitle(R.string.alert_permissions_necessary_title)
                     .setPositiveButton(R.string.button_ok) { dialog, _ ->
                         activity.requestPermissions(arrayOf(
-                                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA),
+                                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO),
                                 permissionRequestCode)
                         dialog.dismiss()
                     }

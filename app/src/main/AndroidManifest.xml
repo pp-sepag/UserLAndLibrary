@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <uses-feature android:name="android.hardware.camera"
         android:required="false" />
@@ -83,6 +84,12 @@
         </activity>
 
         <activity android:name=".CameraActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Transparent.NoActionBar">
+        </activity>
+
+        <activity android:name=".RecordSpeechActivity"
+            android:exported="false"
             android:theme="@style/Theme.AppCompat.Transparent.NoActionBar">
         </activity>
 
