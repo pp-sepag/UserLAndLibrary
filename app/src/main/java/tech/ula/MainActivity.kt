@@ -271,6 +271,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     private fun getCameraInfo() {
         with(defaultSharedPreferences.edit()) {
             putInt("camera_supported", if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) 1 else 0)
+            putInt("microphone_supported", if (packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) 1 else 0)
             apply()
         }
     }

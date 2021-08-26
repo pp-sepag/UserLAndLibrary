@@ -97,6 +97,7 @@ class LocalServerManager(
         val command = "/support/startVNCServer.sh"
         val env = HashMap<String, String>()
         env["HAS_CAMERA"] = sharedPreferences.getInt("camera_supported",0).toString()
+        env["HAS_MICROPHONE"] = sharedPreferences.getInt("microphone_supported",0).toString()
         env["INITIAL_USERNAME"] = session.username
         env["INITIAL_VNC_PASSWORD"] = session.vncPassword
         env["DIMENSIONS"] = session.geometry
