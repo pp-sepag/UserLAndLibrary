@@ -13,6 +13,7 @@ import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.*
 import android.provider.MediaStore
+import android.speech.SpeechRecognizer.isRecognitionAvailable
 import android.util.DisplayMetrics
 import android.view.*
 import android.view.animation.AlphaAnimation
@@ -269,9 +270,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private fun getCameraInfo() {
+        val recognitionServiceAvailable = isRecognitionAvailable(this)
         with(defaultSharedPreferences.edit()) {
             putInt("camera_supported", if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) 1 else 0)
-            putInt("microphone_supported", if (packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) 1 else 0)
+            putInt("microphone_supported", if (recognitionServiceAvailable && packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) 1 else 0)
             apply()
         }
     }
