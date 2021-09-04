@@ -96,10 +96,21 @@ class AssetDownloader(
         }
 
         if (BuildConfig.CHECK_FILESYSTEM_MD5) {
+            var filesystemMD5 = "DEADBEEFDEADBEEF"
             val downloadFiles = downloadDirectory.listFiles() ?: return AssetDownloadFailure(DownloadFailureLocalizationData(R.string.download_failure_md5))
             downloadFiles.forEach {
+                if (it.name.contains("MD5SUMS")) {
+                    val md5FileContents = it.readLines()
+                    md5FileContents.forEach {
+                        val (tempMD5, tempFilename) = it.split("  ")
+                        if (tempFilename.startsWith("${ulaFiles.getArchType()}-"))
+                            filesystemMD5 = tempMD5
+                    }
+                }
+            }
+            downloadFiles.forEach {
                 if (it.name.contains("rootfs.tar.gz")) {
-                    if (!checkMD5(BuildConfig.FILESYSTEM_MD5, it)) {
+                    if (!checkMD5(filesystemMD5, it)) {
                         md5Mismatch = true
                     }
                 }
@@ -189,7 +200,9 @@ class AssetDownloader(
         stagingDirectory.mkdirs()
         val downloadFiles = downloadDirectory.listFiles() ?: return@withContext
         downloadFiles.forEach {
-            if (it.name.contains("rootfs.tar.gz")) {
+            if (it.name.contains("MD5SUMS")) {
+                return@forEach
+            } else if (it.name.contains("rootfs.tar.gz")) {
                 moveRootfsAssetInternal(it)
                 return@forEach
             }

@@ -145,13 +145,17 @@ class AssetRepository(
     private suspend fun getRootFsAssetDownloadRequirements(repo: String): List<DownloadMetadata> {
         val downloadRequirements = mutableListOf<DownloadMetadata>()
         val filename = "rootfs.tar.gz"
+        val filenameMD5 = "MD5SUMS"
         var versionCode = ""
         var url = ""
+        var urlMD5 = ""
 
         if (defaultSharedPreferences.getBoolean("pref_custom_filesystem_enabled", BuildConfig.DEFAULT_CUSTOM_FILESYSTEM_ENABLED)) {
             versionCode = "v0.0.0"
             url = defaultSharedPreferences.getString("pref_filesystem", BuildConfig.DEFAULT_FILESYSTEM_URL)!!
             url += "/${ulaFiles.getArchType()}-${filename}"
+            urlMD5 = defaultSharedPreferences.getString("pref_filesystem", BuildConfig.DEFAULT_FILESYSTEM_URL)!!
+            urlMD5 += "/${filenameMD5}"
         } else {
             val rootFsIsDownloaded = File("$applicationFilesDirPath/$repo/$filename").exists()
             val rootFsIsUpToDate = try {
@@ -165,8 +169,14 @@ class AssetRepository(
             // If the rootfs is not downloaded, network failures will still propagate.
             versionCode = githubApiClient.getLatestReleaseVersion(repo)
             url = githubApiClient.getAssetEndpoint(filename, repo)
+            urlMD5 = githubApiClient.getAssetEndpoint(filenameMD5, repo)
         }
-        val downloadMetadata = DownloadMetadata(filename, repo, versionCode, url)
-        return listOf(downloadMetadata)
+        val downloadFsMetadata = DownloadMetadata(filename, repo, versionCode, url)
+        if (BuildConfig.CHECK_FILESYSTEM_MD5) {
+            val downloadMD5Metadata = DownloadMetadata(filenameMD5, repo, versionCode, urlMD5)
+            return listOf(downloadFsMetadata,downloadMD5Metadata)
+        } else {
+            return listOf(downloadFsMetadata)
+        }
     }
 }
