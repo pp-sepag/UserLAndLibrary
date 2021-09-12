@@ -101,6 +101,8 @@ class LocalServerManager(
         env["INITIAL_USERNAME"] = session.username
         env["INITIAL_VNC_PASSWORD"] = session.vncPassword
         env["DIMENSIONS"] = session.geometry
+        env["VERSION_CODE"] = BuildConfig.VERSION_CODE.toString()
+        env["VERSION_NAME"] = BuildConfig.VERSION_NAME
         if (sharedPreferences.getBoolean("pref_custom_hostname_enabled",false)) {
             env["HOSTNAME"] = sharedPreferences.getString("pref_hostname", BuildConfig.DEFAULT_HOSTNAME)!!
         } else {
