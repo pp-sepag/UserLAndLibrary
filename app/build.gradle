@@ -39,7 +39,7 @@ android {
         buildConfigField "String", "DEFAULT_USERNAME", "\"userland\""
 
         //controls whetehr to ask for session type or not
-        buildConfigField 'boolean', 'USE_DEFAULT_SERVICE_TYPE', 'true'
+        buildConfigField 'boolean', 'USE_DEFAULT_SERVICE_TYPE', 'false'
         buildConfigField "String", "DEFAULT_LAUNCH_TYPE", "\"vnc\""
 
         //default settings for associated preferences
@@ -384,5 +384,11 @@ dependencies {
     implementation project(':bVNC')
     implementation project(':pubkeyGenerator')
 
+    // Use the terminal from termux
+    implementation project(':terminal-app')
+    implementation project(':terminal-view')
+    implementation project(':terminal-emulator')
+
+    // Used only for the auto app startup
     implementation 'com.google.code.gson:gson:2.8.6'
 }
