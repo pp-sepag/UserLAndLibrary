@@ -3,9 +3,10 @@ package tech.ula
 import android.app.Service
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.net.Uri
 import android.os.IBinder
-import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.mlkit.md.LiveBarcodeScanningActivity
 import com.iiordanov.bVNC.RemoteCanvasActivity
@@ -16,7 +17,7 @@ import tech.ula.model.entities.Session
 import tech.ula.model.repositories.UlaDatabase
 import tech.ula.utils.*
 import java.io.File
-import java.io.RandomAccessFile
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
@@ -245,7 +246,7 @@ class ServerService : Service(), CoroutineScope {
 
     private fun cameraRequest() {
         val ulaFiles = UlaFiles(this, this.applicationInfo.nativeLibraryDir)
-        val cameraRequest = File(ulaFiles.pictureDir,"cameraRequest.txt")
+        val cameraRequest = File(ulaFiles.pictureDir, "cameraRequest.txt")
         if (cameraRequest.exists()) {
             val cameraRequestText = cameraRequest.readText(Charsets.UTF_8).trim()
             cameraRequest.delete()
@@ -253,6 +254,17 @@ class ServerService : Service(), CoroutineScope {
                 val barcodeIntent = Intent(this, LiveBarcodeScanningActivity::class.java)
                 barcodeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 this.startActivity(barcodeIntent)
+            } else if (cameraRequestText.endsWith("tone.txt")) {
+                val toneFile = File(ulaFiles.pictureDir, "tone.txt")
+                val toneInfo = toneFile.readText(Charsets.UTF_8).trim()
+                val (
+                        tone,
+                        volume,
+                        duration
+                ) = toneInfo.toLowerCase(Locale.ENGLISH).split(",")
+                toneFile.delete()
+                val toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, volume.toInt())
+                toneGenerator.startTone(tone.toInt(), duration.toInt())
             } else if (cameraRequestText.endsWith("record_speech.txt")) {
                 val recodeSpeechIntent = Intent(this, RecordSpeechActivity::class.java)
                 recodeSpeechIntent.type = "record_speech"
