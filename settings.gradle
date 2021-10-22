@@ -1,4 +1,5 @@
-include ':app', ':terminal-view', ':terminal-emulator'
+include ':app', ':terminal-view', ':terminal-emulator', ':terminal-app'
+project(':terminal-app').projectDir = new File('termux-app-private/app')
 project(':terminal-view').projectDir = new File('termux-app-private/terminal-view')
 project(':terminal-emulator').projectDir = new File('termux-app-private/terminal-emulator')
 
