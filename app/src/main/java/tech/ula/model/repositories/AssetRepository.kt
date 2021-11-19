@@ -135,8 +135,16 @@ class AssetRepository(
         }
 
         val filename = "assets.tar.gz"
-        val versionCode = githubApiClient.getLatestReleaseVersion(repo)
-        val url = githubApiClient.getAssetEndpoint(filename, repo)
+        var versionCode = ""
+        var url = ""
+        if (defaultSharedPreferences.getBoolean("pref_custom_filesystem_enabled", BuildConfig.DEFAULT_CUSTOM_FILESYSTEM_ENABLED)) {
+            versionCode = "v9.9.9"
+            url = defaultSharedPreferences.getString("pref_filesystem", BuildConfig.DEFAULT_FILESYSTEM_URL)!!
+            url += "/${ulaFiles.getArchType()}-${filename}"
+        } else {
+            val versionCode = githubApiClient.getLatestReleaseVersion(repo)
+            val url = githubApiClient.getAssetEndpoint(filename, repo)
+        }
         val downloadMetadata = DownloadMetadata(filename, repo, versionCode, url)
         downloadRequirements.add(downloadMetadata)
         return downloadRequirements
@@ -151,7 +159,7 @@ class AssetRepository(
         var urlMD5 = ""
 
         if (defaultSharedPreferences.getBoolean("pref_custom_filesystem_enabled", BuildConfig.DEFAULT_CUSTOM_FILESYSTEM_ENABLED)) {
-            versionCode = "v0.0.0"
+            versionCode = "v9.9.9"
             url = defaultSharedPreferences.getString("pref_filesystem", BuildConfig.DEFAULT_FILESYSTEM_URL)!!
             url += "/${ulaFiles.getArchType()}-${filename}"
             urlMD5 = defaultSharedPreferences.getString("pref_filesystem", BuildConfig.DEFAULT_FILESYSTEM_URL)!!

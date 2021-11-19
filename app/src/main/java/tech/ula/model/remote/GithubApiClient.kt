@@ -30,10 +30,7 @@ class GithubApiClient(
 
     // This function can be used to tune the release used for each asset type for testing purposes.
     private fun getReleaseToUseForRepo(repo: String): String {
-        return when (repo) {
-            "debian" -> "latest"
-            else -> BuildConfig.DEFAULT_RELEASE
-        }
+        return BuildConfig.DEFAULT_RELEASE
     }
 
     @Throws(IOException::class)
@@ -81,7 +78,7 @@ class GithubApiClient(
             throw err
         }
 
-        val result = adapter.fromJson(response.body()!!.source())!!
+        val result = adapter.fromJson(response.body!!.source())!!
         latestResults[repo] = result
         return@withContext result
     }

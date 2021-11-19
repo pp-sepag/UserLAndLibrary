@@ -1,4 +1,4 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 apply plugin: 'kotlin-android'
 
@@ -20,17 +20,22 @@ android {
         // sequential deployments to both production and beta tracks.
         def vcode = (int)(((new Date().getTime()/1000) - 1559347200) / 10)
 
-        applicationId "tech.ula"
+        //applicationId "tech.ula"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode vcode
         versionName "3.0.3"
         
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
 
+        buildConfigField 'String', 'VERSION_CODE', '\"' + rootProject.ext.appVersionCode + '\"'
+        buildConfigField 'String', 'VERSION_NAME', '\"' + rootProject.ext.appVersionName + '\"'
+
         vectorDrawables.useSupportLibrary = true
         buildConfigField 'boolean', 'ENABLE_PLAY_SERVICES', 'true'
+
+        buildConfigField 'boolean', 'APPS_IN_ASSETS', 'true'
 
         //controls whether to ask for creds or not
         buildConfigField 'boolean', 'USE_DEFAULT_CREDS', 'true'
@@ -38,8 +43,8 @@ android {
         buildConfigField "String", "DEFAULT_VNC_PASSWORD", "\"vncpass\""
         buildConfigField "String", "DEFAULT_USERNAME", "\"userland\""
 
-        //controls whetehr to ask for session type or not
-        buildConfigField 'boolean', 'USE_DEFAULT_SERVICE_TYPE', 'false'
+        //controls whether to ask for session type or not
+        buildConfigField 'boolean', 'USE_DEFAULT_SERVICE_TYPE', 'true'
         buildConfigField "String", "DEFAULT_LAUNCH_TYPE", "\"vnc\""
 
         //default settings for associated preferences
@@ -50,8 +55,8 @@ android {
         buildConfigField 'boolean', 'DEFAULT_HIDE_DISTRIBUTIONS', 'true'
         resValue "string", "default_hide_distributions", "true"
         //this can be used to get apps from a custom url
-        buildConfigField 'boolean', 'DEFAULT_CUSTOM_APPS_ENABLED', 'true'
-        resValue "string", "default_custom_apps_enabled", "true"
+        buildConfigField 'boolean', 'DEFAULT_CUSTOM_APPS_ENABLED', 'false'
+        resValue "string", "default_custom_apps_enabled", "false"
         //this is the default custom apps url
         buildConfigField "String", "DEFAULT_APPS_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/test_sep/apps\""
         resValue "string", "default_apps_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/test_sep/apps\""
@@ -59,17 +64,17 @@ android {
         buildConfigField 'boolean', 'DEFAULT_CUSTOM_FILESYSTEM_ENABLED', 'true'
         resValue "string", "default_custom_filesystem_enabled", "true"
         //this is the default custom filesystem url
-        buildConfigField "String", "DEFAULT_FILESYSTEM_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Ubuntu/releases/download/v7.7.7\""
-        resValue "string", "default_filesystem_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Ubuntu/releases/download/v7.7.7\""
+        buildConfigField "String", "DEFAULT_FILESYSTEM_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Debian/releases/download/v7.7.7\""
+        resValue "string", "default_filesystem_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Debian/releases/download/v7.7.7\""
         //this can be used the hide the toolbar within bVNC
-        buildConfigField 'boolean', 'DEFAULT_HIDE_VNC_TOOLBAR', 'true'
-        resValue "string", "default_hide_vnc_toolbar", "true"
+        buildConfigField 'boolean', 'DEFAULT_HIDE_VNC_TOOLBAR', 'false'
+        resValue "string", "default_hide_vnc_toolbar", "false"
         //this can be used the hide the extra keys within bVNC
-        buildConfigField 'boolean', 'DEFAULT_HIDE_VNC_EXTRA_KEYS', 'true'
-        resValue "string", "default_hide_vnc_extra_keys", "true"
+        buildConfigField 'boolean', 'DEFAULT_HIDE_VNC_EXTRA_KEYS', 'false'
+        resValue "string", "default_hide_vnc_extra_keys", "false"
         //this is the default input mode in bVNC
-        buildConfigField "String", 'DEFAULT_VNC_INPUT_MODE', "\"Direct, Hold Pan\""
-        resValue "string", "default_vnc_input_mode", "\"Direct, Hold Pan\""
+        buildConfigField "String", 'DEFAULT_VNC_INPUT_MODE', "\"Direct, Swipe Pan\""
+        resValue "string", "default_vnc_input_mode", "\"Direct, Swipe Pan\""
         //this is the default hostname to get written to the hosts and hostname file
         buildConfigField "String", "DEFAULT_HOSTNAME", "\"android-device\""
         resValue "string", "pref_hostname_default", "\"android-device\""
@@ -79,7 +84,7 @@ android {
         resValue "string", "pref_dns_default", "\"search Home\\nnameserver 8.8.8.8\\nnameserver 8.8.4.4\""
 
         //these are used to help determine the resolution
-        buildConfigField 'boolean', 'FORCE_PORTRAIT_GEOMETRY', 'false'
+        buildConfigField 'boolean', 'FORCE_PORTRAIT_GEOMETRY', 'true'
         buildConfigField 'int', "MAX_DIMENSION", "1000"
         buildConfigField 'int', "MIN_DIMENSION", "360"
 
@@ -95,9 +100,9 @@ android {
         resValue "string", "clear_support_files_enabled", "false"
 
         //this should be set to true if the assets are embedded in the filesystem
-        buildConfigField 'boolean', 'FILESYSTEM_ONLY_ASSET', 'true'
+        buildConfigField 'boolean', 'FILESYSTEM_ONLY_ASSET', 'false'
 
-        buildConfigField 'boolean', 'CHECK_FILESYSTEM_MD5', 'true'
+        buildConfigField 'boolean', 'CHECK_FILESYSTEM_MD5', 'false'
 
         //this is the default github release for filesystems to use if not overwritten by a custom url
         buildConfigField 'String', 'DEFAULT_RELEASE', "\"tags/v7.7.7\""
@@ -177,12 +182,12 @@ android {
     }
 }
 
-jacoco {
-    toolVersion = "$jacoco_version"
+androidExtensions {
+    experimental = true
 }
 
-androidExtensions {
-    experimental true
+jacoco {
+    toolVersion = "$jacoco_version"
 }
 
 configurations {
@@ -270,7 +275,7 @@ ext.architectures = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
 ext.libDir = "$project.projectDir/src/main/jniLibs"
 
 task downloadAssets(type: Download) {
-    def assetVersion = "v9.9.9"
+    def assetVersion = "v1.2.7"
     def baseUrl = "https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/releases/download/$assetVersion"
     for (arch in architectures) {
         src "$baseUrl/$arch-assets.zip"
@@ -309,20 +314,20 @@ task checkIfAssetsMissing {
 preBuild.dependsOn checkIfAssetsMissing
 
 dependencies {
-    def moshi_version = '1.8.0'
-    def okhttp_version = '3.13.1'
+    def moshi_version = '1.12.0'
+    def okhttp_version = '4.9.0'
     def sentry_version = '1.7.22'
     def slf4j_version = '1.7.26'
 
-    def kotlinx_coroutines_version = '1.0.0'
-    def kotlin_jdk_version = '1.3.31'
+    def kotlinx_coroutines_version = '1.4.3'
+    def kotlin_jdk_version = '1.5.10'
 
     // Androidx versions
-    def room_version = '2.1.0-beta01'
-    def lifecycle_version = '2.2.0-alpha01'
-    def support_library_version = '1.1.0-alpha06'
-    def preference_version = '1.1.0-alpha05'
-    def ktx_version = '1.0.2'
+    def room_version = '2.3.0'
+    def lifecycle_version = '2.2.0'
+    def support_library_version = '1.4.0'
+    def preference_version = '1.1.1'
+    def ktx_version = '1.6.0'
     def billing_version = '2.2.1'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_jdk_version"
@@ -337,6 +342,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation "androidx.preference:preference:$preference_version"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 
     implementation "com.google.android.material:material:$support_library_version"
     ktlint "com.pinterest:ktlint:0.32.0"
@@ -349,10 +355,6 @@ dependencies {
 
     implementation "com.android.billingclient:billing-ktx:$billing_version"
     implementation "com.google.android.gms:play-services-base:17.2.1"
-
-    implementation 'com.google.mlkit:barcode-scanning:16.1.2'
-    implementation 'com.google.mlkit:object-detection:16.2.3'
-    api 'com.google.guava:guava:30.1-jre'
 
     def mockito_version = '2.23.0'
     def mockito_kotlin_version = '2.1.0'
@@ -380,7 +382,7 @@ dependencies {
     androidTestUtil "androidx.test:orchestrator:$androidx_test_version"
 
     // Use the VNC viewer from BVNC
-    api 'androidx.multidex:multidex:2.0.0'
+    api 'androidx.multidex:multidex:2.0.1'
     implementation project(':bVNC')
     implementation project(':pubkeyGenerator')
 

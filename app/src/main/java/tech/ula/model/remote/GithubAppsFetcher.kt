@@ -1,5 +1,6 @@
 package tech.ula.model.remote
 
+import android.content.res.AssetManager
 import android.content.SharedPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,6 +13,7 @@ import java.util.Locale
 
 class GithubAppsFetcher(
     private val filesDirPath: String,
+    private val assets: AssetManager,
     private val sharedPreferences: SharedPreferences,
     private val httpStream: HttpStream = HttpStream(),
     private val logger: Logger = SentryLogger()
@@ -33,7 +35,13 @@ class GithubAppsFetcher(
         return@withContext try {
             val url = "${baseUrl()}/apps.txt"
             val numLinesToSkip = 1 // Skip first line which defines schema
-            val contents: List<String> = httpStream.toLines(url)
+            var contents: List<String>
+            if (BuildConfig.APPS_IN_ASSETS) {
+                val tempContents = assets.open("apps/apps.txt").bufferedReader().use { it.readText() }
+                contents = tempContents.trim().lines()
+            } else {
+                contents = httpStream.toLines(url)
+            }
             contents.drop(numLinesToSkip).map { line ->
                 // Destructure app fields
                 val (
@@ -66,21 +74,51 @@ class GithubAppsFetcher(
     suspend fun fetchAppIcon(app: App) = withContext(Dispatchers.IO) {
         val directoryAndFilename = "${app.name}/${app.name}.png"
         val file = File("$filesDirPath/apps/$directoryAndFilename")
-        val url = "${baseUrl()}/$directoryAndFilename"
-        httpStream.toFile(url, file)
+
+        if (BuildConfig.APPS_IN_ASSETS) {
+            file.parentFile!!.mkdirs()
+            assets.open("apps/$directoryAndFilename").use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output, 1024)
+                }
+            }
+        } else {
+            val url = "${baseUrl()}/$directoryAndFilename"
+            httpStream.toFile(url, file)
+        }
     }
 
     suspend fun fetchAppDescription(app: App) = withContext(Dispatchers.IO) {
         val directoryAndFilename = "${app.name}/${app.name}.txt"
-        val url = "${baseUrl()}/$directoryAndFilename"
         val file = File("$filesDirPath/apps/$directoryAndFilename")
-        httpStream.toTextFile(url, file)
+
+        if (BuildConfig.APPS_IN_ASSETS) {
+            file.parentFile!!.mkdirs()
+            assets.open("apps/$directoryAndFilename").use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output, 1024)
+                }
+            }
+        } else {
+            val url = "${baseUrl()}/$directoryAndFilename"
+            httpStream.toTextFile(url, file)
+        }
     }
 
     suspend fun fetchAppScript(app: App) = withContext(Dispatchers.IO) {
         val directoryAndFilename = "${app.name}/${app.name}.sh"
-        val url = "${baseUrl()}/$directoryAndFilename"
         val file = File("$filesDirPath/apps/$directoryAndFilename")
-        httpStream.toTextFile(url, file)
+
+        if (BuildConfig.APPS_IN_ASSETS) {
+            file.parentFile!!.mkdirs()
+            assets.open("apps/$directoryAndFilename").use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output, 1024)
+                }
+            }
+        } else {
+            val url = "${baseUrl()}/$directoryAndFilename"
+            httpStream.toTextFile(url, file)
+        }
     }
 }

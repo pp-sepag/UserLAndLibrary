@@ -12,7 +12,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.*
-import android.provider.MediaStore
+import android.preference.PreferenceScreen
 import android.speech.SpeechRecognizer.isRecognitionAvailable
 import android.util.DisplayMetrics
 import android.view.*
@@ -22,7 +22,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -31,9 +30,9 @@ import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.NavigationUI.setupWithNavController
+import androidx.preference.Preference
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
-import com.google.mlkit.md.LiveBarcodeScanningActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,11 +52,8 @@ import tech.ula.ui.SessionListFragment
 import tech.ula.utils.*
 import tech.ula.utils.preferences.*
 import tech.ula.viewmodel.*
-import java.io.File
-import java.io.IOException
 import java.lang.reflect.Method
 import java.net.NetworkInterface
-import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, AppsListFragment.AppSelection, FilesystemListFragment.FilesystemListProgress {
@@ -92,7 +88,13 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     val billingManager by lazy {
-        BillingManager(this, contributionPrompter.onEntitledSubPurchases, contributionPrompter.onEntitledInAppPurchases, contributionPrompter.onPurchase, contributionPrompter.onSubscriptionSupportedChecked)
+        BillingManager(
+            this,
+            contributionPrompter.onEntitledSubPurchases,
+            contributionPrompter.onEntitledInAppPurchases,
+            contributionPrompter.onPurchase,
+            contributionPrompter.onSubscriptionSupportedChecked
+        )
     }
 
     private val contributionPrompter by lazy {
@@ -136,7 +138,13 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
         val assetPreferences = AssetPreferences(this)
         val githubApiClient = GithubApiClient(ulaFiles)
-        val assetRepository = AssetRepository(filesDir.path, ulaFiles, assetPreferences, defaultSharedPreferences, githubApiClient)
+        val assetRepository = AssetRepository(
+            filesDir.path,
+            ulaFiles,
+            assetPreferences,
+            defaultSharedPreferences,
+            githubApiClient
+        )
 
         val filesystemManager = FilesystemManager(ulaFiles, busyboxExecutor)
         val storageCalculator = StorageCalculator(StatFs(filesDir.path))
@@ -146,7 +154,13 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         val assetDownloader = AssetDownloader(assetPreferences, downloadManagerWrapper, ulaFiles)
 
         val appsStartupFsm = AppsStartupFsm(ulaDatabase, filesystemManager, ulaFiles)
-        val sessionStartupFsm = SessionStartupFsm(ulaDatabase, assetRepository, filesystemManager, assetDownloader, storageCalculator)
+        val sessionStartupFsm = SessionStartupFsm(
+            ulaDatabase,
+            assetRepository,
+            filesystemManager,
+            assetDownloader,
+            storageCalculator
+        )
         ViewModelProviders.of(this, MainActivityViewModelFactory(appsStartupFsm, sessionStartupFsm))
                 .get(MainActivityViewModel::class.java)
     }
@@ -155,8 +169,12 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         super.onNewIntent(intent)
         if (intent?.type.equals("settings"))
             navController.navigate(R.id.settings_fragment)
-        else
+        else {
+            if (intent != null) {
+                checkForAppIntent(intent)
+            }
             autoStart()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -183,7 +201,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             contributionPrompter.showView()
         }
 
-        handleQWarning()
+        //handleQWarning()
 
         if (optInPrompter.userHasOptedIn()) {
             logger.initialize(this)
@@ -193,8 +211,26 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
         if (intent?.type.equals("settings"))
             navController.navigate(R.id.settings_fragment)
-        else
+        else {
+            checkForAppIntent(intent)
             autoStart()
+        }
+    }
+
+    private fun checkForAppIntent(intent: Intent) {
+        var app: App
+        val prefs = getSharedPreferences("apps", Context.MODE_PRIVATE)
+        if (intent.extras != null) {
+            if (intent.extras!!.getParcelable<App>("app") != null) {
+                app = intent.extras!!.getParcelable<App>("app")!!
+                with(prefs.edit()) {
+                    val gson = Gson()
+                    val json= gson.toJson(app)
+                    putString("AutoApp", json)
+                    apply()
+                }
+            }
+        }
     }
 
     private fun setNavStartDestination() {
@@ -205,8 +241,13 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             else -> R.id.app_list_fragment
         }
         navController.graph = graph
-        val bottomNavView = this.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_nav_view)
-        if (defaultSharedPreferences.getBoolean("pref_hide_sessions_filesystems", BuildConfig.DEFAULT_HIDE_SESSIONS_FILESYSTEMS)){
+        val bottomNavView = this.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(
+            R.id.bottom_nav_view
+        )
+        if (defaultSharedPreferences.getBoolean(
+                "pref_hide_sessions_filesystems",
+                BuildConfig.DEFAULT_HIDE_SESSIONS_FILESYSTEMS
+            )){
             bottomNavView.visibility = View.GONE
         } else {
             bottomNavView.visibility = View.VISIBLE
@@ -225,7 +266,12 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private fun handleQWarning() {
-        val handler = QWarningHandler(this.getSharedPreferences(QWarningHandler.prefsString, Context.MODE_PRIVATE), ulaFiles)
+        val handler = QWarningHandler(
+            this.getSharedPreferences(
+                QWarningHandler.prefsString,
+                Context.MODE_PRIVATE
+            ), ulaFiles
+        )
         if (handler.messageShouldBeDisplayed()) {
             AlertDialog.Builder(this)
                     .setTitle(R.string.q_warning_title)
@@ -272,8 +318,17 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     private fun getCameraInfo() {
         val recognitionServiceAvailable = isRecognitionAvailable(this)
         with(defaultSharedPreferences.edit()) {
-            putInt("camera_supported", if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) 1 else 0)
-            putInt("microphone_supported", if (recognitionServiceAvailable && packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) 1 else 0)
+            putInt(
+                "camera_supported",
+                if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) 1 else 0
+            )
+            putInt(
+                "microphone_supported",
+                if (recognitionServiceAvailable && packageManager.hasSystemFeature(
+                        PackageManager.FEATURE_MICROPHONE
+                    )
+                ) 1 else 0
+            )
             apply()
         }
     }
@@ -283,7 +338,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             val re1 = "^\\d+(\\.\\d+){3}$".toRegex()
             val re2 = "^[0-9a-f]+(:[0-9a-f]*)+:[0-9a-f]+$".toRegex()
             val SystemProperties = Class.forName("android.os.SystemProperties")
-            val method: Method = SystemProperties.getMethod("get", *arrayOf<Class<*>>(String::class.java))
+            val method: Method = SystemProperties.getMethod(
+                "get",
+                *arrayOf<Class<*>>(String::class.java)
+            )
             val props = arrayOf("net.dns1", "net.dns2", "dhcp.wlan0.domain", "net.hostname")
             for (i in props.indices) {
                 val v = method.invoke(null, props[i]) as String
@@ -296,7 +354,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                     }
                 } else if ((i == 2) && (v != null && !v.trim().isEmpty())) {
                     with(defaultSharedPreferences.edit()) {
-                        putString("search_domains", v.replace(","," "))
+                        putString("search_domains", v.replace(",", " "))
                         apply()
                     }
                 } else if (i == 3) {
@@ -312,7 +370,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 }
             }
         } else {
-            val connectivityManager = ContextCompat.getSystemService(this, ConnectivityManager::class.java)
+            val connectivityManager = ContextCompat.getSystemService(
+                this,
+                ConnectivityManager::class.java
+            )
             if (connectivityManager != null) {
                 val currentNetwork = connectivityManager.getActiveNetwork()
                 if (currentNetwork != null) {
@@ -342,17 +403,6 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private fun autoStart() {
-        if (defaultSharedPreferences.getBoolean("photo_pending", false)) {
-            val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-            val resultFile = File(storageDir, ".cameraResponse.txt")
-            val finalResultFile = File(storageDir, "cameraResponse.txt")
-            resultFile.writeText("1")
-            resultFile.renameTo(finalResultFile)
-            with(defaultSharedPreferences.edit()) {
-                putBoolean("photo_pending", false)
-                apply()
-            }
-        }
         val prefs = getSharedPreferences("apps", Context.MODE_PRIVATE)
         val json = prefs.getString("AutoApp", " ")
         if (json != null)
@@ -367,8 +417,14 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     override fun onStart() {
         super.onStart()
         LocalBroadcastManager.getInstance(this)
-                .registerReceiver(serverServiceBroadcastReceiver, IntentFilter(ServerService.SERVER_SERVICE_RESULT))
-        registerReceiver(downloadBroadcastReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+                .registerReceiver(
+                    serverServiceBroadcastReceiver,
+                    IntentFilter(ServerService.SERVER_SERVICE_RESULT)
+                )
+        registerReceiver(
+            downloadBroadcastReceiver,
+            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        )
     }
 
     override fun onResume() {
@@ -389,7 +445,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.terms_and_conditions) {
-            val intent = Intent("android.intent.action.VIEW", Uri.parse("https://userland.tech/eula"))
+            val intent = Intent(
+                "android.intent.action.VIEW",
+                Uri.parse("https://userland.tech/eula")
+            )
             startActivity(intent)
         }
         if (item.itemId == R.id.option_wiki) {
@@ -398,13 +457,18 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         if (item.itemId == R.id.clear_support_files) {
             displayClearSupportFilesDialog()
         }
-        return NavigationUI.onNavDestinationSelected(item,
-                Navigation.findNavController(this, R.id.nav_host_fragment)) ||
+        return NavigationUI.onNavDestinationSelected(
+            item,
+            Navigation.findNavController(this, R.id.nav_host_fragment)
+        ) ||
                 super.onOptionsItemSelected(item)
     }
 
     private fun sendWikiIntent() {
-        val intent = Intent("android.intent.action.VIEW", Uri.parse("https://github.com/CypherpunkArmory/UserLAnd/wiki"))
+        val intent = Intent(
+            "android.intent.action.VIEW",
+            Uri.parse("https://github.com/CypherpunkArmory/UserLAnd/wiki")
+        )
         startActivity(intent)
     }
 
@@ -494,7 +558,12 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         val windowManager = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         val orientation = applicationContext.resources.configuration.orientation
-        deviceDimensions.saveDeviceDimensions(windowManager, DisplayMetrics(), orientation, defaultSharedPreferences)
+        deviceDimensions.saveDeviceDimensions(
+            windowManager,
+            DisplayMetrics(),
+            orientation,
+            defaultSharedPreferences
+        )
         session.geometry = deviceDimensions.getScreenResolution()
     }
 
@@ -524,9 +593,19 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         } catch (e: Exception) {
             val appPackageName = "x.org.server"
             try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("market://details?id=$appPackageName")
+                    )
+                )
             } catch (error: android.content.ActivityNotFoundException) {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")
+                    )
+                )
             }
         }
     }
@@ -566,7 +645,11 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             }
             is FilesystemCredentialsRequired -> {
                 if (BuildConfig.USE_DEFAULT_CREDS) {
-                    viewModel.submitFilesystemCredentials(BuildConfig.DEFAULT_USERNAME, BuildConfig.DEFAULT_SSH_PASSWORD, BuildConfig.DEFAULT_VNC_PASSWORD)
+                    viewModel.submitFilesystemCredentials(
+                        BuildConfig.DEFAULT_USERNAME,
+                        BuildConfig.DEFAULT_SSH_PASSWORD,
+                        BuildConfig.DEFAULT_VNC_PASSWORD
+                    )
                 } else
                     getCredentials()
             }
@@ -584,7 +667,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 displayNetworkChoicesDialog(state.downloadRequirements)
             }
             is ActiveSessionsMustBeDeactivated -> {
-                displayGenericErrorDialog(R.string.general_error_title, R.string.deactivate_sessions)
+                displayGenericErrorDialog(
+                    R.string.general_error_title,
+                    R.string.deactivate_sessions
+                )
             }
         }
     }
@@ -606,12 +692,16 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     private fun showDialog(dialogType: String) {
         when (dialogType) {
             "unhandledSessionServiceType" -> {
-                displayGenericErrorDialog(R.string.general_error_title,
-                        R.string.illegal_state_unhandled_session_service_type)
+                displayGenericErrorDialog(
+                    R.string.general_error_title,
+                    R.string.illegal_state_unhandled_session_service_type
+                )
             }
             "playStoreMissingForClient" ->
-                displayGenericErrorDialog(R.string.alert_need_client_app_title,
-                        R.string.alert_need_client_app_message)
+                displayGenericErrorDialog(
+                    R.string.alert_need_client_app_title,
+                    R.string.alert_need_client_app_message
+                )
         }
     }
 
@@ -636,7 +726,11 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         CoroutineScope(Dispatchers.Main).launch { viewModel.handleClearSupportFiles(assetFileClearer) }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (PermissionHandler.permissionsWereGranted(requestCode, grantResults)) {
             viewModel.permissionsHaveBeenGranted()
@@ -661,7 +755,11 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             }
             is DownloadProgress -> {
                 val step = getString(R.string.progress_downloading)
-                val details = getString(R.string.progress_downloading_out_of, state.numComplete, state.numTotal)
+                val details = getString(
+                    R.string.progress_downloading_out_of,
+                    state.numComplete,
+                    state.numTotal
+                )
                 updateProgressBar(step, details)
             }
             is CopyingDownloads -> {
@@ -678,7 +776,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             }
             is FilesystemExtractionStep -> {
                 val step = getString(R.string.progress_setting_up_filesystem)
-                val details = getString(R.string.progress_extraction_details, state.extractionTarget)
+                val details = getString(
+                    R.string.progress_extraction_details,
+                    state.extractionTarget
+                )
                 updateProgressBar(step, details)
             }
             is ClearingSupportFiles -> {
@@ -800,7 +901,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private fun displayLowStorageDialog() {
-        displayGenericErrorDialog(R.string.alert_storage_low_title, R.string.alert_storage_low_message) {
+        displayGenericErrorDialog(
+            R.string.alert_storage_low_title,
+            R.string.alert_storage_low_message
+        ) {
             viewModel.lowAvailableStorageAcknowledged()
         }
     }

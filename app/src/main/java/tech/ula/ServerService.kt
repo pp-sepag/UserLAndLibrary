@@ -8,7 +8,6 @@ import android.media.ToneGenerator
 import android.net.Uri
 import android.os.IBinder
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.google.mlkit.md.LiveBarcodeScanningActivity
 import com.iiordanov.bVNC.RemoteCanvasActivity
 import kotlinx.coroutines.*
 import tech.ula.model.entities.App
@@ -133,9 +132,6 @@ class ServerService : Service(), CoroutineScope {
         startForeground(NotificationConstructor.serviceNotificationId, notificationManager.buildPersistentServiceNotification())
         session.pid = localServerManager.startServer(session)
 
-        val scheduleTaskExecutor= Executors.newScheduledThreadPool(1)
-        scheduleTaskExecutor.scheduleAtFixedRate(java.lang.Runnable { cameraRequest() }, 1000, 100, TimeUnit.MILLISECONDS)
-
         while (!localServerManager.isServerRunning(session)) {
             delay(500)
         }
@@ -177,10 +173,10 @@ class ServerService : Service(), CoroutineScope {
 
     private fun startVncClient(session: Session, packageName: String) {
         val bVncIntent = Intent(this, RemoteCanvasActivity::class.java)
-        bVncIntent.data = Uri.parse("vnc://127.0.0.1:5951/?VncUsername=${session.username}&VncPassword=${session.vncPassword}")
+        bVncIntent.data = Uri.parse("vnc://127.0.0.1:5952/?VncUsername=${session.username}&VncPassword=${session.vncPassword}")
         bVncIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val ulaFiles = UlaFiles(this, this.applicationInfo.nativeLibraryDir)
-        bVncIntent.putExtra("command_dir", ulaFiles.pictureDir.absolutePath);
+        bVncIntent.putExtra("command_dir", ulaFiles.intentsDir.absolutePath);
         bVncIntent.putExtra("hide_toolbar", this.defaultSharedPreferences.getBoolean("pref_hide_vnc_toolbar", BuildConfig.DEFAULT_HIDE_VNC_TOOLBAR))  //seems to hide after a few seconds
         bVncIntent.putExtra("hide_extra_keys", this.defaultSharedPreferences.getBoolean("pref_hide_vnc_extra_keys", BuildConfig.DEFAULT_HIDE_VNC_EXTRA_KEYS))
         val inputMode = when(this.defaultSharedPreferences.getString("pref_default_vnc_input_mode", BuildConfig.DEFAULT_VNC_INPUT_MODE)) {
@@ -242,41 +238,5 @@ class ServerService : Service(), CoroutineScope {
                 .putExtra("type", "dialog")
                 .putExtra("dialogType", type)
         broadcaster.sendBroadcast(intent)
-    }
-
-    private fun cameraRequest() {
-        val ulaFiles = UlaFiles(this, this.applicationInfo.nativeLibraryDir)
-        val cameraRequest = File(ulaFiles.pictureDir, "cameraRequest.txt")
-        if (cameraRequest.exists()) {
-            val cameraRequestText = cameraRequest.readText(Charsets.UTF_8).trim()
-            cameraRequest.delete()
-            if (cameraRequestText.endsWith("barcode.txt")) {
-                val barcodeIntent = Intent(this, LiveBarcodeScanningActivity::class.java)
-                barcodeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                this.startActivity(barcodeIntent)
-            } else if (cameraRequestText.endsWith("tone.txt")) {
-                val toneFile = File(ulaFiles.pictureDir, "tone.txt")
-                val toneInfo = toneFile.readText(Charsets.UTF_8).trim()
-                val (
-                        tone,
-                        volume,
-                        duration
-                ) = toneInfo.toLowerCase(Locale.ENGLISH).split(",")
-                toneFile.delete()
-                val toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, volume.toInt())
-                toneGenerator.startTone(tone.toInt(), duration.toInt())
-            } else if (cameraRequestText.endsWith("record_speech.txt")) {
-                val recodeSpeechIntent = Intent(this, RecordSpeechActivity::class.java)
-                recodeSpeechIntent.type = "record_speech"
-                recodeSpeechIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                this.startActivity(recodeSpeechIntent)
-            } else {
-                val cameraIntent = Intent(this, CameraActivity::class.java)
-                cameraIntent.type = "take_picture"
-                cameraIntent.putExtra("cameraRequest", cameraRequestText)
-                cameraIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                this.startActivity(cameraIntent)
-            }
-        }
     }
 }

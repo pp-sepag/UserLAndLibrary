@@ -20,13 +20,7 @@ class PermissionHandler {
                                 Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
 
                         ContextCompat.checkSelfPermission(context,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-
-                        ContextCompat.checkSelfPermission(context,
-                                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
-
-                        ContextCompat.checkSelfPermission(context,
-                                Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                     )
         }
 
@@ -35,9 +29,7 @@ class PermissionHandler {
                 permissionRequestCode -> {
                     (grantResults.isNotEmpty() &&
                             grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                            grantResults[1] == PackageManager.PERMISSION_GRANTED &&
-                            grantResults[2] == PackageManager.PERMISSION_GRANTED &&
-                            grantResults[3] == PackageManager.PERMISSION_GRANTED)
+                            grantResults[1] == PackageManager.PERMISSION_GRANTED)
                 }
                 else -> false
             }
