@@ -1,6 +1,6 @@
 [submodule "remote-desktop-clients-private"]
-	path = remote-desktop-clients-private
+	path = remote-desktop-clients
 	url = https://github.com/CypherpunkArmory/remote-desktop-clients.git
 [submodule "termux-app-private"]
-	path = termux-app-private
+	path = termux-app
 	url = https://github.com/CypherpunkArmory/termux-app.git
