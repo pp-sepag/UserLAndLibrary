@@ -1,12 +1,13 @@
 package tech.ula.utils
 
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import tech.ula.BuildConfig
-import tech.ula.R
 import tech.ula.model.entities.ServiceType
 import tech.ula.model.entities.Session
 import java.io.File
+import java.lang.reflect.Type
 
 class LocalServerManager(
         private val applicationFilesDirPath: String,
@@ -15,7 +16,7 @@ class LocalServerManager(
         private val logger: Logger = SentryLogger()
 ) {
 
-    private val vncDisplayNumber = 52
+    private val vncDisplayNumber = BuildConfig.VNC_DISPLAY.toLong()
 
     fun Process.pid(): Long {
         return this.toString()
@@ -96,14 +97,22 @@ class LocalServerManager(
         deletePidFile(session)
         val command = "/support/startVNCServer.sh"
         val env = HashMap<String, String>()
-        env["HAS_CAMERA"] = sharedPreferences.getInt("camera_supported",0).toString()
-        env["HAS_MICROPHONE"] = sharedPreferences.getInt("microphone_supported",0).toString()
+        env["HAS_CAMERA"] = sharedPreferences.getInt("camera_supported", 0).toString()
+        env["HAS_MICROPHONE"] = sharedPreferences.getInt("microphone_supported", 0).toString()
         env["INITIAL_USERNAME"] = session.username
         env["INITIAL_VNC_PASSWORD"] = session.vncPassword
         env["DIMENSIONS"] = session.geometry
         env["VERSION_CODE"] = BuildConfig.VERSION_CODE
         env["VERSION_NAME"] = BuildConfig.VERSION_NAME
-        if (sharedPreferences.getBoolean("pref_custom_hostname_enabled",false)) {
+        env["VNC_DISPLAY"] = BuildConfig.VNC_DISPLAY
+        if (sharedPreferences.contains("env")) {
+            val gson = Gson()
+            val storedEnvString: String? = sharedPreferences.getString("env", "")
+            val type: Type = object : TypeToken<HashMap<String?, String?>?>() {}.getType()
+            val prefsEnv: HashMap<String, String> = gson.fromJson(storedEnvString, type)
+            env.putAll(prefsEnv)
+        }
+        if (sharedPreferences.getBoolean("pref_custom_hostname_enabled", false)) {
             env["HOSTNAME"] = sharedPreferences.getString("pref_hostname", BuildConfig.DEFAULT_HOSTNAME)!!
         } else {
             if (sharedPreferences.contains("unique_id"))
@@ -112,7 +121,7 @@ class LocalServerManager(
                 env["HOSTNAME"] = BuildConfig.DEFAULT_HOSTNAME
         }
         env["HOSTS"] = "127.0.0.1 localhost\n127.0.0.1 ${env["HOSTNAME"]}"
-        if (sharedPreferences.getBoolean("pref_custom_dns_enabled",false)) {
+        if (sharedPreferences.getBoolean("pref_custom_dns_enabled", false)) {
             env["RESOLV"] = sharedPreferences.getString("pref_dns", BuildConfig.DEFAULT_DNS_DOMAINS + "\n" + BuildConfig.DEFAULT_DNS_NAMESERVERS)!!
         } else {
             env["RESOLV"] = ""

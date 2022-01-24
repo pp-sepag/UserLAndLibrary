@@ -26,6 +26,7 @@ class BillingManager(
     private val onEntitledSubPurchases: (List<Purchase>) -> Unit,
     private val onEntitledInAppPurchases: (List<Purchase>) -> Unit,
     private val onPurchase: (Purchase) -> Unit,
+    private val onFlowComplete: () -> Unit,
     private val onSubscriptionSupportedChecked: (Boolean) -> Unit
 ) {
 
@@ -52,14 +53,21 @@ class BillingManager(
                                 // are given to them. You can also choose to remind the user in the
                                 // future to complete the purchase if you detect that it is still
                                 // pending.
+                                onFlowComplete()
                             }
                         }
                     }
                 }
                 log("onPurchasesUpdated(), $purchases")
             }
-            BillingResponseCode.USER_CANCELED -> log("onPurchasesUpdated() - user cancelled the purchase flow - skipping")
-            else -> log("onPurchasesUpdated() got unknown resultCode: ${billingResult.responseCode}")
+            BillingResponseCode.USER_CANCELED -> {
+                log("onPurchasesUpdated() - user cancelled the purchase flow - skipping")
+                onFlowComplete()
+            }
+            else -> {
+                log("onPurchasesUpdated() got unknown resultCode: ${billingResult.responseCode}")
+                onFlowComplete()
+            }
         }
     }
 
@@ -93,7 +101,7 @@ class BillingManager(
         if (isSubscriptionPurchaseSupported()) {
             val purchasesResult = billingClient.queryPurchases(BillingClient.SkuType.SUBS)
             if (purchasesResult.responseCode == BillingResponseCode.OK) {
-                onEntitledSubPurchases(purchasesResult.purchasesList)
+                purchasesResult.purchasesList?.let { onEntitledSubPurchases(it) }
             } else {
                 log("Error trying to query purchases: $purchasesResult")
             }
@@ -103,7 +111,7 @@ class BillingManager(
     fun queryInAppPurchases() {
         val purchasesResult = billingClient.queryPurchases(BillingClient.SkuType.INAPP)
         if (purchasesResult.responseCode == BillingResponseCode.OK) {
-            onEntitledInAppPurchases(purchasesResult.purchasesList)
+            purchasesResult.purchasesList?.let { onEntitledInAppPurchases(it) }
         } else {
             log("Error trying to query purchases: $purchasesResult")
         }
