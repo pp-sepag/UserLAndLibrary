@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.StringRes
 import com.android.billingclient.api.Purchase
+import tech.ula.BuildConfig
 import tech.ula.MainActivity
 import tech.ula.R
 
@@ -34,11 +35,12 @@ interface UserPrompter {
 
     val finishedAction: () -> Unit
 
-    val savedActivity: Activity
-    val savedViewGroup: ViewGroup
+    val savedActivity: MainActivity
+    var savedViewGroup: ViewGroup?
 
     fun viewShouldBeShown(): Boolean
-    fun showView() {
+    fun showView(viewGroup: ViewGroup) {
+        savedViewGroup = viewGroup
         val view = savedActivity.layoutInflater.inflate(R.layout.layout_user_prompt, null)
         val prompt = view.findViewById<TextView>(R.id.text_prompt)
         val posBtn = view.findViewById<Button>(R.id.btn_positive_response)
@@ -50,8 +52,7 @@ interface UserPrompter {
         posBtn.setOnClickListener initial@{
             if (altInitialPosFlow) {
                 initialPositiveBtnAction()
-                finishedAction()
-                savedViewGroup.removeView(view)
+                savedViewGroup!!.removeView(view)
             } else {
                 prompt.text = savedActivity.getString(primaryRequest)
 
@@ -59,13 +60,13 @@ interface UserPrompter {
                 posBtn.setOnClickListener primary@{
                     primaryPositiveBtnAction()
                     finishedAction()
-                    savedViewGroup.removeView(view)
+                    savedViewGroup!!.removeView(view)
                 }
 
                 negBtn.text = savedActivity.getString(primaryNegBtnText)
                 negBtn.setOnClickListener primary@{
                     finishedAction()
-                    savedViewGroup.removeView(view)
+                    savedViewGroup!!.removeView(view)
                 }
             }
         }
@@ -78,21 +79,21 @@ interface UserPrompter {
             posBtn.setOnClickListener secondary@{
                 secondaryPositiveBtnAction()
                 finishedAction()
-                savedViewGroup.removeView(view)
+                savedViewGroup!!.removeView(view)
             }
 
             negBtn.text = savedActivity.getString(secondaryNegBtnText)
             negBtn.setOnClickListener secondary@{
                 finishedAction()
-                savedViewGroup.removeView(view)
+                savedViewGroup!!.removeView(view)
             }
         }
 
-        savedViewGroup.addView(view)
+        savedViewGroup!!.addView(view)
     }
 }
 
-class UserFeedbackPrompter(private val activity: Activity, private val viewGroup: ViewGroup) : UserPrompter {
+class UserFeedbackPrompter(private val activity: MainActivity) : UserPrompter {
     companion object {
         const val prefString = "usage"
     }
@@ -102,14 +103,13 @@ class UserFeedbackPrompter(private val activity: Activity, private val viewGroup
     private val userGaveFeedbackKey = "userGaveFeedback"
     private val dateTimeFirstOpenKey = "dateTimeFirstOpen"
     private val millisecondsInThreeDays = 259200000L
-    private val minimumNumberOfOpensBeforeReviewRequest = 15
+    private val minimumNumberOfOpensBeforeReviewRequest = 3
 
     private val doNothing = {
     }
-    override val savedActivity: Activity
+    override val savedActivity: MainActivity
         get() = activity
-    override val savedViewGroup: ViewGroup
-        get() = viewGroup
+    override var savedViewGroup: ViewGroup? = null
     override val altInitialPosFlow: Boolean
         get() = false
     override val initialPositiveBtnAction: () -> Unit
@@ -145,13 +145,13 @@ class UserFeedbackPrompter(private val activity: Activity, private val viewGroup
         get() = userHasGivenFeedback
 
     private val sendReviewIntent = {
-        val userlandPlayStoreURI = "https://play.google.com/store/apps/details?id=tech.ula"
+        val userlandPlayStoreURI = "https://play.google.com/store/apps/details?id=" + savedActivity.packageName
         val intent = Intent("android.intent.action.VIEW", Uri.parse(userlandPlayStoreURI))
         activity.startActivity(intent)
     }
 
     private val sendGithubIntent = {
-        val githubURI = "https://github.com/CypherpunkArmory/UserLAnd"
+        val githubURI = "https://github.com/CypherpunkArmory/" + BuildConfig.REPO_NAME
         val intent = Intent("android.intent.action.VIEW", Uri.parse(githubURI))
         activity.startActivity(intent)
     }
@@ -161,6 +161,7 @@ class UserFeedbackPrompter(private val activity: Activity, private val viewGroup
             putBoolean(userGaveFeedbackKey, true)
             apply()
         }
+        savedActivity.userHasCompletedFeedback()
     }
 
     override fun viewShouldBeShown(): Boolean {
@@ -168,8 +169,7 @@ class UserFeedbackPrompter(private val activity: Activity, private val viewGroup
     }
 
     private fun askingForFeedbackIsAppropriate(): Boolean {
-        return getIsSufficientTimeElapsedSinceFirstOpen() &&
-                numberOfTimesOpenedIsGreaterThanThreshold() &&
+        return numberOfTimesOpenedIsGreaterThanThreshold() &&
                 !getUserGaveFeedback()
     }
 
@@ -199,16 +199,15 @@ class UserFeedbackPrompter(private val activity: Activity, private val viewGroup
     }
 }
 
-class CollectionOptInPrompter(private val activity: Activity, private val viewGroup: ViewGroup) : UserPrompter {
+class CollectionOptInPrompter(private val activity: MainActivity) : UserPrompter {
     private val prefs = activity.defaultSharedPreferences
     private val logger = SentryLogger()
 
     private val doNothing = {
     }
-    override val savedActivity: Activity
+    override val savedActivity: MainActivity
         get() = activity
-    override val savedViewGroup: ViewGroup
-        get() = viewGroup
+    override var savedViewGroup: ViewGroup? = null
     override val altInitialPosFlow: Boolean
         get() = false
     override val initialPositiveBtnAction: () -> Unit
@@ -273,7 +272,7 @@ class CollectionOptInPrompter(private val activity: Activity, private val viewGr
     }
 }
 
-class ContributionPrompter(private val activity: MainActivity, private val viewGroup: ViewGroup) : UserPrompter {
+class ContributionPrompter(private val activity: MainActivity) : UserPrompter {
     private val numberOfTimesOpenedKey = "numberOfTimesOpenedContribution"
     private val hasMadeSubPurchaseKey = "hasMadeSubPurchase"
     private val hasMadeInAppPurchaseKey = "hasMadeInAppPurchase"
@@ -284,8 +283,7 @@ class ContributionPrompter(private val activity: MainActivity, private val viewG
     }
     override val savedActivity: MainActivity
         get() = activity
-    override val savedViewGroup: ViewGroup
-        get() = viewGroup
+    override var savedViewGroup: ViewGroup? = null
 
     private val openContributionView = {
         val view = savedActivity.layoutInflater.inflate(R.layout.dia_contribution, null)
@@ -338,10 +336,10 @@ class ContributionPrompter(private val activity: MainActivity, private val viewG
                 }
             }
             savedActivity.billingManager.startPurchaseFlow(productId)
-            savedViewGroup.removeView(view)
+            savedViewGroup!!.removeView(view)
         }
 
-        savedViewGroup.addView(view)
+        savedViewGroup!!.addView(view)
     }
     override val altInitialPosFlow: Boolean
         get() = true
@@ -370,6 +368,10 @@ class ContributionPrompter(private val activity: MainActivity, private val viewG
         processPurchase(it)
     }
 
+    val onFlowComplete: () -> Unit = {
+        finishedAction()
+    }
+
     private fun processSubPurchases(purchases: List<Purchase>) {
         setHasMadeSubPurchase(!purchases.isEmpty())
     }
@@ -384,6 +386,7 @@ class ContributionPrompter(private val activity: MainActivity, private val viewG
         else
             setHasMadeSubPurchase(true)
         Toast.makeText(savedActivity, "Thanks for your contribution", Toast.LENGTH_LONG).show()
+        finishedAction()
     }
 
     override val initialPrompt: Int
@@ -416,7 +419,7 @@ class ContributionPrompter(private val activity: MainActivity, private val viewG
         get() = userHasResponded
 
     private val sendGithubIntent = {
-        val githubURI = "https://github.com/CypherpunkArmory/UserLAnd/wiki/FAQ"
+        val githubURI = "https://github.com/CypherpunkArmory/" + BuildConfig.REPO_NAME + "/wiki/FAQ"
         val intent = Intent("android.intent.action.VIEW", Uri.parse(githubURI))
         savedActivity.startActivity(intent)
     }
@@ -426,6 +429,7 @@ class ContributionPrompter(private val activity: MainActivity, private val viewG
             putInt(numberOfTimesOpenedKey, 0)
             apply()
         }
+        savedActivity.userHasCompletedContribution()
     }
 
     override fun viewShouldBeShown(): Boolean {

@@ -143,6 +143,14 @@ class MainActivityViewModel(
         submitSessionStartupEvent(AssetDownloadComplete(id))
     }
 
+    fun userFeedbackChecked() {
+        submitAppsStartupEvent(UserFeedbackChecked)
+    }
+
+    fun userContributionChecked() {
+        submitAppsStartupEvent(UserContributionChecked)
+    }
+
     fun submitFilesystemCredentials(username: String, password: String, vncPassword: String) {
         if (lastSelectedFilesystem == unselectedFilesystem) {
             postIllegalStateWithLog(NoFilesystemSelectedWhenCredentialsSubmitted)
@@ -209,10 +217,16 @@ class MainActivityViewModel(
             is WaitingForAppSelection -> {}
             is FetchingDatabaseEntries -> {}
             is DatabaseEntriesFetched -> {
-                submitAppsStartupEvent(CheckAppsFilesystemCredentials(lastSelectedFilesystem))
+                state.postValue(UserFeedbackCheckRequired)
             }
             is DatabaseEntriesFetchFailed -> {
                 postIllegalStateWithLog(ErrorFetchingAppDatabaseEntries)
+            }
+            is UserFeedbackCheckComplete -> {
+                state.postValue(UserContributionCheckRequired)
+            }
+            is UserContributionCheckComplete -> {
+                submitAppsStartupEvent(CheckAppsFilesystemCredentials(lastSelectedFilesystem))
             }
             is AppsFilesystemHasCredentials -> {
                 submitAppsStartupEvent(CheckAppSessionServiceType(lastSelectedSession))
@@ -454,6 +468,8 @@ object InsufficientAvailableStorage : IllegalState()
 object BusyboxMissing : IllegalState()
 
 sealed class UserInputRequiredState : State()
+object UserFeedbackCheckRequired: UserInputRequiredState()
+object UserContributionCheckRequired: UserInputRequiredState()
 object FilesystemCredentialsRequired : UserInputRequiredState()
 object LowStorageAcknowledgementRequired : UserInputRequiredState()
 object AppServiceTypePreferenceRequired : UserInputRequiredState()

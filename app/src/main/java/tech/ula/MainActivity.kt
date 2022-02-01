@@ -64,6 +64,8 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     private var currentFragmentDisplaysProgressDialog = false
     private var autoStarted = false
 
+    private var customDialog: AlertDialog? = null
+
     private val logger = SentryLogger()
     private val ulaFiles by lazy { UlaFiles(this, this.applicationInfo.nativeLibraryDir) }
     private val busyboxExecutor by lazy {
@@ -80,11 +82,11 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private val userFeedbackPrompter by lazy {
-        UserFeedbackPrompter(this, findViewById(R.id.layout_user_prompt_insert))
+        UserFeedbackPrompter(this)
     }
 
     private val optInPrompter by lazy {
-        CollectionOptInPrompter(this, findViewById(R.id.layout_user_prompt_insert))
+        CollectionOptInPrompter(this)
     }
 
     val billingManager by lazy {
@@ -93,12 +95,13 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             contributionPrompter.onEntitledSubPurchases,
             contributionPrompter.onEntitledInAppPurchases,
             contributionPrompter.onPurchase,
+            contributionPrompter.onFlowComplete,
             contributionPrompter.onSubscriptionSupportedChecked
         )
     }
 
     private val contributionPrompter by lazy {
-        ContributionPrompter(this, findViewById(R.id.layout_user_prompt_insert))
+        ContributionPrompter(this)
     }
 
     private val downloadBroadcastReceiver = object : BroadcastReceiver() {
@@ -188,25 +191,6 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
         setupWithNavController(bottom_nav_view, navController)
 
-        val promptViewHolder = findViewById<ViewGroup>(R.id.layout_user_prompt_insert)
-        if (userFeedbackPrompter.viewShouldBeShown() && BuildConfig.ASK_FOR_FEEDBACK) {
-            userFeedbackPrompter.showView()
-        }
-
-        if (optInPrompter.viewShouldBeShown() && BuildConfig.HAS_LOGGER) {
-            optInPrompter.showView()
-        }
-
-        if (contributionPrompter.viewShouldBeShown() && BuildConfig.ASK_FOR_CONTRIBUTION) {
-            contributionPrompter.showView()
-        }
-
-        //handleQWarning()
-
-        if (optInPrompter.userHasOptedIn()) {
-            logger.initialize(this)
-        }
-
         viewModel.getState().observe(this, stateObserver)
 
         if (intent?.type.equals("settings"))
@@ -218,11 +202,19 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private fun checkForAppIntent(intent: Intent) {
-        var app: App
         val prefs = getSharedPreferences("apps", Context.MODE_PRIVATE)
         if (intent.extras != null) {
+            if (intent.extras!!.getSerializable("env") != null) {
+                val env = intent.extras!!.getSerializable("env") as HashMap<String, String>
+                with(defaultSharedPreferences.edit()) {
+                    val gson = Gson()
+                    val json = gson.toJson(env)
+                    putString("env", json)
+                    apply()
+                }
+            }
             if (intent.extras!!.getParcelable<App>("app") != null) {
-                app = intent.extras!!.getParcelable<App>("app")!!
+                val app = intent.extras!!.getParcelable<App>("app")!!
                 with(prefs.edit()) {
                     val gson = Gson()
                     val json= gson.toJson(app)
@@ -638,17 +630,47 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         Toast.makeText(this, content, Toast.LENGTH_LONG).show()
     }
 
+    fun getRandPassword(n: Int): String
+    {
+        val characterSet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+        val random = Random(System.nanoTime())
+        val password = StringBuilder()
+
+        for (i in 0 until n)
+        {
+            val rIndex = random.nextInt(characterSet.length)
+            password.append(characterSet[rIndex])
+        }
+
+        return password.toString()
+    }
+
     private fun handleUserInputState(state: UserInputRequiredState) {
         return when (state) {
             is LowStorageAcknowledgementRequired -> {
                 displayLowStorageDialog()
+            }
+            is UserFeedbackCheckRequired -> {
+                if (userFeedbackPrompter.viewShouldBeShown() && BuildConfig.ASK_FOR_FEEDBACK) {
+                    getUserFeedback()
+                }  else {
+                    viewModel.userFeedbackChecked()
+                }
+            }
+            is UserContributionCheckRequired -> {
+                if (contributionPrompter.viewShouldBeShown() && BuildConfig.ASK_FOR_CONTRIBUTION) {
+                    getUserContribution()
+                }  else {
+                    viewModel.userContributionChecked()
+                }
             }
             is FilesystemCredentialsRequired -> {
                 if (BuildConfig.USE_DEFAULT_CREDS) {
                     viewModel.submitFilesystemCredentials(
                         BuildConfig.DEFAULT_USERNAME,
                         BuildConfig.DEFAULT_SSH_PASSWORD,
-                        BuildConfig.DEFAULT_VNC_PASSWORD
+                        if (BuildConfig.USE_RANDOM_VNC_PASSWORD) getRandPassword(8) else BuildConfig.DEFAULT_VNC_PASSWORD
                     )
                 } else
                     getCredentials()
@@ -874,30 +896,70 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 .show()
     }
 
+    private fun getUserFeedback() {
+        val dialog = AlertDialog.Builder(this)
+        val dialogView = this.layoutInflater.inflate(R.layout.dia_place_holder, null)
+        dialog.setView(dialogView)
+        dialog.setCancelable(true)
+        customDialog = dialog.create()
+
+        customDialog!!.setOnCancelListener {
+            viewModel.userFeedbackChecked()
+        }
+        customDialog!!.show()
+
+        userFeedbackPrompter.showView(customDialog!!.findViewById(R.id.layout_user_prompt_insert))
+    }
+
+    fun userHasCompletedFeedback() {
+        customDialog!!.dismiss()
+        viewModel.userFeedbackChecked()
+    }
+
+    private fun getUserContribution() {
+        val dialog = AlertDialog.Builder(this)
+        val dialogView = this.layoutInflater.inflate(R.layout.dia_place_holder, null)
+        dialog.setView(dialogView)
+        dialog.setCancelable(true)
+        customDialog = dialog.create()
+
+        customDialog!!.setOnCancelListener {
+            viewModel.userContributionChecked()
+        }
+        customDialog!!.show()
+
+        contributionPrompter.showView(customDialog!!.findViewById(R.id.layout_user_prompt_insert))
+    }
+
+    fun userHasCompletedContribution() {
+        customDialog!!.dismiss()
+        viewModel.userContributionChecked()
+    }
+
     private fun getCredentials() {
         val dialog = AlertDialog.Builder(this)
         val dialogView = this.layoutInflater.inflate(R.layout.dia_app_credentials, null)
         dialog.setView(dialogView)
         dialog.setCancelable(true)
         dialog.setPositiveButton(R.string.button_continue, null)
-        val customDialog = dialog.create()
+        customDialog = dialog.create()
 
-        customDialog.setOnShowListener {
-            customDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val username = customDialog.find<TextInputEditText>(R.id.text_input_username).text.toString()
-                val password = customDialog.find<TextInputEditText>(R.id.text_input_password).text.toString()
-                val vncPassword = customDialog.find<TextInputEditText>(R.id.text_input_vnc_password).text.toString()
+        customDialog!!.setOnShowListener {
+            customDialog!!.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val username = customDialog!!.find<TextInputEditText>(R.id.text_input_username).text.toString()
+                val password = customDialog!!.find<TextInputEditText>(R.id.text_input_password).text.toString()
+                val vncPassword = customDialog!!.find<TextInputEditText>(R.id.text_input_vnc_password).text.toString()
 
                 if (validateCredentials(username, password, vncPassword)) {
-                    customDialog.dismiss()
+                    customDialog!!.dismiss()
                     viewModel.submitFilesystemCredentials(username, password, vncPassword)
                 }
             }
         }
-        customDialog.setOnCancelListener {
+        customDialog!!.setOnCancelListener {
             viewModel.handleUserInputCancelled()
         }
-        customDialog.show()
+        customDialog!!.show()
     }
 
     private fun displayLowStorageDialog() {

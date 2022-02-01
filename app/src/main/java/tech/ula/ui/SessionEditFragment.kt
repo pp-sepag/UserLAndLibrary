@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import kotlinx.android.synthetic.main.frag_filesystem_edit.*
 import kotlinx.android.synthetic.main.frag_session_edit.* // ktlint-disable no-wildcard-imports
+import tech.ula.BuildConfig
 import tech.ula.R
 import tech.ula.model.entities.Filesystem
 import tech.ula.model.entities.ServiceType
@@ -206,7 +207,7 @@ class SessionEditFragment : Fragment() {
 
     private fun getDefaultServicePort(selectedServiceType: ServiceType): Long {
         return when (selectedServiceType) {
-            ServiceType.Vnc -> 51
+            ServiceType.Vnc -> BuildConfig.VNC_DISPLAY.toLong()
             else -> 2022
         }
     }

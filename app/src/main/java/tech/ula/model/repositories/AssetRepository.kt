@@ -88,7 +88,14 @@ class AssetRepository(
     }
 
     private suspend fun fetchAssetList(assetType: String): List<Asset> = withContext(Dispatchers.IO) {
-        val downloadUrl = githubApiClient.getAssetsListDownloadUrl(assetType)
+        var downloadUrl = ""
+
+        if (defaultSharedPreferences.getBoolean("pref_custom_filesystem_enabled", BuildConfig.DEFAULT_CUSTOM_FILESYSTEM_ENABLED)) {
+            downloadUrl  = defaultSharedPreferences.getString("pref_filesystem", BuildConfig.DEFAULT_FILESYSTEM_URL)!!
+            downloadUrl  += "/${ulaFiles.getArchType()}-assets.txt"
+        } else {
+            downloadUrl = githubApiClient.getAssetsListDownloadUrl(assetType)
+        }
 
         val inputStream = httpStream.fromUrl(downloadUrl)
         val reader = BufferedReader(InputStreamReader(inputStream))

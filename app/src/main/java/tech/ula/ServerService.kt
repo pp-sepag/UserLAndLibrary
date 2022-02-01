@@ -173,7 +173,7 @@ class ServerService : Service(), CoroutineScope {
 
     private fun startVncClient(session: Session, packageName: String) {
         val bVncIntent = Intent(this, RemoteCanvasActivity::class.java)
-        bVncIntent.data = Uri.parse("vnc://127.0.0.1:5952/?VncUsername=${session.username}&VncPassword=${session.vncPassword}")
+        bVncIntent.data = Uri.parse("vnc://127.0.0.1:59${BuildConfig.VNC_DISPLAY}/?VncUsername=${session.username}&VncPassword=${session.vncPassword}")
         bVncIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val ulaFiles = UlaFiles(this, this.applicationInfo.nativeLibraryDir)
         bVncIntent.putExtra("command_dir", ulaFiles.intentsDir.absolutePath);

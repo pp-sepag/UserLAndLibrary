@@ -37,7 +37,9 @@ class AppsStartupFsm(
         val currentState = state.value!!
         return when (event) {
             is AppSelected -> currentState is WaitingForAppSelection
-            is CheckAppsFilesystemCredentials -> currentState is DatabaseEntriesFetched
+            is UserFeedbackChecked-> currentState is DatabaseEntriesFetched
+            is UserContributionChecked -> currentState is UserFeedbackCheckComplete
+            is CheckAppsFilesystemCredentials -> currentState is UserContributionCheckComplete
             is SubmitAppsFilesystemCredentials -> currentState is AppsFilesystemRequiresCredentials
             is CheckAppSessionServiceType -> currentState is AppsFilesystemHasCredentials
             is SubmitAppSessionServiceType -> currentState is AppRequiresServiceType
@@ -56,6 +58,8 @@ class AppsStartupFsm(
         }
         return@launch when (event) {
             is AppSelected -> fetchDatabaseEntries(event.app)
+            is UserFeedbackChecked -> state.postValue(UserFeedbackCheckComplete)
+            is UserContributionChecked -> state.postValue(UserContributionCheckComplete)
             is CheckAppsFilesystemCredentials -> checkAppsFilesystemCredentials(event.appsFilesystem)
             is SubmitAppsFilesystemCredentials -> {
                 setAppsFilesystemCredentials(event.filesystem, event.username, event.password, event.vncPassword)
@@ -168,6 +172,8 @@ object WaitingForAppSelection : AppsStartupState()
 object FetchingDatabaseEntries : AppsStartupState()
 data class DatabaseEntriesFetched(val appsFilesystem: Filesystem, val appSession: Session) : AppsStartupState()
 object DatabaseEntriesFetchFailed : AppsStartupState()
+object UserFeedbackCheckComplete : AppsStartupState()
+object UserContributionCheckComplete : AppsStartupState()
 object AppsFilesystemHasCredentials : AppsStartupState()
 data class AppsFilesystemRequiresCredentials(val appsFilesystem: Filesystem) : AppsStartupState()
 object AppHasServiceTypeSet : AppsStartupState()
@@ -180,6 +186,8 @@ data class AppDatabaseEntriesSynced(val app: App, val session: Session, val file
 
 sealed class AppsStartupEvent
 data class AppSelected(val app: App) : AppsStartupEvent()
+object UserFeedbackChecked : AppsStartupEvent()
+object UserContributionChecked : AppsStartupEvent()
 data class CheckAppsFilesystemCredentials(val appsFilesystem: Filesystem) : AppsStartupEvent()
 data class SubmitAppsFilesystemCredentials(val filesystem: Filesystem, val username: String, val password: String, val vncPassword: String) : AppsStartupEvent()
 data class CheckAppSessionServiceType(val appSession: Session) : AppsStartupEvent()
