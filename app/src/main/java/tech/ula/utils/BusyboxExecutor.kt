@@ -166,21 +166,23 @@ class BusyboxWrapper(private val ulaFiles: UlaFiles) {
 
     fun getProotEnv(filesystemDir: File, prootDebugLevel: String): HashMap<String, String> {
         // TODO This hack should be removed once there are no users on releases 2.5.14 - 2.6.1
-        handleHangingBindingDirectories(filesystemDir)
         val emulatedStorageBinding = "-b ${ulaFiles.emulatedUserDir.absolutePath}:/storage/internal"
         val externalStorageBinding = ulaFiles.sdCardUserDir?.run {
             "-b ${this.absolutePath}:/storage/sdcard"
         } ?: ""
+        val globalExternalStorageBinding = ulaFiles.globalSdCardDir?.run {
+            "-b ${ulaFiles.globalSdCardDir}:/sdcard"
+        } ?: ""
         val intentsBinding = "-b ${ulaFiles.intentsDir}:/Intents"
-        val bindings = "$emulatedStorageBinding $externalStorageBinding $intentsBinding"
+        val bindings = "$globalExternalStorageBinding $emulatedStorageBinding $externalStorageBinding $intentsBinding"
         return hashMapOf(
-                "LD_LIBRARY_PATH" to ulaFiles.supportDir.absolutePath,
-                "LIB_PATH" to ulaFiles.supportDir.absolutePath,
-                "ROOT_PATH" to ulaFiles.filesDir.absolutePath,
-                "ROOTFS_PATH" to filesystemDir.absolutePath,
-                "PROOT_DEBUG_LEVEL" to prootDebugLevel,
-                "EXTRA_BINDINGS" to bindings,
-                "OS_VERSION" to System.getProperty("os.version")!!
+            "LD_LIBRARY_PATH" to ulaFiles.supportDir.absolutePath,
+            "LIB_PATH" to ulaFiles.supportDir.absolutePath,
+            "ROOT_PATH" to ulaFiles.filesDir.absolutePath,
+            "ROOTFS_PATH" to filesystemDir.absolutePath,
+            "PROOT_DEBUG_LEVEL" to prootDebugLevel,
+            "EXTRA_BINDINGS" to bindings,
+            "OS_VERSION" to System.getProperty("os.version")!!
         )
     }
 
@@ -193,23 +195,4 @@ class BusyboxWrapper(private val ulaFiles: UlaFiles) {
         return execInProotFile.exists()
     }
 
-    // TODO this hack should be removed when no users are left using version 2.5.14 - 2.6.1
-    private fun handleHangingBindingDirectories(filesystemDir: File) {
-        // If users upgraded from a version 2.5.14 - 2.6.1, the storage directory will exist but
-        // with unusable permissions. It needs to be recreated.
-        val storageBindingDir = File(filesystemDir, "storage")
-        val storageBindingDirEmpty = storageBindingDir.listFiles()?.isEmpty() ?: true
-        if (storageBindingDir.exists() && storageBindingDir.isDirectory && storageBindingDirEmpty) {
-            storageBindingDir.delete()
-        }
-        storageBindingDir.mkdirs()
-
-        // If users upgraded from a version before 2.5.14, the old sdcard binding should be removed
-        // to increase clarity.
-        val sdCardBindingDir = File(filesystemDir, "sdcard")
-        val sdCardBindingDirEmpty = sdCardBindingDir.listFiles()?.isEmpty() ?: true
-        if (sdCardBindingDir.exists() && sdCardBindingDir.isDirectory && sdCardBindingDirEmpty) {
-            sdCardBindingDir.delete()
-        }
-    }
 }
