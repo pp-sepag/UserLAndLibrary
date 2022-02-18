@@ -12,6 +12,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.*
+import android.preference.PreferenceScreen
 import android.speech.SpeechRecognizer.isRecognitionAvailable
 import android.util.DisplayMetrics
 import android.view.*
@@ -29,6 +30,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.NavigationUI.setupWithNavController
+import androidx.preference.Preference
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
@@ -602,22 +604,12 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 2296) {
-            if (Environment.isExternalStorageManager()) {
-                with(defaultSharedPreferences.edit()) {
-                    putBoolean("granted_manage_external_permission", true)
-                    apply()
-                }
-            }
-            viewModel.permissionsHaveBeenGranted()
-        } else {
-            data?.let {
+        data?.let {
                 val session = viewModel.lastSelectedSession
                 val result = data.getStringExtra("run") ?: ""
                 if (session.serviceType == ServiceType.Xsdl && result.isNotEmpty()) {
                     startSession(session)
                 }
-            }
         }
     }
 
@@ -662,14 +654,14 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             is UserFeedbackCheckRequired -> {
                 if (userFeedbackPrompter.viewShouldBeShown() && BuildConfig.ASK_FOR_FEEDBACK) {
                     getUserFeedback()
-                } else {
+                }  else {
                     viewModel.userFeedbackChecked()
                 }
             }
             is UserContributionCheckRequired -> {
                 if (contributionPrompter.viewShouldBeShown() && BuildConfig.ASK_FOR_CONTRIBUTION) {
                     getUserContribution()
-                } else {
+                }  else {
                     viewModel.userContributionChecked()
                 }
             }
@@ -763,10 +755,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (PermissionHandler.permissionsWereGranted(requestCode, grantResults)) {
-            if (!PermissionHandler.manageExternalPermissionsHaveBeenRequested(this))
-                PermissionHandler.showPermissionsNecessaryDialog(this)
-            else
-                viewModel.permissionsHaveBeenGranted()
+            viewModel.permissionsHaveBeenGranted()
         } else {
             PermissionHandler.showPermissionsNecessaryDialog(this)
         }

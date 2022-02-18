@@ -243,8 +243,6 @@
     <!-- Permissions necessary alert -->
     <string name="alert_permissions_necessary_title">&appname; requires permissions!</string>
     <string name="alert_permissions_necessary_message">To continue, enable storage permissions to allow &appname; to download files and move them from external storage to app local storage.</string>
-    <string name="alert_manage_external_permissions_necessary_title">&appname; requests permissions!</string>
-    <string name="alert_manage_external_permissions_necessary_message">To further provide full sdcard, enable external storage permissions for &appname; this will allow directories and files to be moved into and out of &appname; more easily.</string>
     <string name="alert_permissions_necessary_cancel_button">Cancel</string>
 
     <!-- Network unavailable alert -->

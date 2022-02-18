@@ -2,7 +2,6 @@ package tech.ula.utils
 
 import android.content.Context
 import android.os.Build
-import android.os.Environment
 import android.system.Os
 import java.io.File
 import java.lang.NullPointerException
@@ -24,8 +23,6 @@ class UlaFiles(
     val sdCardUserDir: File? = if (sdCardScopedDir != null) {
         File(sdCardScopedDir, "storage")
     } else null
-
-    val globalSdCardDir: File? = Environment.getExternalStorageDirectory()
 
     val busybox = File(supportDir, "busybox")
     val proot = File(supportDir, "proot")
