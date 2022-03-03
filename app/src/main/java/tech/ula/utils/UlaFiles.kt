@@ -2,9 +2,9 @@ package tech.ula.utils
 
 import android.content.Context
 import android.os.Build
+import android.os.Environment
 import android.system.Os
 import java.io.File
-import java.lang.NullPointerException
 
 class UlaFiles(
     context: Context,
@@ -23,6 +23,14 @@ class UlaFiles(
     val sdCardUserDir: File? = if (sdCardScopedDir != null) {
         File(sdCardScopedDir, "storage")
     } else null
+
+    val sdcardDir: File? = Environment.getExternalStorageDirectory()
+    val documentsDir: File? = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+    val downloadDir: File? = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+    val musicDir: File? = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
+    val picturesDir: File? = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+    val videosDir: File? = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
+    val DCIMDir: File? = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
 
     val busybox = File(supportDir, "busybox")
     val proot = File(supportDir, "proot")

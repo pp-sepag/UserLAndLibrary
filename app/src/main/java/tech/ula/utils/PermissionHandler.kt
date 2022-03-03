@@ -42,7 +42,7 @@ class PermissionHandler {
                     .setTitle(R.string.alert_permissions_necessary_title)
                     .setPositiveButton(R.string.button_ok) { dialog, _ ->
                         activity.requestPermissions(arrayOf(
-                                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO),
+                                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
                                 permissionRequestCode)
                         dialog.dismiss()
                     }

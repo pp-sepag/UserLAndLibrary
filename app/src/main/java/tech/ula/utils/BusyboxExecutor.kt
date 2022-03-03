@@ -83,7 +83,7 @@ class BusyboxExecutor(
         val updatedCommand = busyboxWrapper.addBusyboxAndProot(command)
         val filesystemDir = File("${ulaFiles.filesDir.absolutePath}/$filesystemDirName")
 
-        env.putAll(busyboxWrapper.getProotEnv(filesystemDir, prootDebugLevel))
+        env.putAll(busyboxWrapper.getProotEnv(env, filesystemDir, prootDebugLevel))
 
         val processBuilder = ProcessBuilder(updatedCommand)
         processBuilder.directory(ulaFiles.filesDir)
@@ -164,15 +164,38 @@ class BusyboxWrapper(private val ulaFiles: UlaFiles) {
         return listOf(ulaFiles.busybox.absolutePath, "sh", "support/execInProot.sh") + command.split(" ")
     }
 
-    fun getProotEnv(filesystemDir: File, prootDebugLevel: String): HashMap<String, String> {
-        // TODO This hack should be removed once there are no users on releases 2.5.14 - 2.6.1
-        handleHangingBindingDirectories(filesystemDir)
+    fun getProotEnv(
+        env: HashMap<String, String> = hashMapOf(),
+        filesystemDir: File,
+        prootDebugLevel: String): HashMap<String, String> {
         val emulatedStorageBinding = "-b ${ulaFiles.emulatedUserDir.absolutePath}:/storage/internal"
         val externalStorageBinding = ulaFiles.sdCardUserDir?.run {
             "-b ${this.absolutePath}:/storage/sdcard"
         } ?: ""
+        val sdcardBinding = ulaFiles.sdcardDir?.run {
+            "-b ${this.absolutePath}:/sdcard"
+        } ?: ""
+        val documentsBinding = ulaFiles.documentsDir?.run {
+            "-b ${this.absolutePath}:/Documents"
+        } ?: ""
+        val downloadsBinding = ulaFiles.downloadDir?.run {
+            "-b ${this.absolutePath}:/Downloads"
+        } ?: ""
+        val musicBinding = ulaFiles.musicDir?.run {
+            "-b ${this.absolutePath}:/Music"
+        } ?: ""
+        val picturesBinding = ulaFiles.picturesDir?.run {
+            "-b ${this.absolutePath}:/Pictures"
+        } ?: ""
+        val videosBinding = ulaFiles.videosDir?.run {
+            "-b ${this.absolutePath}:/Videos"
+        } ?: ""
+        val DCIMBinding = ulaFiles.DCIMDir?.run {
+            "-b ${this.absolutePath}:/DCIM"
+        } ?: ""
+
         val intentsBinding = "-b ${ulaFiles.intentsDir}:/Intents"
-        val bindings = "$emulatedStorageBinding $externalStorageBinding $intentsBinding"
+        val bindings = "$emulatedStorageBinding $externalStorageBinding $sdcardBinding $documentsBinding $downloadsBinding $musicBinding $picturesBinding $videosBinding $DCIMBinding $intentsBinding"
         return hashMapOf(
                 "LD_LIBRARY_PATH" to ulaFiles.supportDir.absolutePath,
                 "LIB_PATH" to ulaFiles.supportDir.absolutePath,
@@ -191,25 +214,5 @@ class BusyboxWrapper(private val ulaFiles: UlaFiles) {
     fun executionScriptIsPresent(): Boolean {
         val execInProotFile = File(ulaFiles.supportDir, "execInProot.sh")
         return execInProotFile.exists()
-    }
-
-    // TODO this hack should be removed when no users are left using version 2.5.14 - 2.6.1
-    private fun handleHangingBindingDirectories(filesystemDir: File) {
-        // If users upgraded from a version 2.5.14 - 2.6.1, the storage directory will exist but
-        // with unusable permissions. It needs to be recreated.
-        val storageBindingDir = File(filesystemDir, "storage")
-        val storageBindingDirEmpty = storageBindingDir.listFiles()?.isEmpty() ?: true
-        if (storageBindingDir.exists() && storageBindingDir.isDirectory && storageBindingDirEmpty) {
-            storageBindingDir.delete()
-        }
-        storageBindingDir.mkdirs()
-
-        // If users upgraded from a version before 2.5.14, the old sdcard binding should be removed
-        // to increase clarity.
-        val sdCardBindingDir = File(filesystemDir, "sdcard")
-        val sdCardBindingDirEmpty = sdCardBindingDir.listFiles()?.isEmpty() ?: true
-        if (sdCardBindingDir.exists() && sdCardBindingDir.isDirectory && sdCardBindingDirEmpty) {
-            sdCardBindingDir.delete()
-        }
     }
 }
