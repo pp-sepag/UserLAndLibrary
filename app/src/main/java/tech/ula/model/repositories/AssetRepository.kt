@@ -149,8 +149,8 @@ class AssetRepository(
             url = defaultSharedPreferences.getString("pref_filesystem", BuildConfig.DEFAULT_FILESYSTEM_URL)!!
             url += "/${ulaFiles.getArchType()}-${filename}"
         } else {
-            val versionCode = githubApiClient.getLatestReleaseVersion(repo)
-            val url = githubApiClient.getAssetEndpoint(filename, repo)
+            versionCode = githubApiClient.getLatestReleaseVersion(repo)
+            url = githubApiClient.getAssetEndpoint(filename, repo)
         }
         val downloadMetadata = DownloadMetadata(filename, repo, versionCode, url)
         downloadRequirements.add(downloadMetadata)
@@ -184,7 +184,9 @@ class AssetRepository(
             // If the rootfs is not downloaded, network failures will still propagate.
             versionCode = githubApiClient.getLatestReleaseVersion(repo)
             url = githubApiClient.getAssetEndpoint(filename, repo)
-            urlMD5 = githubApiClient.getAssetEndpoint(filenameMD5, repo)
+            if (BuildConfig.CHECK_FILESYSTEM_MD5) {
+                urlMD5 = githubApiClient.getAssetEndpoint(filenameMD5, repo)
+            }
         }
         val downloadFsMetadata = DownloadMetadata(filename, repo, versionCode, url)
         if (BuildConfig.CHECK_FILESYSTEM_MD5) {

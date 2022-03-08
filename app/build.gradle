@@ -66,8 +66,8 @@ android {
         buildConfigField "String", "DEFAULT_APPS_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/test_sep/apps\""
         resValue "string", "default_apps_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/raw/test_sep/apps\""
         //this can be used to get the filesystem from a custom url
-        buildConfigField 'boolean', 'DEFAULT_CUSTOM_FILESYSTEM_ENABLED', 'true'
-        resValue "string", "default_custom_filesystem_enabled", "true"
+        buildConfigField 'boolean', 'DEFAULT_CUSTOM_FILESYSTEM_ENABLED', 'false'
+        resValue "string", "default_custom_filesystem_enabled", "false"
         //this is the default custom filesystem url
         buildConfigField "String", "DEFAULT_FILESYSTEM_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Debian/releases/download/v7.7.7\""
         resValue "string", "default_filesystem_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Debian/releases/download/v7.7.7\""
