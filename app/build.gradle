@@ -69,8 +69,8 @@ android {
         buildConfigField 'boolean', 'DEFAULT_CUSTOM_FILESYSTEM_ENABLED', 'false'
         resValue "string", "default_custom_filesystem_enabled", "false"
         //this is the default custom filesystem url
-        buildConfigField "String", "DEFAULT_FILESYSTEM_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Debian/releases/download/v7.7.7\""
-        resValue "string", "default_filesystem_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Debian/releases/download/v7.7.7\""
+        buildConfigField "String", "DEFAULT_FILESYSTEM_URL", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Debian/releases/download/v7.7.9\""
+        resValue "string", "default_filesystem_url", "\"https://github.com/CypherpunkArmory/UserLAnd-Assets-Debian/releases/download/v7.7.9\""
         //this can be used the hide the toolbar within bVNC
         buildConfigField 'boolean', 'DEFAULT_HIDE_VNC_TOOLBAR', 'false'
         resValue "string", "default_hide_vnc_toolbar", "false"
@@ -110,7 +110,7 @@ android {
         buildConfigField 'boolean', 'CHECK_FILESYSTEM_MD5', 'false'
 
         //this is the default github release for filesystems to use if not overwritten by a custom url
-        buildConfigField 'String', 'DEFAULT_RELEASE', "\"tags/v7.7.7\""
+        buildConfigField 'String', 'DEFAULT_RELEASE', "\"tags/v7.7.9\""
 
         // Ignore Sentry packages that cause lint failure
         lintOptions {
@@ -280,7 +280,7 @@ ext.architectures = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
 ext.libDir = "$project.projectDir/src/main/jniLibs"
 
 task downloadAssets(type: Download) {
-    def assetVersion = "v1.2.7"
+    def assetVersion = "v1.2.30"
     def baseUrl = "https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/releases/download/$assetVersion"
     for (arch in architectures) {
         src "$baseUrl/$arch-assets.zip"
