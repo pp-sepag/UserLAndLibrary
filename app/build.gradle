@@ -29,7 +29,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
 
-        buildConfigField "String", "REPO_NAME", "\"FoxBox\""
+        buildConfigField "String", "REPO_NAME", "\"GIMP\""
 
         buildConfigField 'String', 'VERSION_CODE', '\"' + rootProject.ext.appVersionCode + '\"'
         buildConfigField 'String', 'VERSION_NAME', '\"' + rootProject.ext.appVersionName + '\"'
@@ -50,15 +50,15 @@ android {
         buildConfigField 'boolean', 'USE_DEFAULT_SERVICE_TYPE', 'true'
         buildConfigField "String", "DEFAULT_LAUNCH_TYPE", "\"vnc\""
 
-        buildConfigField "String", "VNC_DISPLAY", "\"52\""
+        buildConfigField "String", "VNC_DISPLAY", "\"55\""
 
         //default settings for associated preferences
         //this can be used to hide bottom navigation
         buildConfigField 'boolean', 'DEFAULT_HIDE_SESSIONS_FILESYSTEMS', 'true'
         resValue "string", "default_hide_sessions_filesystems", "true"
         //this can be used to hide distributions from being shown in the apps list
-        buildConfigField 'boolean', 'DEFAULT_HIDE_DISTRIBUTIONS', 'true'
-        resValue "string", "default_hide_distributions", "true"
+        buildConfigField 'boolean', 'DEFAULT_HIDE_DISTRIBUTIONS', 'false'
+        resValue "string", "default_hide_distributions", "false"
         //this can be used to get apps from a custom url
         buildConfigField 'boolean', 'DEFAULT_CUSTOM_APPS_ENABLED', 'false'
         resValue "string", "default_custom_apps_enabled", "false"
@@ -78,8 +78,8 @@ android {
         buildConfigField 'boolean', 'DEFAULT_HIDE_VNC_EXTRA_KEYS', 'false'
         resValue "string", "default_hide_vnc_extra_keys", "false"
         //this is the default input mode in bVNC
-        buildConfigField "String", 'DEFAULT_VNC_INPUT_MODE', "\"Direct, Swipe Pan\""
-        resValue "string", "default_vnc_input_mode", "\"Direct, Swipe Pan\""
+        buildConfigField "String", 'DEFAULT_VNC_INPUT_MODE', "\"Direct, Hold Pan\""
+        resValue "string", "default_vnc_input_mode", "\"Direct, Hold Pan\""
         //this is the default hostname to get written to the hosts and hostname file
         buildConfigField "String", "DEFAULT_HOSTNAME", "\"android-device\""
         resValue "string", "pref_hostname_default", "\"android-device\""
@@ -96,7 +96,7 @@ android {
         //these can be used to turn off certain prompts we present to users
         buildConfigField 'boolean', 'HAS_LOGGER', 'false'
         buildConfigField 'boolean', 'ASK_FOR_FEEDBACK', 'true'
-        buildConfigField 'boolean', 'ASK_FOR_CONTRIBUTION', 'true'
+        buildConfigField 'boolean', 'ASK_FOR_CONTRIBUTION', 'false'
 
         //these can be used to remove items from the setting menu
         resValue "string", "help_enabled", "false"
@@ -110,7 +110,7 @@ android {
         buildConfigField 'boolean', 'CHECK_FILESYSTEM_MD5', 'false'
 
         //this is the default github release for filesystems to use if not overwritten by a custom url
-        buildConfigField 'String', 'DEFAULT_RELEASE', "\"tags/v7.7.9\""
+        buildConfigField 'String', 'DEFAULT_RELEASE', "\"latest\""
 
         // Ignore Sentry packages that cause lint failure
         lintOptions {
@@ -280,7 +280,7 @@ ext.architectures = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
 ext.libDir = "$project.projectDir/src/main/jniLibs"
 
 task downloadAssets(type: Download) {
-    def assetVersion = "v1.2.30"
+    def assetVersion = "v1.2.7"
     def baseUrl = "https://github.com/CypherpunkArmory/UserLAnd-Assets-Support/releases/download/$assetVersion"
     for (arch in architectures) {
         src "$baseUrl/$arch-assets.zip"
