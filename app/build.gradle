@@ -50,7 +50,7 @@ android {
         buildConfigField 'boolean', 'USE_DEFAULT_SERVICE_TYPE', 'true'
         buildConfigField "String", "DEFAULT_LAUNCH_TYPE", "\"vnc\""
 
-        buildConfigField "String", "VNC_DISPLAY", "\"55\""
+        buildConfigField "String", "VNC_DISPLAY", "\"52\""
 
         //default settings for associated preferences
         //this can be used to hide bottom navigation
