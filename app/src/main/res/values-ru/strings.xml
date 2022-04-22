@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE resources [
-    <!ENTITY appname "GIMP">
-    ]>
-
 <resources>
-    <string name="app_name">&appname;</string>
-    <string name="welcome">Добро пожаловать в &appname;!</string>
+    <string name="welcome">Добро пожаловать в %1$s!</string>
     <string name="permission_request_code">1000</string>
 
     <!-- Labels -->
@@ -51,7 +46,7 @@
     <string name="error_vnc_password_invalid">Пароль VNC содержит недопустимые знаки</string>
 
     <!-- Illegal State Dialog -->
-    <string name="illegal_state_title">Приложение &appname; перешло в некорректное состояние!</string>
+    <string name="illegal_state_title">Приложение %1$s перешло в некорректное состояние!</string>
 
     <string name="illegal_state_transition">Переход в некорректное состояние: %1$s</string>
 
@@ -85,8 +80,7 @@
     <!-- Notification strings -->
     <string name="services_notification_channel_name">Службы</string>
     <string name="services_notification_channel_description">Постоянные службы</string>
-    <string name="service_notification_title">&appname;</string>
-    <string name="service_notification_description">&appname; работает в фоновом режиме.</string>
+    <string name="service_notification_description">%1$s работает в фоновом режиме.</string>
 
     <!-- Progress bar messages -->
     <string name="progress_start_step">Подготовка&#8230;</string>
@@ -104,7 +98,7 @@
     <!-- Preferences -->
     <string name="pref_app_category">Настройки приложения</string>
     <string name="pref_default_landing_page_title">Начальная страница</string>
-    <string name="pref_default_landing_page_message">Выберите страницу, которую бы хотели видеть после запуска &appname;.</string>
+    <string name="pref_default_landing_page_message">Выберите страницу, которую бы хотели видеть после запуска %1$s.</string>
     <string name="pref_proot_category">Настройки PRoot</string>
     <string name="pref_proot_debugging_enabled_title">Журнал отладки PRoot включён</string>
     <string name="pref_proot_debugging_enabled_summary">Нужно только в случае неполадок. Журнал хранится в\n/mnt/sdcard/PRoot_Debug_Log</string>
@@ -152,8 +146,8 @@
     <string name="alert_need_client_app_message">Для данного действия необходим клиент SSH или VNC, который у вас не обнаружен. Установите поддерживаемый клиент, чтобы продожить.</string>
 
     <!-- Permissions necessary alert -->
-    <string name="alert_permissions_necessary_title">&appname; необходимы разрешения!</string>
-    <string name="alert_permissions_necessary_message">Чтобы продолжить, разрешите &appname; доступ к памяти телефона (необходимо для скачивания файлов и их перемещения в локальное хранилище).</string>
+    <string name="alert_permissions_necessary_title">%1$s необходимы разрешения!</string>
+    <string name="alert_permissions_necessary_message">Чтобы продолжить, разрешите %1$s доступ к памяти телефона (необходимо для скачивания файлов и их перемещения в локальное хранилище).</string>
     <string name="alert_permissions_necessary_cancel_button">Отмена</string>
 
     <!-- Network unavailable alert -->
@@ -169,7 +163,7 @@
     <!-- Toasts -->
     <string name="session_unique_name_required">Сессии должны иметь различные имена!</string>
     <string name="filesystem_unique_name_required">Файловые системы должны иметь различные имена!</string>
-    <string name="single_session_supported">На текущий момент &appname; поддерживает лишь единственную активную сессию!</string>
+    <string name="single_session_supported">На текущий момент %1$s поддерживает лишь единственную активную сессию!</string>
     <string name="debug_log_deleted">Журнал отладки удалён или не существует!</string>
 
     <!-- Content descriptions -->

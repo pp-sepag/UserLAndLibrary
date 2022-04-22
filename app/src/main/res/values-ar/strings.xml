@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE resources [
-    <!ENTITY appname "GIMP">
-    ]>
-
 <resources>                                                         <!-- Translators, pay attention to these notes! -->
-    <string name="app_name">&appname;</string>
-    <string name="welcome">مرحبا بكم في &appname;!</string>
+    <string name="welcome">مرحبا بكم في %1$s!</string>
     <string name="permission_request_code">1000</string>
   
     <!-- Labels -->
@@ -83,7 +78,7 @@
   
     <!-- Illegal State Dialog -->
     <string name="illegal_state_github_message">%1$s \n سيتم الآن تعطل التطبيق بحيث يمكننا استلام سجل أخطاء. لا تتردد أيضًا في إخبارنا على جيثب! نحن نعمل على حل هذه القضايا.</string>
-    <string name="illegal_state_title">لقد دخل &appname; حالة غير قانونية!</string>
+    <string name="illegal_state_title">لقد دخل %1$s حالة غير قانونية!</string>
     <string name="illegal_state_transition">انتقال الحالة السيئة:%1$s</string>
     <string name="illegal_state_too_many_selections_when_permissions_granted">تم اختيار كل من الجلسة والتطبيق عند منح الأذونات.</string>
     <string name="illegal_state_no_selections_when_permissions_granted">لم يتم تحديد جلسة أو تطبيق عند منح الأذونات.</string>
@@ -125,8 +120,7 @@
     <!--string name="services_notification_channel_id">&appname; خدمات</string-->
     <string name="services_notification_channel_name">خدمات</string>
     <string name="services_notification_channel_description">الخدمات المستمرة</string>
-    <string name="service_notification_title">&appname;</string>
-    <string name="service_notification_description">يدير &appname; خدمة خلفية.</string>
+    <string name="service_notification_description">يدير %1$s خدمة خلفية.</string>
 
     <!-- Progress bar messages -->
     <string name="progress_start_step">الحصول على الأمور جاهزة بالنسبة لك &#8230;</string>
@@ -202,8 +196,8 @@
     <string name="alert_need_client_app_message">ستحتاج إلى عميل SSH أو VNC أو XSDL لإكمال هذا الإجراء ، ولكن يبدو أنك لم تقم بتثبيت متجر Play. \n \n الرجاء تثبيت تطبيق العميل (SSH / VNC / XSDL) المقترن بنوع العميل للجلسة للمتابعة.</string>
 
     <!-- Permissions necessary alert -->
-    <string name="alert_permissions_necessary_title">&appname; يتطلب أذونات!</string>
-    <string name="alert_permissions_necessary_message">للمتابعة ، يمكنك تمكين أذونات التخزين للسماح لـ &appname; بتنزيل الملفات ونقلها من وحدة التخزين الخارجية إلى تطبيق التخزين المحلي.</string>
+    <string name="alert_permissions_necessary_title">%1$s يتطلب أذونات!</string>
+    <string name="alert_permissions_necessary_message">للمتابعة ، يمكنك تمكين أذونات التخزين للسماح لـ %1$s بتنزيل الملفات ونقلها من وحدة التخزين الخارجية إلى تطبيق التخزين المحلي.</string>
     <string name="alert_permissions_necessary_cancel_button">الغاء</string>
 
     <!-- Network unavailable alert -->
@@ -211,7 +205,7 @@
     
     <!-- Storage capacity low alert -->
     <string name="alert_storage_low_title">انخفاض سعة التخزين</string>
-    <string name="alert_storage_low_message">لضمان ان تكون وظائف نظام الملفات سلسلة على &appname;. تاكد من ان يكون متوفر 1GB على الاقل من مساحة التخزين</string>
+    <string name="alert_storage_low_message">لضمان ان تكون وظائف نظام الملفات سلسلة على %1$s. تاكد من ان يكون متوفر 1GB على الاقل من مساحة التخزين</string>
 
     <!-- Wifi alert -->
     <string name="alert_wifi_disabled_title">لا واي فاي!</string>
@@ -223,7 +217,7 @@
     <!-- Toasts -->
     <string name="session_unique_name_required">الجلسات تتطلب اسمًا فريدًا!</string>
     <string name="filesystem_unique_name_required">تتطلب أنظمة الملفات اسمًا فريدًا!</string>
-    <string name="single_session_supported">&appname; يدعم حاليا فقط جلسة واحدة نشطة!</string>
+    <string name="single_session_supported">%1$s يدعم حاليا فقط جلسة واحدة نشطة!</string>
     <string name="debug_log_deleted">سجل تصحيح حذف أو غير موجود!</string>
     <string name="debug_log_export_success">تم تصدير سجل التصحيح بنجاح!</string>
     <string name="debug_log_export_failure">فشل تصدير سجل التصحيح!</string>
@@ -244,26 +238,17 @@
     <string name="no_backup_selected">لم يتم تحديد نظام استيراد الملفات</string>
 
     <!-- Review request -->
-    <string name="review_is_user_enjoying">تتمتع &appname;؟</string>
+    <string name="review_is_user_enjoying">تتمتع %1$s؟</string>
     <string name="review_ask_for_rating">ماذا عن التقييم على متجر Play ، إذن؟</string>
     <string name="review_ask_for_feedback">هل تمانع في إعطائنا بعض التعليقات على Github؟</string>
 
     <!-- Error collection opt-in -->
     <string name="opt_in_preference">الاشتراك في الإبلاغ عن الأخطاء</string>
-    <string name="opt_in_preference_summary">اسمح لنا بجمع تقارير الأخطاء لتحسين &appname;.</string>
-    <string name="opt_in_help_prompt">هل ترغب في مساعدة &appname; لتصبح أكثر استقرارًا عن طريق إرسال تقارير الخطأ إلينا؟</string>
+    <string name="opt_in_preference_summary">اسمح لنا بجمع تقارير الأخطاء لتحسين %1$s.</string>
+    <string name="opt_in_help_prompt">هل ترغب في مساعدة %1$s لتصبح أكثر استقرارًا عن طريق إرسال تقارير الخطأ إلينا؟</string>
     <string name="opt_in_error_collection_prompt">الاشتراك في خدمة جمع سجل الخطأ؟</string>
     <string name="opt_in_secondary_prompt">هل أنت واثق؟  يمكنك تغيير هذا الإعداد لاحقًا في صفحة الإعدادات.</string>
     <string name="opt_in_secondary_pos_btn">حسنًا ، سأشارك.</string>
-
-    <!-- Q Warning -->
-    <string name="q_warning_title">لقد تغير الوصول إلى الملفات!</string>
-    <string name="q_warning_message">
-        في الاصدار التالي من Android باصدار Q ستكون هناك تعديلات على حماية النظام والتي توثر على عمل تطبيقنا &appname;.
-        وكيف يمكن لمستخدمينا الحصول على الملفات من داخل وخارج نظام الملفات &appname;.
-        فان استخدام دليل sdcard/ لن يتصرف كما هو عليه الحال قبل اصدار Q.
-        يرجى زيارة ويكيبيديا المتوفرة لدينا على GitHub لمعرفة المزيد.
-    </string>
 
     <!-- Advanced options -->
     <string name="desc_import_backups_should_use_same_settings">املأ نفسه: \n\n\u2022 اسم المستخدم \n\u2022 كلمة المرور \n\u2022 كلمة مرور VNC \n\u2022 التوزيع \n\n كنسخة احتياطية لضمان الأداء الوظيفي السلس</string>

@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE resources [
-    <!ENTITY appname "GIMP">
-    ]>
-
 <resources>
-    <string name="app_name">&appname;</string>
-    <string name="welcome">به یوزرلند خوش آمدید!</string>
+    <string name="welcome">به %1$s خوش آمدید!</string>
     <string name="permission_request_code">1000</string>
 
     <!-- Labels -->
@@ -58,8 +53,7 @@
     <!-- Notification strings -->
     <string name="services_notification_channel_name">خدمات</string>
     <string name="services_notification_channel_description">خدمات مداوم</string>
-    <string name="service_notification_title">یوزرلند</string>
-    <string name="service_notification_description">یوزرلند در حال اجرای خدمتی در پس‌زمینه است.</string>
+    <string name="service_notification_description">%1$s در حال اجرای خدمتی در پس‌زمینه است.</string>
 
     <!-- Progress bar messages -->
     <string name="progress_fetching_asset_lists">درحال دریافت فهرست اجزا&#8230;</string>
@@ -110,8 +104,8 @@
     <string name="alert_need_client_app_message">برای اجام این کار به یک کارخواه SSH یا VNC نیزا دارد، اما به نظر می‌رسد پلی‌استور نصب نیست. لطفا برای ادامه، یک برنامه کارخواه SSH یا VNC نصب کنید.</string>
 
     <!-- Permissions necessary alert -->
-    <string name="alert_permissions_necessary_title">یوزرلند نیاز به دسترسی دارد!</string>
-    <string name="alert_permissions_necessary_message">برای ادامه و برای اینکه یوزرلند بتواند پرونده‌ها را بارگیری و سپس آن‌ها را از حافظه خارجی به حافظه محلی کاره جابجا کند، بایستی اجازه دسترسی به حافظه را فعال کنید.</string>
+    <string name="alert_permissions_necessary_title">%1$s نیاز به دسترسی دارد!</string>
+    <string name="alert_permissions_necessary_message">برای ادامه و برای اینکه %1$s بتواند پرونده‌ها را بارگیری و سپس آن‌ها را از حافظه خارجی به حافظه محلی کاره جابجا کند، بایستی اجازه دسترسی به حافظه را فعال کنید.</string>
     <string name="alert_permissions_necessary_cancel_button">لغو</string>
 
     <!-- Network unavailable alert -->
@@ -126,8 +120,8 @@
 
     <!-- Toasts -->
     <string name="session_unique_name_required">نام نشست‌ها باید یک‌تا باشد!</string>
-    <string name="filesystem_unique_name_required">نام فایل‌سیستم‌ها باید یک‌تا باشد!</string>
-    <string name="single_session_supported">یوزرلند در حال حاضر تنها از یک نشست فعال پشتیبانی می‌کند!</string>
+    <string name="filesystem_unique_name_required">نام فایل‌سیستم‌ها باید یک‌تا باشد!</string>%1$s
+    <string name="single_session_supported">%1$s در حال حاضر تنها از یک نشست فعال پشتیبانی می‌کند!</string>
     <string name="debug_log_deleted">لاگ دیباگ یا پاک شده و یا وجود ندارد!</string>
 
     <!-- Content descriptions -->

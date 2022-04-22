@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE resources [
-    <!ENTITY appname "GIMP">
-    ]>
-
 <resources>
-    <string name="app_name">&appname;</string>
-    <string name="welcome">Bienvenue à &appname; !</string>
+    <string name="welcome">Bienvenue à %1$s !</string>
     <string name="permission_request_code">1000</string>
 
     <!-- Labels -->
@@ -58,8 +53,7 @@
     <!-- Notification strings -->
     <string name="services_notification_channel_name">Services</string>
     <string name="services_notification_channel_description">Services persistants</string>
-    <string name="service_notification_title">&appname;</string>
-    <string name="service_notification_description">&appname; exécute un service en arrière-plan.</string>
+    <string name="service_notification_description">%1$s exécute un service en arrière-plan.</string>
 
     <!-- Progress bar messages -->
     <string name="progress_fetching_asset_lists">Récupération des listes de contenus&#8230;</string>
@@ -110,8 +104,8 @@
     <string name="alert_need_client_app_message">ous aurez besoin d’un client SSH ou VNC pour terminer, mais Google Play n’est sans doute pas installé sur votre mobile. Veuillez installer une application client SSH ou VNC pour poursuivre.</string>
 
     <!-- Permissions necessary alert -->
-    <string name="alert_permissions_necessary_title">&appname; a besoin de permissions !</string>
-    <string name="alert_permissions_necessary_message">Pour continuer, activer les permissions de stockage pour que &appname; puisse télécharger des fichiers et les déplacer du stockage externe au stockage local de l’appli.</string>
+    <string name="alert_permissions_necessary_title">%1$s a besoin de permissions !</string>
+    <string name="alert_permissions_necessary_message">Pour continuer, activer les permissions de stockage pour que %1$s puisse télécharger des fichiers et les déplacer du stockage externe au stockage local de l’appli.</string>
     <string name="alert_permissions_necessary_cancel_button">Annuler</string>
 
     <!-- Network unavailable alert -->
@@ -127,7 +121,7 @@
     <!-- Toasts -->
     <string name="session_unique_name_required">Les Sessions ont besoin d\'un nom unique !</string>
     <string name="filesystem_unique_name_required">Les Systèmes de fichiers ont besoin d\'un nom unique !</string>
-    <string name="single_session_supported">Actuellement &appname; ne prend en charge qu’une seule session active !</string>
+    <string name="single_session_supported">Actuellement %1$s ne prend en charge qu’une seule session active !</string>
     <string name="debug_log_deleted">Le journal de débogage a été supprimé ou n’existe pas !</string>
 
     <!-- Content descriptions -->

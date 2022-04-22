@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE resources [
-    <!ENTITY appname "GIMP">
-    ]>
-
-<resources>                                                         <!-- Translators, pay attention to these notes! --> 
-    <string name="app_name">&appname;</string>
-    <string name="welcome">&appname;\'e Hoş Geldiniz!</string>
+<resources>                                                         <!-- Translators, pay attention to these notes! -->
+    <string name="welcome">%1$s\'e Hoş Geldiniz!</string>
     <string name="permission_request_code">1000</string>
 
     <!-- Labels -->
@@ -86,7 +81,7 @@
         %1$s \nBu sorunları gidermeye uğraşıyoruz. Yardımcı olmak isterseniz bize
         GitHub üzerinden bu hata hakkında bilgi verebilirsiniz!
     </string>
-    <string name="illegal_state_title">&appname; yasak bir duruma girdi!</string>
+    <string name="illegal_state_title">%1$s yasak bir duruma girdi!</string>
 
     <string name="illegal_state_transition">Kötü durum geçişi: %1$s</string>
 
@@ -129,8 +124,7 @@
     <!-- Notification strings -->
     <string name="services_notification_channel_name">Servisler</string>
     <string name="services_notification_channel_description">Devamlı servisler</string>
-    <string name="service_notification_title">&appname;</string>
-    <string name="service_notification_description">&appname; bir arka plan servisi çalıştırıyor.</string>
+    <string name="service_notification_description">%1$s bir arka plan servisi çalıştırıyor.</string>
 
     <!-- Progress bar messages -->
     <string name="progress_start_step">Sizin için her şeyi hazırlıyoruz&#8230;</string>
@@ -209,8 +203,8 @@
     <string name="alert_need_client_app_message">Bu işlemi gerçekleştirmek için SSH, VNC veya XSDL istemcilerine ihtiyacınız var, ancak Play Store sizde yüklü değilmiş gibi gözüküyor. \n\nDevam etmek için lütfen oturumun istemci tipiyle uyuşan bir istemci uygulaması (SSH/VNC/XSDL) yükleyin.</string>
 
     <!-- Permissions necessary alert -->
-    <string name="alert_permissions_necessary_title">&appname;\'in izinlere ihtiyacı var!</string>
-    <string name="alert_permissions_necessary_message">Devam etmek için &appname;\'in depolama alanını kullanabilmesi, dosyaları indirebilmesi ve dosyaları harici depolama ile kendi yerel uygulama klasörü arasında taşıyabilmesi için izinler gerekiyor.</string>
+    <string name="alert_permissions_necessary_title">%1$s\'in izinlere ihtiyacı var!</string>
+    <string name="alert_permissions_necessary_message">Devam etmek için %1$s\'in depolama alanını kullanabilmesi, dosyaları indirebilmesi ve dosyaları harici depolama ile kendi yerel uygulama klasörü arasında taşıyabilmesi için izinler gerekiyor.</string>
     <string name="alert_permissions_necessary_cancel_button">İptal</string>
 
     <!-- Network unavailable alert -->
@@ -218,7 +212,7 @@
 
     <!-- Storage capacity low alert -->
     <string name="alert_storage_low_title">Depolama alanı doluyor</string>
-    <string name="alert_storage_low_message">&appname;\'deki bir dosya sistemini en akıcı biçimde kullanabilmek için en az 1 GB boş alanınızın olduğundan emin olun.</string>
+    <string name="alert_storage_low_message">%1$s\'deki bir dosya sistemini en akıcı biçimde kullanabilmek için en az 1 GB boş alanınızın olduğundan emin olun.</string>
 
     <!-- Wifi alert -->
     <string name="alert_wifi_disabled_title">Wifi yok!</string>
@@ -230,7 +224,7 @@
     <!-- Toasts -->
     <string name="session_unique_name_required">Oturumlar özel bir isim gerektirir!</string>
     <string name="filesystem_unique_name_required">Dosya sistemleri özel bir isim gerektirir!</string>
-    <string name="single_session_supported">&appname; şu anda sadece tek bir aktif oturumu destekliyor!</string>
+    <string name="single_session_supported">%1$s şu anda sadece tek bir aktif oturumu destekliyor!</string>
     <string name="debug_log_export_success">Hata ayıklama kaydı başarıyla dışa aktarıldı!</string>
     <string name="debug_log_export_failure">Hata ayıklama kaydı başarısız oldu!</string>
     <string name="debug_log_deleted">Hata ayıklama kaydı silindi!</string>
@@ -251,26 +245,17 @@
     <string name="no_backup_selected">Dosya sistemi içe aktarımı seçilmedi</string>
     
     <!-- Review request -->
-    <string name="review_is_user_enjoying">&appname;\'de eğleniyor musunuz?</string>
+    <string name="review_is_user_enjoying">%1$s\'de eğleniyor musunuz?</string>
     <string name="review_ask_for_rating">O zaman Play Store\'da bize oy vermeye ne dersiniz?</string>
     <string name="review_ask_for_feedback">Sakıncası yoksa bize GitHub\'da geri bildirim verir misiniz?</string>
 
     <!-- Error collection opt-in -->
     <string name="opt_in_preference">Hata raporlama sistemine dahil olun</string>
-    <string name="opt_in_preference_summary">Hata raporlarını toplayıp &appname;\'i geliştirmemize yardımcı olun.</string>
-    <string name="opt_in_help_prompt">Bize hata raporlarınızı göndererek &appname;\'in daha stabil olmasına yardımcı olmak ister misiniz?</string>
+    <string name="opt_in_preference_summary">Hata raporlarını toplayıp %1$s\'i geliştirmemize yardımcı olun.</string>
+    <string name="opt_in_help_prompt">Bize hata raporlarınızı göndererek %1$s\'in daha stabil olmasına yardımcı olmak ister misiniz?</string>
     <string name="opt_in_error_collection_prompt">Hata raporlama sistemine dahil olunsun mu?</string>
     <string name="opt_in_secondary_prompt">Emin misiniz? Daha sonra bu ayarı ayarlar penceresinden değiştirebilirsiniz.</string>
     <string name="opt_in_secondary_pos_btn">Tamam, dahil olacağım.</string>
-
-    <!-- Q Warning -->
-    <string name="q_warning_title">Dosya erişimi değişti!</string>
-    <string name="q_warning_message">
-        Android\'in sonraki sürümü, Q, uygulamamızı ve kullanıcılarımızın nasıl &appname; dosya
-        sistemlerine erişeceklerini etkileyen güncellemeler getiriyor. Bu değişikliklere uyum
-        sağlamak durumunda olduğumuz için, \"/sdcard\"a ve dışına dosya aktarımı artık eskisi
-        gibi işlemeyecek. Daha fazla bilgi için GitHub\'daki wiki\'mizi ziyaret edebilirsiniz.
-    </string>
 
     <!-- Advanced options -->
     <string name="desc_import_backups_should_use_same_settings">Fill out the same: \n\n\u2022 username \n\u2022 password \n\u2022 VNC password \n\u2022 distribution \n\n as the backup to ensure smooth functionality</string>

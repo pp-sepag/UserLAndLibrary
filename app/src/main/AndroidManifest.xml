@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     android:installLocation="internalOnly"
     xmlns:tools="http://schemas.android.com/tools"
-    package="tech.ula">
+    package="tech.ula.library">
 
     <uses-permission tools:node="removeAll"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
