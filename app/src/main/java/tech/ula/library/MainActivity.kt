@@ -35,10 +35,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tech.ula.library.R
-import tech.ula.library.model.entities.App
-import tech.ula.library.model.entities.ServiceType
-import tech.ula.library.model.entities.Session
 import tech.ula.library.model.remote.GithubApiClient
 import tech.ula.library.model.repositories.AssetRepository
 import tech.ula.library.model.repositories.DownloadMetadata
@@ -54,9 +52,9 @@ import java.lang.reflect.Method
 import java.net.NetworkInterface
 import java.util.*
 import tech.ula.customlibrary.BuildConfig
+import tech.ula.library.model.entities.*
 import tech.ula.library.model.state.SessionStartupFsm
 import tech.ula.library.utils.*
-import tech.ula.library.model.entities.toServiceType
 
 class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, AppsListFragment.AppSelection, FilesystemListFragment.FilesystemListProgress {
 
@@ -454,12 +452,22 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     override fun appHasBeenSelected(app: App, autoStart: Boolean) {
         getNetInfo()
         getCameraInfo()
+
+        val prefs = getSharedPreferences("apps", Context.MODE_PRIVATE)
+        val askConnectType = prefs.getBoolean("askConnectType", false)
+        if (askConnectType) {
+            with(prefs.edit()) {
+                putBoolean("askConnectType", false)
+                apply()
+            }
+        }
+
         if (!PermissionHandler.permissionsAreGranted(this)) {
             PermissionHandler.showPermissionsNecessaryDialog(this)
-            viewModel.waitForPermissions(appToContinue = app)
+            viewModel.waitForPermissions(appToContinue = app, askConnectType = askConnectType)
             return
         }
-        viewModel.submitAppSelection(app, autoStart)
+        viewModel.submitAppSelection(app, autoStart, askConnectType)
     }
 
     override fun sessionHasBeenSelected(session: Session) {
@@ -467,7 +475,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         getCameraInfo()
         if (!PermissionHandler.permissionsAreGranted(this)) {
             PermissionHandler.showPermissionsNecessaryDialog(this)
-            viewModel.waitForPermissions(sessionToContinue = session)
+            viewModel.waitForPermissions(sessionToContinue = session, askConnectType = false)
             return
         }
         viewModel.submitSessionSelection(session)
@@ -652,7 +660,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 if (BuildConfig.USE_DEFAULT_CREDS) {
                     viewModel.submitFilesystemCredentials(
                         BuildConfig.DEFAULT_USERNAME,
-                        BuildConfig.DEFAULT_SSH_PASSWORD,
+                        if (BuildConfig.USE_RANDOM_SSH_PASSWORD) getRandPassword(8) else BuildConfig.DEFAULT_SSH_PASSWORD,
                         if (BuildConfig.USE_RANDOM_VNC_PASSWORD) getRandPassword(8) else BuildConfig.DEFAULT_VNC_PASSWORD
                     )
                 } else
@@ -967,15 +975,6 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         customDialog.setOnShowListener {
             val sshTypePreference = customDialog.find<RadioButton>(R.id.ssh_radio_button)
             val vncTypePreference = customDialog.find<RadioButton>(R.id.vnc_radio_button)
-            val xsdlTypePreference = customDialog.find<RadioButton>(R.id.xsdl_radio_button)
-
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) {
-                xsdlTypePreference.isEnabled = false
-                xsdlTypePreference.alpha = 0.5f
-
-                val xsdlSupportedText = customDialog.findViewById<TextView>(R.id.text_xsdl_version_supported_description)
-                xsdlSupportedText.visibility = View.VISIBLE
-            }
 
             if (!viewModel.lastSelectedApp.supportsCli) {
                 sshTypePreference.isEnabled = false
@@ -987,7 +986,6 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 val selectedType = when {
                     sshTypePreference.isChecked -> ServiceType.Ssh
                     vncTypePreference.isChecked -> ServiceType.Vnc
-                    xsdlTypePreference.isChecked -> ServiceType.Xsdl
                     else -> ServiceType.Unselected
                 }
                 viewModel.submitAppServiceType(selectedType)

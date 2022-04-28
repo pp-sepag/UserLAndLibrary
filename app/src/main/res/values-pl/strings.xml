@@ -170,8 +170,8 @@
     <string name="support_tightvnc">VNC - TightVNC</string>
 
     <!-- Client Types -->
-    <string name="client_ssh">SSH</string>
-    <string name="client_vnc">VNC</string>
+    <string name="client_ssh">Terminal</string>
+    <string name="client_vnc">Graphical</string>
     <string name="client_xsdl">XSDL</string>
 
     <!-- Alerts -->

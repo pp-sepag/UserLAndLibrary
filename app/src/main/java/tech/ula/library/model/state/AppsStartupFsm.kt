@@ -1,5 +1,6 @@
 package tech.ula.library.model.state
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
@@ -25,6 +26,8 @@ class AppsStartupFsm(
     private val filesystemDao = ulaDatabase.filesystemDao()
 
     private val state = MutableLiveData<AppsStartupState>().apply { postValue(WaitingForAppSelection) }
+
+    private var lastAskConnectType = false
 
     fun getState(): LiveData<AppsStartupState> {
         return state
@@ -58,7 +61,7 @@ class AppsStartupFsm(
             return@launch
         }
         return@launch when (event) {
-            is AppSelected -> fetchDatabaseEntries(event.app)
+            is AppSelected -> fetchDatabaseEntries(event.app, event.askConnectType)
             is UserFeedbackChecked -> state.postValue(UserFeedbackCheckComplete)
             is UserContributionChecked -> state.postValue(UserContributionCheckComplete)
             is CheckAppsFilesystemCredentials -> checkAppsFilesystemCredentials(event.appsFilesystem)
@@ -73,11 +76,12 @@ class AppsStartupFsm(
         }
     }
 
-    private suspend fun fetchDatabaseEntries(app: App) {
+    private suspend fun fetchDatabaseEntries(app: App, askConnectType: Boolean) {
         state.postValue(FetchingDatabaseEntries)
         try {
             val appsFilesystem = findAppsFilesystem(app)
             val appSession = findAppSession(app, appsFilesystem.id)
+            lastAskConnectType = askConnectType
             state.postValue(DatabaseEntriesFetched(appsFilesystem, appSession))
         } catch (err: Exception) {
             state.postValue(DatabaseEntriesFetchFailed)
@@ -96,7 +100,7 @@ class AppsStartupFsm(
     }
 
     private fun checkServiceType(appSession: Session) {
-        if (appSession.serviceType == ServiceType.Unselected) {
+        if (lastAskConnectType || (appSession.serviceType == ServiceType.Unselected)) {
             state.postValue(AppRequiresServiceType)
             return
         }
@@ -186,7 +190,7 @@ object SyncingDatabaseEntries : AppsStartupState()
 data class AppDatabaseEntriesSynced(val app: App, val session: Session, val filesystem: Filesystem) : AppsStartupState()
 
 sealed class AppsStartupEvent
-data class AppSelected(val app: App) : AppsStartupEvent()
+data class AppSelected(val app: App, val askConnectType: Boolean) : AppsStartupEvent()
 object UserFeedbackChecked : AppsStartupEvent()
 object UserContributionChecked : AppsStartupEvent()
 data class CheckAppsFilesystemCredentials(val appsFilesystem: Filesystem) : AppsStartupEvent()

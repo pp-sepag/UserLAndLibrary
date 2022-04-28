@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.IBinder
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.iiordanov.bVNC.RemoteCanvasActivity
+import com.termux.app.TermuxActivity
 import kotlinx.coroutines.*
 import tech.ula.library.model.entities.App
 import tech.ula.library.model.entities.ServiceType
@@ -160,12 +161,12 @@ class ServerService : Service(), CoroutineScope {
     }
 
     private fun startSshClient(session: Session) {
-        val connectBotIntent = Intent()
-        connectBotIntent.action = Intent.ACTION_VIEW
-        connectBotIntent.data = Uri.parse("ssh://${session.username}@localhost:2022/#userland")
-        connectBotIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        val sshIntent = Intent(this, TermuxActivity::class.java)
+        sshIntent.action = Intent.ACTION_VIEW
+        sshIntent.data = Uri.parse("ssh://${session.username}@localhost:2022/#userland/${session.password}")
+        sshIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-        startActivity(connectBotIntent)
+        startActivity(sshIntent)
     }
 
     private fun startVncClient(session: Session, packageName: String) {

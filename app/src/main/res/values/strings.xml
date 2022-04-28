@@ -149,6 +149,8 @@
     <string name="pref_default_landing_page_message">Select the page you would like to open the app with.</string>
     <string name="pref_clear_auto_start_title">Clear Auto Start Settings</string>
     <string name="pref_clear_auto_start_summary">Stops any app from auto starting until enabled again.</string>
+    <string name="pref_clear_connect_type_title">Clear Connection Type Settings</string>
+    <string name="pref_clear_connect_type_summary">Will ask again what connection type you prefer on the next start.</string>
     <string name="pref_hide_sessions_filesystems_title">Hide Bottom Navigation</string>
     <string name="pref_hide_sessions_filesystems_summary">Simplifies app by hiding views that are not the default landing page.</string>
     <string name="pref_hide_distributions_title">Hide Distributions</string>
@@ -199,8 +201,8 @@
     <string name="support_tightvnc">VNC - TightVNC</string>
 
     <!-- Client Types -->
-    <string name="client_ssh">SSH</string>
-    <string name="client_vnc">VNC</string>
+    <string name="client_ssh">Terminal</string>
+    <string name="client_vnc">Graphical</string>
     <string name="client_xsdl">XSDL</string>
 
     <!-- Alerts -->

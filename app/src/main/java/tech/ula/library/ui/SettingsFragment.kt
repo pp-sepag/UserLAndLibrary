@@ -38,6 +38,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
         }
 
+        val clearConnectTypePreference: Preference = findPreference("pref_clear_connect_type")!!
+        clearConnectTypePreference.setOnPreferenceClickListener {
+            val prefs = activity!!.getSharedPreferences("apps", Context.MODE_PRIVATE)
+            with(prefs.edit()) {
+                putBoolean("askConnectType", true)
+                apply()
+                true
+            }
+        }
+
         val hideSessionsFilesystemsPreference: CheckBoxPreference = findPreference("pref_hide_sessions_filesystems")!!
         hideSessionsFilesystemsPreference.setOnPreferenceChangeListener { preference, newValue ->
             if (newValue is Boolean) {

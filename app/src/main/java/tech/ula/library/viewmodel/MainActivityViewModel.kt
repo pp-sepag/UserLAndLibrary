@@ -45,6 +45,8 @@ class MainActivityViewModel(
     private val unselectedFilesystem = Filesystem(id = -1, name = "UNSELECTED")
     var lastSelectedFilesystem = unselectedFilesystem
 
+    private var lastAskConnectType = false
+
     private val appsState = appsStartupFsm.getState()
 
     private val sessionState = sessionStartupFsm.getState()
@@ -109,10 +111,11 @@ class MainActivityViewModel(
         submitSessionStartupEvent(SyncDownloadState)
     }
 
-    fun waitForPermissions(appToContinue: App = unselectedApp, sessionToContinue: Session = unselectedSession) {
+    fun waitForPermissions(appToContinue: App = unselectedApp, sessionToContinue: Session = unselectedSession, askConnectType: Boolean) {
         resetStartupState()
         lastSelectedApp = appToContinue
         lastSelectedSession = sessionToContinue
+        lastAskConnectType = askConnectType
     }
 
     fun permissionsHaveBeenGranted() {
@@ -124,7 +127,7 @@ class MainActivityViewModel(
                 postIllegalStateWithLog(NoSelectionsMadeWhenPermissionsGranted)
             }
             lastSelectedApp != unselectedApp -> {
-                submitAppsStartupEvent(AppSelected(lastSelectedApp))
+                submitAppsStartupEvent(AppSelected(lastSelectedApp, lastAskConnectType))
             }
             lastSelectedSession != unselectedSession -> {
                 submitSessionStartupEvent(SessionSelected(lastSelectedSession))
@@ -132,10 +135,10 @@ class MainActivityViewModel(
         }
     }
 
-    fun submitAppSelection(app: App, autoStart: Boolean) {
+    fun submitAppSelection(app: App, autoStart: Boolean, askConnectType: Boolean) {
         if (!autoStart && !selectionsCanBeMade()) return
         lastSelectedApp = app
-        submitAppsStartupEvent(AppSelected(app))
+        submitAppsStartupEvent(AppSelected(app, askConnectType))
     }
 
     fun submitSessionSelection(session: Session) {
