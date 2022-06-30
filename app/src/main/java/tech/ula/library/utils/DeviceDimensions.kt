@@ -26,8 +26,8 @@ class DeviceDimensions {
             }
         }
 
-        if (sharedPreferences.getBoolean("pref_custom_scaling_enabled", false)) {
-            scaling = sharedPreferences.getString("pref_scaling", "1.0")!!.toFloat()
+        if (sharedPreferences.getBoolean("pref_custom_scaling_enabled", BuildConfig.DEFAULT_PREF_CUSTOM_SCALING_ENABLED)) {
+            scaling = sharedPreferences.getString("pref_scaling", BuildConfig.DEFAULT_PREF_SCALING)!!.toFloat()
         } else {
             if (height > width) {
                 scalingMax = height/BuildConfig.MAX_DIMENSION
