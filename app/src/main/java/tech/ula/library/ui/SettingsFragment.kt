@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import androidx.preference.*
+import tech.ula.customlibrary.BuildConfig
 import tech.ula.library.utils.ProotDebugLogger
 import tech.ula.library.utils.UlaFiles
 import tech.ula.library.utils.defaultSharedPreferences
@@ -66,20 +67,22 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun hidePrefs() {
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_default_nav_location"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_clear_auto_start"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hide_sessions_filesystems"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hide_distributions"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_custom_hostname_enabled"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hostname"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_custom_apps_enabled"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_apps"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_custom_filesystem_enabled"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_filesystem"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hide_vnc_toolbar"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hide_vnc_extra_keys"))
-        (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_default_vnc_input_mode"))
-        (findPreference("pref_screen") as PreferenceScreen?)!!.removePreference(findPreference("pref_proot_category"))
+        if (BuildConfig.HIDE_USERLAND_PREFS) {
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_default_nav_location"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_clear_auto_start"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hide_sessions_filesystems"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hide_distributions"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_custom_hostname_enabled"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hostname"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_custom_apps_enabled"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_apps"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_custom_filesystem_enabled"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_filesystem"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hide_vnc_toolbar"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hide_vnc_extra_keys"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_default_vnc_input_mode"))
+            (findPreference("pref_screen") as PreferenceScreen?)!!.removePreference(findPreference("pref_proot_category"))
+        }
     }
 
     override fun setDivider(divider: Drawable?) {

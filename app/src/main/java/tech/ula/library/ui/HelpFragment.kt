@@ -19,6 +19,8 @@ class HelpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        welcome_text.text = getString(R.string.welcome,getString(R.string.app_name))
+
         github_logo.setOnClickListener {
             val intent = Intent("android.intent.action.VIEW", Uri.parse("https://github.com/CypherpunkArmory/UserLAnd/issues"))
             startActivity(intent)

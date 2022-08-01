@@ -40,7 +40,7 @@
             android:name=".ServerService"
             android:stopWithTask="true" />
 
-        <activity android:screenOrientation="landscape"
+        <activity android:screenOrientation="${orientation}"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|density|screenLayout"
             android:name="com.iiordanov.bVNC.RemoteCanvasActivity"
             android:windowSoftInputMode="stateHidden|adjustResize"
