@@ -12,6 +12,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.*
+import android.provider.MediaStore
 import android.speech.SpeechRecognizer.isRecognitionAvailable
 import android.util.DisplayMetrics
 import android.view.*
@@ -21,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -31,10 +33,13 @@ import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.NavigationUI.setupWithNavController
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
+import com.google.mlkit.md.LiveBarcodeScanningActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.IOException
 import kotlinx.coroutines.withContext
 import tech.ula.library.R
 import tech.ula.library.model.remote.GithubApiClient
@@ -50,6 +55,7 @@ import tech.ula.library.utils.preferences.*
 import tech.ula.library.viewmodel.*
 import java.lang.reflect.Method
 import java.net.NetworkInterface
+import java.text.SimpleDateFormat
 import java.util.*
 import tech.ula.customlibrary.BuildConfig
 import tech.ula.library.model.entities.*
@@ -136,7 +142,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         }
     }
 
-    private val viewModel: MainActivityViewModel by lazy {
+    public val viewModel: MainActivityViewModel by lazy {
         val ulaDatabase = UlaDatabase.getInstance(this)
 
         val assetPreferences = AssetPreferences(this)
@@ -153,7 +159,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         val storageCalculator = StorageCalculator(StatFs(filesDir.path))
 
         val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val downloadManagerWrapper = DownloadManagerWrapper(downloadManager)
+        val downloadManagerWrapper = DownloadManagerWrapper(downloadManager, this)
         val assetDownloader = AssetDownloader(assetPreferences, downloadManagerWrapper, ulaFiles)
 
         val appsStartupFsm = AppsStartupFsm(ulaDatabase, filesystemManager, ulaFiles)
@@ -170,9 +176,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        if (intent?.type.equals("settings"))
-            navController.navigate(R.id.settings_fragment)
-        else {
+        if (intent?.type.equals("settings")) {
+            if (!defaultSharedPreferences.getBoolean("pref_hide_settings", BuildConfig.DEFAULT_HIDE_SETTINGS))
+                navController.navigate(R.id.settings_fragment)
+        } else {
             if (intent != null) {
                 checkForAppIntent(intent)
             }
@@ -193,8 +200,11 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
         viewModel.getState().observe(this, stateObserver)
 
+        PreferenceGetter(ulaFiles, defaultSharedPreferences).fetchXML()
+
         if (intent?.type.equals("settings"))
-            navController.navigate(R.id.settings_fragment)
+            if (!defaultSharedPreferences.getBoolean("pref_hide_settings", BuildConfig.DEFAULT_HIDE_SETTINGS))
+                navController.navigate(R.id.settings_fragment)
         else {
             checkForAppIntent(intent)
             autoStart()
@@ -261,6 +271,8 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_options, menu)
+        if (defaultSharedPreferences.getBoolean("pref_hide_settings", BuildConfig.DEFAULT_HIDE_SETTINGS))
+            menu.removeItem(R.id.settings_fragment)
         return true
     }
 
@@ -372,6 +384,17 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
     }
 
     private fun autoStart() {
+        if (defaultSharedPreferences.getBoolean("photo_pending", false)) {
+            val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            val resultFile = File(storageDir, ".cameraResponse.txt")
+            val finalResultFile = File(storageDir, "cameraResponse.txt")
+            resultFile.writeText("1")
+            resultFile.renameTo(finalResultFile)
+            with(defaultSharedPreferences.edit()) {
+                putBoolean("photo_pending", false)
+                apply()
+            }
+        }
         val prefs = getSharedPreferences("apps", Context.MODE_PRIVATE)
         val json = prefs.getString("AutoApp", " ")
         if (json != null)

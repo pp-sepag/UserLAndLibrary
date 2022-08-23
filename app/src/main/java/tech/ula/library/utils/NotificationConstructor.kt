@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import tech.ula.customlibrary.BuildConfig
 import tech.ula.library.MainActivity
 import tech.ula.library.R
 import tech.ula.library.ServerService
@@ -64,7 +65,10 @@ class NotificationConstructor(val context: Context) {
                 .setAutoCancel(false)
                 .setContentIntent(pendingSessionListIntent)
                 .addAction(0, "Stop Sessions", stopSessionsPendingIntent)
-                .addAction(0, "Settings", settingsPendingIntent)
+
+        if (!context.defaultSharedPreferences.getBoolean("pref_hide_settings", BuildConfig.DEFAULT_HIDE_SETTINGS)) {
+            builder.addAction(0, "Settings", settingsPendingIntent)
+        }
 
         return builder.build()
     }

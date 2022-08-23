@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import tech.ula.library.model.entities.App
+import tech.ula.library.model.repositories.AppRefreshStatus
 import tech.ula.library.model.repositories.AppsRepository
 import tech.ula.library.model.repositories.RefreshStatus
 import kotlin.coroutines.CoroutineContext
@@ -40,7 +41,7 @@ class AppsListViewModel(
         this.launch { appsRepository.refreshData(this) }
     }
 
-    fun getRefreshStatus(): LiveData<RefreshStatus> {
+    fun getRefreshStatus(): LiveData<AppRefreshStatus> {
         return appsRepository.getRefreshStatus()
     }
 }

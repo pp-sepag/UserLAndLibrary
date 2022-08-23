@@ -4,7 +4,9 @@
     <item
         android:id="@id/settings_fragment"
         android:icon="@android:drawable/ic_menu_preferences"
-        android:title="@string/settings" />
+	android:title="@string/settings"
+	android:visible="@string/settings_enabled"
+	/>
 
     <item
         android:id="@+id/clear_support_files"

@@ -17,7 +17,7 @@ class UlaFiles(
     val supportDir: File = File(filesDir, "support")
     val emulatedScopedDir = context.getExternalFilesDir(null)!!
     val emulatedUserDir = File(emulatedScopedDir, "storage")
-    val intentsDir = File(filesDir, "Intents")
+    val intentsDir = File(emulatedScopedDir, "Intents")
 
     val sdCardScopedDir: File? = resolveSdCardScopedStorage(context)
     val sdCardUserDir: File? = if (sdCardScopedDir != null) {

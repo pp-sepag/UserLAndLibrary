@@ -29,7 +29,7 @@ class HttpStream {
         file.createNewFile()
         val inputStream = fromUrl(url)
         val outputStream = file.outputStream()
-        outputStream.write(inputStream.readBytes())
+        inputStream.copyTo(outputStream)
         inputStream.close()
         outputStream.close()
     }

@@ -21,6 +21,7 @@ import tech.ula.library.R
 import tech.ula.library.ServerService
 import tech.ula.library.model.entities.App
 import tech.ula.library.model.remote.GithubAppsFetcher
+import tech.ula.library.model.repositories.AppRefreshStatus
 import tech.ula.library.model.repositories.AppsRepository
 import tech.ula.library.model.repositories.RefreshStatus
 import tech.ula.library.model.repositories.UlaDatabase
@@ -78,12 +79,12 @@ class AppsListFragment : Fragment(), AppsListAdapter.AppsClickHandler {
         }
     }
 
-    private val refreshStatusObserver = Observer<RefreshStatus> {
+    private val refreshStatusObserver = Observer<AppRefreshStatus> {
         it?.let { newStatus ->
-            refreshStatus = newStatus
+            refreshStatus = newStatus.refreshStatus
             swipe_refresh.isRefreshing = refreshStatus == RefreshStatus.ACTIVE
 
-            if (refreshStatus == RefreshStatus.FAILED) showRefreshUnavailableDialog()
+            if (refreshStatus == RefreshStatus.FAILED) showRefreshUnavailableDialog(newStatus.message)
         }
     }
 
@@ -166,9 +167,9 @@ class AppsListFragment : Fragment(), AppsListAdapter.AppsClickHandler {
         return true
     }
 
-    private fun showRefreshUnavailableDialog() {
+    private fun showRefreshUnavailableDialog(message: String) {
         AlertDialog.Builder(activityContext)
-                .setMessage(R.string.alert_network_required_for_refresh)
+                .setMessage(getString(R.string.alert_network_required_for_refresh) + "\n" + getString(R.string.alert_unreachable_app) + " " + message)
                 .setTitle(R.string.general_error_title)
                 .setPositiveButton(R.string.button_ok) {
                     dialog, _ ->

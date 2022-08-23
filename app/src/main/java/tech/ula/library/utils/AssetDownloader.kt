@@ -1,19 +1,25 @@
 package tech.ula.library.utils
 
 import android.app.DownloadManager
+import android.content.Context
 import android.database.Cursor
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import android.text.TextUtils
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.rauschig.jarchivelib.Archiver
 import org.rauschig.jarchivelib.ArchiverFactory
+import tech.ula.library.MainActivity
+import tech.ula.library.model.repositories.DownloadMetadata
 import tech.ula.customlibrary.BuildConfig
 import tech.ula.library.R
-import tech.ula.library.model.repositories.DownloadMetadata
 import tech.ula.library.utils.preferences.AssetPreferences
 import java.io.*
+import java.lang.Exception
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -68,8 +74,12 @@ class AssetDownloader(
 
         enqueuedDownloadIds.addAll(downloadRequirements.map { metadata ->
             val destination = File(downloadDirectory, metadata.downloadTitle)
-            val request = downloadManagerWrapper.generateDownloadRequest(metadata.url, destination)
-            downloadManagerWrapper.enqueue(request)
+            if (BuildConfig.USE_DOWNLOAD_MANAGER) {
+                val request = downloadManagerWrapper.generateDownloadRequest(metadata.url, destination)
+                downloadManagerWrapper.enqueue(request)
+            } else {
+                downloadManagerWrapper.generateDownloadRequestAndEnqueue(metadata.url, destination)
+            }
         })
         assetPreferences.setDownloadsAreInProgress(inProgress = true)
         assetPreferences.setEnqueuedDownloads(enqueuedDownloadIds)
@@ -249,7 +259,14 @@ class AssetDownloader(
     }
 }
 
-class DownloadManagerWrapper(private val downloadManager: DownloadManager) {
+class DownloadManagerWrapper(private val downloadManager: DownloadManager, private val activity: MainActivity) {
+
+    private var nextQueueEntry : Long = 0
+    private var downloadQueue : HashMap<Long, Int> = HashMap<Long, Int> ()
+    private val START = 0
+    private val SUCCESS = 1
+    private val FAIL = 2
+
     fun generateDownloadRequest(url: String, destination: File): DownloadManager.Request {
         val uri = Uri.parse(url)
         val request = DownloadManager.Request(uri)
@@ -260,6 +277,26 @@ class DownloadManagerWrapper(private val downloadManager: DownloadManager) {
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
         request.setDestinationUri(destinationUri)
         return request
+    }
+
+    fun generateDownloadRequestAndEnqueue(url: String, destination: File): Long {
+        val index = nextQueueEntry
+        nextQueueEntry++
+        val scope = GlobalScope.async {
+            val httpStream: HttpStream = HttpStream()
+            delay(1)
+            downloadQueue.put(index,START)
+            try {
+                httpStream.toFile(url, destination)
+            } catch (err: Exception) {
+                downloadQueue[index] = FAIL
+                return@async
+            }
+            downloadQueue[index] = SUCCESS
+            activity.runOnUiThread { activity.viewModel.submitCompletedDownloadId(index) }
+            return@async
+        }
+        return index
     }
 
     fun enqueue(request: DownloadManager.Request): Long {
@@ -277,23 +314,39 @@ class DownloadManagerWrapper(private val downloadManager: DownloadManager) {
     }
 
     fun downloadHasSucceeded(id: Long): Boolean {
-        val query = generateQuery(id)
-        val cursor = generateCursor(query)
-        if (cursor.moveToFirst()) {
-            val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
-            return status == DownloadManager.STATUS_SUCCESSFUL
+        if (!BuildConfig.USE_DOWNLOAD_MANAGER) {
+            if (!downloadQueue.containsKey(id))
+                return false
+            if (downloadQueue[id] == SUCCESS)
+                return true
+            return false
+        } else {
+            val query = generateQuery(id)
+            val cursor = generateCursor(query)
+            if (cursor.moveToFirst()) {
+                val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                return status == DownloadManager.STATUS_SUCCESSFUL
+            }
+            return false
         }
-        return false
     }
 
     fun downloadHasFailed(id: Long): Boolean {
-        val query = generateQuery(id)
-        val cursor = generateCursor(query)
-        if (cursor.moveToFirst()) {
-            val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
-            return status == DownloadManager.STATUS_FAILED
+        if (!BuildConfig.USE_DOWNLOAD_MANAGER) {
+            if (!downloadQueue.containsKey(id))
+                return true
+            if (downloadQueue[id] == FAIL)
+                return true
+            return false
+        } else {
+            val query = generateQuery(id)
+            val cursor = generateCursor(query)
+            if (cursor.moveToFirst()) {
+                val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                return status == DownloadManager.STATUS_FAILED
+            }
+            return false
         }
-        return false
     }
 
     fun getDownloadFailureReason(id: Long): DownloadFailureLocalizationData {

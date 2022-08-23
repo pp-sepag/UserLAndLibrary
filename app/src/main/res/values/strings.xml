@@ -176,6 +176,8 @@
     <string name="pref_default_vnc_input_mode_summary">Set the default VNC Input Mode. Can be overridden from VNC session toolbar.</string>
     <string name="pref_hide_vnc_extra_keys_title">Hide VNC Extra Keys</string>
     <string name="pref_hide_vnc_extra_keys_summary">Hides the extra keys that get displayed with the soft keyboard.</string>
+    <string name="pref_hide_settings_title">Hide this Setting Menu</string>
+    <string name="pref_hide_settings_summary">Makes this setting menu inaccessible.</string>
 
     <string name="pref_proot_category">PRoot Preferences</string>
     <string name="pref_proot_debugging_enabled_title">PRoot Debugging Logs Enabled</string>
@@ -243,6 +245,7 @@
 
     <!-- Network unavailable alert -->
     <string name="alert_network_required_for_refresh">Refreshing apps requires an available or stronger network connection.</string>
+    <string name="alert_unreachable_app">Unreachable app:</string>
 
     <!-- Storage capacity low alert -->
     <string name="alert_storage_low_title">Low storage capacity</string>

@@ -73,23 +73,29 @@ class GithubAppsFetcher(
         }
     }
 
+    @Throws(IOException::class)
     suspend fun fetchAppIcon(app: App) = withContext(Dispatchers.IO) {
         val directoryAndFilename = "${app.name}/${app.name}.png"
         val file = File("$filesDirPath/apps/$directoryAndFilename")
 
-        if (BuildConfig.APPS_IN_ASSETS) {
-            file.parentFile!!.mkdirs()
-            assets.open("apps/$directoryAndFilename").use { input ->
-                file.outputStream().use { output ->
-                    input.copyTo(output, 1024)
+        try {
+            if (BuildConfig.APPS_IN_ASSETS) {
+                file.parentFile!!.mkdirs()
+                assets.open("apps/$directoryAndFilename").use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output, 1024)
+                    }
                 }
+            } else {
+                val url = "${baseUrl()}/$directoryAndFilename"
+                httpStream.toFile(url, file)
             }
-        } else {
-            val url = "${baseUrl()}/$directoryAndFilename"
-            httpStream.toFile(url, file)
+        } catch (err: Exception) {
+            throw err
         }
     }
 
+    @Throws(IOException::class)
     suspend fun fetchAppDescription(app: App) = withContext(Dispatchers.IO) {
         val directoryAndFilename = "${app.name}/${app.name}.txt"
         val file = File("$filesDirPath/apps/$directoryAndFilename")
@@ -107,6 +113,7 @@ class GithubAppsFetcher(
         }
     }
 
+    @Throws(IOException::class)
     suspend fun fetchAppScript(app: App) = withContext(Dispatchers.IO) {
         val directoryAndFilename = "${app.name}/${app.name}.sh"
         val file = File("$filesDirPath/apps/$directoryAndFilename")

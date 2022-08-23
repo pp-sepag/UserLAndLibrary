@@ -117,6 +117,12 @@
             android:entryValues="@array/vnc_input_modes"
             android:defaultValue="@string/default_vnc_input_mode"
             app:iconSpaceReserved="false"/>
+        <CheckBoxPreference
+            android:key="pref_hide_settings"
+            android:title="@string/pref_hide_settings_title"
+            android:summary="@string/pref_hide_settings_summary"
+            android:defaultValue="@string/pref_hide_settings_default"
+            app:iconSpaceReserved="false"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/pref_proot_category"

@@ -3,9 +3,12 @@ package tech.ula.library
 import android.app.Service
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.net.Uri
 import android.os.IBinder
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.google.mlkit.md.LiveBarcodeScanningActivity
 import com.iiordanov.bVNC.RemoteCanvasActivity
 import com.termux.app.TermuxActivity
 import kotlinx.coroutines.*
@@ -14,7 +17,10 @@ import tech.ula.library.model.entities.ServiceType
 import tech.ula.library.model.entities.Session
 import tech.ula.library.model.repositories.UlaDatabase
 import tech.ula.library.utils.*
+import java.io.File
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 import tech.ula.customlibrary.BuildConfig
 import tech.ula.library.utils.BusyboxExecutor
@@ -130,6 +136,11 @@ class ServerService : Service(), CoroutineScope {
         startForeground(NotificationConstructor.serviceNotificationId, notificationManager.buildPersistentServiceNotification())
         session.pid = localServerManager.startServer(session)
 
+        if (BuildConfig.POLL_FOR_INTENTS) {
+            val scheduleTaskExecutor= Executors.newScheduledThreadPool(1)
+            scheduleTaskExecutor.scheduleAtFixedRate(java.lang.Runnable { intentRequest() }, 1000, 100, TimeUnit.MILLISECONDS)
+        }
+
         while (!localServerManager.isServerRunning(session)) {
             delay(500)
         }
@@ -236,5 +247,41 @@ class ServerService : Service(), CoroutineScope {
                 .putExtra("type", "dialog")
                 .putExtra("dialogType", type)
         broadcaster.sendBroadcast(intent)
+    }
+
+    private fun intentRequest() {
+        val ulaFiles = UlaFiles(this, this.applicationInfo.nativeLibraryDir)
+        val cameraRequest = File(ulaFiles.intentsDir, "cameraRequest.txt")
+        if (cameraRequest.exists()) {
+            val cameraRequestText = cameraRequest.readText(Charsets.UTF_8).trim()
+            cameraRequest.delete()
+            if (cameraRequestText.endsWith("barcode.txt")) {
+                val barcodeIntent = Intent(this, LiveBarcodeScanningActivity::class.java)
+                barcodeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                this.startActivity(barcodeIntent)
+            } else if (cameraRequestText.endsWith("tone.txt")) {
+                val toneFile = File(ulaFiles.intentsDir, "tone.txt")
+                val toneInfo = toneFile.readText(Charsets.UTF_8).trim()
+                val (
+                        tone,
+                        volume,
+                        duration
+                ) = toneInfo.toLowerCase(Locale.ENGLISH).split(",")
+                toneFile.delete()
+                val toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, volume.toInt())
+                toneGenerator.startTone(tone.toInt(), duration.toInt())
+            } else if (cameraRequestText.endsWith("record_speech.txt")) {
+                val recodeSpeechIntent = Intent(this, RecordSpeechActivity::class.java)
+                recodeSpeechIntent.type = "record_speech"
+                recodeSpeechIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                this.startActivity(recodeSpeechIntent)
+            } else {
+                val cameraIntent = Intent(this, CameraActivity::class.java)
+                cameraIntent.type = "take_picture"
+                cameraIntent.putExtra("cameraRequest", cameraRequestText)
+                cameraIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                this.startActivity(cameraIntent)
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package tech.ula.library.model.repositories
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.* // ktlint-disable no-wildcard-imports
@@ -25,7 +26,7 @@ class AppsRepository(
 ) {
     private val className = "AppsRepository"
 
-    private val refreshStatus = MutableLiveData<RefreshStatus>()
+    private val refreshStatus = MutableLiveData<AppRefreshStatus>()
 
     fun getAllApps(): LiveData<List<App>> {
         return appsDao.getAllApps()
@@ -35,13 +36,13 @@ class AppsRepository(
         return appsDao.getActiveApps()
     }
 
-    fun getRefreshStatus(): LiveData<RefreshStatus> {
+    fun getRefreshStatus(): LiveData<AppRefreshStatus> {
         return refreshStatus
     }
 
     suspend fun refreshData(scope: CoroutineScope) {
         val distributionsList = mutableSetOf<String>()
-        refreshStatus.postValue(RefreshStatus.ACTIVE)
+        refreshStatus.postValue(AppRefreshStatus(RefreshStatus.ACTIVE,""))
         val jobs = mutableListOf<Job>()
 
         var appsUrl = BuildConfig.DEFAULT_APPS_URL
@@ -61,25 +62,42 @@ class AppsRepository(
             appsDao.deleteAllApps()
         }
 
+        var failed = false
+        var failMessage = "Not Found"
+
         try {
             remoteAppsSource.fetchAppsList().forEach { app ->
-                jobs.add(scope.launch {
+                jobs.add(scope.launch() {
                     if (app.category.toLowerCase(Locale.ENGLISH) == "distribution") distributionsList.add(app.name)
-                    remoteAppsSource.fetchAppIcon(app)
-                    remoteAppsSource.fetchAppDescription(app)
-                    remoteAppsSource.fetchAppScript(app)
+                    try {
+                        remoteAppsSource.fetchAppIcon(app)
+                        remoteAppsSource.fetchAppDescription(app)
+                        remoteAppsSource.fetchAppScript(app)
+                    } catch (err: Exception) {
+                        logger.addExceptionBreadcrumb(err)
+                        failed = true
+                        failMessage = app.name
+                    }
                     appsDao.insertApp(app) // Insert the db element last to force observer refresh
-            }) }
+                })
+            }
         } catch (err: Exception) {
-            refreshStatus.postValue(RefreshStatus.FAILED)
-            val message = err.message ?: "Not found"
-            val breadcrumb = UlaBreadcrumb(className, BreadcrumbType.RuntimeError, message)
+            logger.addExceptionBreadcrumb(err)
+            failed = true;
+            failMessage = "App list"
+        }
+
+        jobs.joinAll()
+
+        if (failed) {
+            refreshStatus.postValue(AppRefreshStatus(RefreshStatus.FAILED,failMessage))
+            val breadcrumb = UlaBreadcrumb(className, BreadcrumbType.RuntimeError, failMessage)
             logger.addBreadcrumb(breadcrumb)
             logger.sendEvent("App Refresh Failed")
             return
         }
-        jobs.joinAll()
-        refreshStatus.postValue(RefreshStatus.FINISHED)
+
+        refreshStatus.postValue(AppRefreshStatus(RefreshStatus.FINISHED,""))
         appsPreferences.setDistributionsList(distributionsList)
     }
 }
@@ -87,3 +105,6 @@ class AppsRepository(
 enum class RefreshStatus {
     ACTIVE, FINISHED, FAILED, INACTIVE
 }
+
+class AppRefreshStatus(val refreshStatus: RefreshStatus, val message: String) {
+} 

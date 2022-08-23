@@ -81,7 +81,8 @@
     <fragment
         android:id="@+id/settings_fragment"
         android:name="tech.ula.library.ui.SettingsFragment"
-        android:label="@string/settings" />
+        android:label="@string/settings"
+	android:visible="@string/settings_enabled" />
 
     <fragment
         android:id="@+id/help_fragment"
