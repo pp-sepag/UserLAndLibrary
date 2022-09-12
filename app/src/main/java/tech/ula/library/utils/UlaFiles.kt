@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Environment
 import android.system.Os
+import tech.ula.customlibrary.BuildConfig
 import java.io.File
 
 class UlaFiles(
@@ -80,7 +81,7 @@ class UlaFiles(
             if (libFileName.startsWith("lib_proot.") ||
                 libFileName.startsWith("lib_libtalloc") ||
                 libFileName.startsWith("lib_loader")) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && BuildConfig.HAS_A10_PROOT) {
                     if (libFileName.endsWith(".a10.so")) {
                         libFileName = libFileName.replace(".a10.so", ".so")
                     } else {

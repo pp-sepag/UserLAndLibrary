@@ -15,6 +15,14 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.android.vending.BILLING" />
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+    <uses-feature android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-feature android:name="android.hardware.microphone"
+        android:required="false" />
 
     <supports-screens
         android:xlargeScreens="true"
@@ -22,6 +30,12 @@
         android:normalScreens="true"
         android:smallScreens="true"
         android:anyDensity="true"/>
+
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="false"
@@ -42,12 +56,47 @@
             android:name=".ServerService"
             android:stopWithTask="true" />
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="tech.ula.library.provider.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+
         <activity android:screenOrientation="${orientation}"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|density|screenLayout"
             android:name="com.iiordanov.bVNC.RemoteCanvasActivity"
             android:windowSoftInputMode="stateHidden|adjustResize"
             android:theme="@style/AppTheme"
             android:resizeableActivity="true">
+        </activity>
+
+        <activity android:name=".CameraActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Transparent.NoActionBar">
+        </activity>
+
+        <activity android:name=".RecordSpeechActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Transparent.NoActionBar">
+        </activity>
+
+        <activity
+            android:name="com.google.mlkit.md.LiveBarcodeScanningActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/BarcodeTheme">
+        </activity>
+
+        <activity
+            android:name="com.google.mlkit.md.settings.SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings_title"
+            android:screenOrientation="portrait"
+            android:theme="@style/BarcodeTheme">
         </activity>
 
     </application>

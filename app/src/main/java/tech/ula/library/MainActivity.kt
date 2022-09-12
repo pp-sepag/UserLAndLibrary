@@ -202,10 +202,14 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
         PreferenceGetter(ulaFiles, defaultSharedPreferences).fetchXML()
 
-        if (intent?.type.equals("settings"))
-            if (!defaultSharedPreferences.getBoolean("pref_hide_settings", BuildConfig.DEFAULT_HIDE_SETTINGS))
+        if (intent?.type.equals("settings")) {
+            if (!defaultSharedPreferences.getBoolean(
+                    "pref_hide_settings",
+                    BuildConfig.DEFAULT_HIDE_SETTINGS
+                )
+            )
                 navController.navigate(R.id.settings_fragment)
-        else {
+        } else {
             checkForAppIntent(intent)
             autoStart()
         }
@@ -385,7 +389,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
 
     private fun autoStart() {
         if (defaultSharedPreferences.getBoolean("photo_pending", false)) {
-            val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            val storageDir: File? = File(getExternalFilesDir(null),"Intents")
             val resultFile = File(storageDir, ".cameraResponse.txt")
             val finalResultFile = File(storageDir, "cameraResponse.txt")
             resultFile.writeText("1")

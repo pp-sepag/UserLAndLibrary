@@ -272,13 +272,13 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
     }
 
     fun writeBarcode(barcode: String) {
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = File(getExternalFilesDir(null),"Intents")
         val resultFile = File(storageDir, "barcode.txt")
         resultFile.writeText("$barcode")
     }
 
     fun sendResult(code: Int) {
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = File(getExternalFilesDir(null),"Intents")
         val resultFile = File(storageDir, ".cameraResponse.txt")
         val finalResultFile = File(storageDir, "cameraResponse.txt")
         resultFile.writeText("$code")

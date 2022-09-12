@@ -32,7 +32,7 @@ class RecordSpeechActivity : AppCompatActivity() {
     @Throws(IOException::class)
     fun createSpeechFile(voiceResult: String): File {
         // Create an image file name
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = File(getExternalFilesDir(null),"Intents")
         val speechFile = File(storageDir, "record_speech.txt")
         speechFile.createNewFile()
         speechFile.writeText("$voiceResult")
@@ -122,7 +122,7 @@ class RecordSpeechActivity : AppCompatActivity() {
     }
 
     fun sendResult(code: Int) {
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = File(getExternalFilesDir(null),"Intents")
         val resultFile = File(storageDir, ".cameraResponse.txt")
         val finalResultFile = File(storageDir, "cameraResponse.txt")
         resultFile.writeText("$code")

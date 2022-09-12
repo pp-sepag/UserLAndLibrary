@@ -50,7 +50,7 @@ class CameraActivity : AppCompatActivity() {
     @Throws(IOException::class)
     fun createImageFile(name: String): File {
         // Create an image file name
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = File(getExternalFilesDir(null),"Intents")
         val photoFile = File(storageDir,name)
         photoFile.createNewFile()
         currentPhotoPath = photoFile.absolutePath
@@ -76,7 +76,7 @@ class CameraActivity : AppCompatActivity() {
                     photoFile?.also {
                         val photoURI: Uri = FileProvider.getUriForFile(
                                 this,
-                                "tech.ula.provider.fileprovider",
+                                "tech.ula.library.provider.fileprovider",
                                 it
                         )
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
@@ -94,7 +94,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     fun sendResult(code: Int) {
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = File(getExternalFilesDir(null),"Intents")
         val resultFile = File(storageDir, ".cameraResponse.txt")
         val finalResultFile = File(storageDir, "cameraResponse.txt")
         resultFile.writeText("$code")
