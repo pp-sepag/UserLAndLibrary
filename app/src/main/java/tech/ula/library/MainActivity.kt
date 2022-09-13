@@ -285,7 +285,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
             val all: List<NetworkInterface> = Collections.list(NetworkInterface.getNetworkInterfaces())
             for (nif in all) {
                 if (!nif.getName().equals("wlan0", true)) continue
-                val macBytes: ByteArray = nif.getHardwareAddress() ?: return ""
+                val macBytes: ByteArray = nif.getHardwareAddress() ?: return UUID.randomUUID().toString()
                 val res1 = StringBuilder()
                 for (b in macBytes) {
                     res1.append(String.format("%02X:", b))
