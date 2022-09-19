@@ -105,6 +105,7 @@ class LocalServerManager(
         env["VERSION_CODE"] = BuildConfig.VERSION_CODE
         env["VERSION_NAME"] = BuildConfig.VERSION_NAME
         env["VNC_DISPLAY"] = BuildConfig.VNC_DISPLAY
+        env["INTENTS_DIR"] = "/Intents/"
         if (sharedPreferences.contains("env")) {
             val gson = Gson()
             val storedEnvString: String? = sharedPreferences.getString("env", "")
