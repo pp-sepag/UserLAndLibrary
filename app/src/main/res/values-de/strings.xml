@@ -273,7 +273,9 @@
     <!-- Advanced options -->
     <string name="desc_import_backups_should_use_same_settings">Bitte gleich ausfüllen: \n\n\u2022 Nutzername \n\u2022 Passwort \n\u2022 VNC-Passwort \n\u2022 Distribution \n\n wie beim Backup, um einen reibungslosen Ablauf sicherzustellen</string>
     <string name="pref_clear_auto_start_title">Autostart Einstellungen löschen</string>
-    <string name="pref_clear_auto_start_summary">Keine App mehr automatisch starten, bis wieder aktiviert wird.</string>
+    <string name="pref_clear_auto_start_summary">Keine App mehr automatisch starten, bis wieder eine aktiviert wird.</string>
+    <string name="pref_clear_connect_type_title">Verbindungstyp Einstellungens löschen</string>
+    <string name="pref_clear_connect_type_summary">Beim nächsten Start erneut fragen, welcher Verbindungstyp bevorzugt wird.</string>
     <string name="pref_hide_sessions_filesystems_title">Untere Navigationsleiste ausblenden</string>
     <string name="pref_hide_sessions_filesystems_summary">Vereinfacht die Anwendung, indem nur Elemente auf der Startseite angezeigt werden.</string>
     <string name="pref_hide_distributions_title">Distributionen ausblenden</string>
