@@ -70,6 +70,16 @@ class PreferenceGetter(
                                 putString("pref_dns",text)
                                 apply()
                             }
+                        } else if (tagname.equals("pref_custom_scaling_enabled", ignoreCase = true)) {
+                            with(sharedPreferences.edit()) {
+                                putBoolean("pref_custom_scaling_enabled",text.toBoolean())
+                                apply()
+                            }
+                        } else if (tagname.equals("pref_scaling", ignoreCase = true)) {
+                            with(sharedPreferences.edit()) {
+                                putString("pref_scaling",text)
+                                apply()
+                            }
                         } else if (tagname.equals("pref_hide_settings", ignoreCase = true)) {
                             with(sharedPreferences.edit()) {
                                 putBoolean("pref_hide_settings",text.toBoolean())
