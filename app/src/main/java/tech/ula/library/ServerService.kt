@@ -7,25 +7,39 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.net.Uri
 import android.os.IBinder
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.ftdi.j2xx.D2xxManager
+import com.ftdi.j2xx.D2xxManager.D2xxException
+import com.ftdi.j2xx.D2xxManager.FtDeviceInfoListNode
+import com.ftdi.j2xx.FT_Device
 import com.google.mlkit.md.LiveBarcodeScanningActivity
 import com.iiordanov.bVNC.RemoteCanvasActivity
 import com.termux.app.TermuxActivity
 import kotlinx.coroutines.*
+import tech.ula.customlibrary.BuildConfig
 import tech.ula.library.model.entities.App
 import tech.ula.library.model.entities.ServiceType
 import tech.ula.library.model.entities.Session
 import tech.ula.library.model.repositories.UlaDatabase
 import tech.ula.library.utils.*
-import java.io.File
+import java.io.*
+import java.net.ServerSocket
+import java.net.Socket
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
-import tech.ula.customlibrary.BuildConfig
-import tech.ula.library.utils.BusyboxExecutor
 
 class ServerService : Service(), CoroutineScope {
+
+    var ftd2xx: D2xxManager? = null
+
+    var ft_device_0: FT_Device? = null
+    var ft_device_1: FT_Device? = null
+    var ft_device_2: FT_Device? = null
+    var ft_device_3: FT_Device? = null
 
     private val job = Job()
     override val coroutineContext: CoroutineContext
@@ -33,6 +47,8 @@ class ServerService : Service(), CoroutineScope {
 
     companion object {
         const val SERVER_SERVICE_RESULT: String = "tech.ula.library.ServerService.RESULT"
+        private val TAG = ServerService::class.java.simpleName
+        private const val PORT = 9876
     }
 
     private val activeSessions: MutableMap<Long, Session> = mutableMapOf()
@@ -55,8 +71,65 @@ class ServerService : Service(), CoroutineScope {
         LocalServerManager(this.filesDir.path, busyboxExecutor, this.defaultSharedPreferences)
     }
 
+    private var serverSocket: ServerSocket? = null
+    private val working = AtomicBoolean(true)
+    private val runnable = Runnable {
+        var socket: Socket? = null
+        try {
+            var devCount = 0
+
+            while (devCount == 0) {
+                devCount = ftd2xx!!.createDeviceInfoList(this)
+                if (devCount == 0)
+                    Thread.sleep(1000L)
+            }
+            Log.i("Ftdi", "Device number = " + Integer.toString(devCount))
+
+            val deviceList = arrayOfNulls<FtDeviceInfoListNode>(devCount)
+            ftd2xx!!.getDeviceInfoList(devCount, deviceList)
+            Log.i("Ftdi","Device description =  ${deviceList[0]!!.description}")
+
+            val ft_device_0 = ftd2xx!!.openByIndex(this, 0)
+            val ft_device_1 = ftd2xx!!.openByIndex(this, 1)
+            val ft_device_2 = ftd2xx!!.openByIndex(this, 2)
+            val ft_device_3 = ftd2xx!!.openByIndex(this, 3)
+            serverSocket = ServerSocket(PORT)
+            while (working.get()) {
+                if (serverSocket != null) {
+                    socket = serverSocket!!.accept()
+                    Log.i(TAG, "New client: $socket")
+                    val outputStream = socket.getOutputStream()
+                    val inputStream = socket.getInputStream()
+                    // Use threads for each client to communicate with them simultaneously
+                    val t: Thread = TcpClientHandler(inputStream, outputStream, ft_device_0, ft_device_1, ft_device_2, ft_device_3)
+                    t.start()
+                } else {
+                    Log.e(TAG, "Couldn't create ServerSocket!")
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            try {
+                socket?.close()
+            } catch (ex: IOException) {
+                ex.printStackTrace()
+            }
+            ft_device_0!!.close()
+            ft_device_1!!.close()
+            ft_device_2!!.close()
+            ft_device_3!!.close()
+        }
+    }
+
     override fun onCreate() {
         broadcaster = LocalBroadcastManager.getInstance(this)
+        if (BuildConfig.POLL_FOR_INTENTS) {
+            try {
+                ftd2xx = D2xxManager.getInstance(this)
+            } catch (ex: D2xxException) {
+                ex.printStackTrace()
+            }
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -109,6 +182,7 @@ class ServerService : Service(), CoroutineScope {
 
     override fun onDestroy() {
         super.onDestroy()
+        working.set(false)
         // Redundancy to ensure no hanging processes, given broad device spectrum.
         this.coroutineContext.cancel()
     }
@@ -139,6 +213,7 @@ class ServerService : Service(), CoroutineScope {
         if (BuildConfig.POLL_FOR_INTENTS) {
             val scheduleTaskExecutor= Executors.newScheduledThreadPool(1)
             scheduleTaskExecutor.scheduleAtFixedRate(java.lang.Runnable { intentRequest() }, 1000, 100, TimeUnit.MILLISECONDS)
+            Thread(runnable).start()
         }
 
         while (!localServerManager.isServerRunning(session)) {
@@ -284,4 +359,166 @@ class ServerService : Service(), CoroutineScope {
             }
         }
     }
+}
+
+class TcpClientHandler(private val inputStream: InputStream, private val outputStream: OutputStream, private val ft_device_0: FT_Device, private val ft_device_1: FT_Device, private val ft_device_2: FT_Device, private val ft_device_3: FT_Device) : Thread() {
+
+    var uart_configured_0 = false
+    var uart_configured_1 = false
+    var uart_configured_2 = false
+    var uart_configured_3 = false
+
+    fun setConfig(index: Int, baud: Int, dataBits: Byte, stopBits: Byte, parity: Byte, flowControl: Byte): Boolean {
+        var dataBits = dataBits
+        var stopBits = stopBits
+        var parity = parity
+        var ftDev: FT_Device
+        ftDev = when (index) {
+            0 -> ft_device_0
+            1 -> ft_device_1
+            2 -> ft_device_2
+            3 -> ft_device_3
+            else -> ft_device_0
+        }
+        if (ftDev.isOpen == false) {
+            Log.e(TAG, "SetConfig: ftDev not open!!!!!!  index:$index")
+        } else {
+            Log.i(TAG, "SetConfig: ftDev open, index:$index")
+        }
+        // configure our port
+        // reset to UART mode for 232 devices
+        ftDev.setBitMode(0.toByte(), D2xxManager.FT_BITMODE_RESET)
+
+        // set 230400 baud rate
+        // ftdid2xx.setBaudRate(9600 );
+        ftDev.setBaudRate(baud)
+        dataBits = when (dataBits.toInt()) {
+            7 -> D2xxManager.FT_DATA_BITS_7
+            8 -> D2xxManager.FT_DATA_BITS_8
+            else -> D2xxManager.FT_DATA_BITS_8
+        }
+        stopBits = when (stopBits.toInt()) {
+            1 -> D2xxManager.FT_STOP_BITS_1
+            2 -> D2xxManager.FT_STOP_BITS_2
+            else -> D2xxManager.FT_STOP_BITS_1
+        }
+        parity = when (parity.toInt()) {
+            0 -> D2xxManager.FT_PARITY_NONE
+            1 -> D2xxManager.FT_PARITY_ODD
+            2 -> D2xxManager.FT_PARITY_EVEN
+            3 -> D2xxManager.FT_PARITY_MARK
+            4 -> D2xxManager.FT_PARITY_SPACE
+            else -> D2xxManager.FT_PARITY_NONE
+        }
+        ftDev.setDataCharacteristics(dataBits, stopBits, parity)
+        val flowCtrlSetting: Short
+        flowCtrlSetting = when (flowControl.toInt()) {
+            0 -> D2xxManager.FT_FLOW_NONE
+            1 -> D2xxManager.FT_FLOW_RTS_CTS
+            2 -> D2xxManager.FT_FLOW_DTR_DSR
+            3 -> D2xxManager.FT_FLOW_XON_XOFF
+            else -> D2xxManager.FT_FLOW_NONE
+        }
+
+        ftDev.setFlowControl(flowCtrlSetting, 0x00.toByte(), 0x00.toByte())
+        when (index) {
+            0 -> {
+                uart_configured_0 = true
+            }
+            1 -> {
+                uart_configured_1 = true
+            }
+            2 -> {
+                uart_configured_2 = true
+            }
+            3 -> {
+                uart_configured_3 = true
+            }
+        }
+        return true
+    }
+
+    fun sendMessage(index: Int, writeData: ByteArray): Int {
+        var ftDev: FT_Device
+        ftDev = when (index) {
+            0 -> ft_device_0
+            1 -> ft_device_1
+            2 -> ft_device_2
+            3 -> ft_device_3
+            else -> ft_device_0
+        }
+        ftDev.latencyTimer = 16.toByte()
+
+        // ftDev.Purge(true, true);
+        val len = ftDev.write(writeData, writeData.size)
+        if (len == 0)
+            Log.e(TAG, "sendMessage wrote 0 bytes")
+        else
+            Log.i(TAG, "sendMessage wrote $writeData")
+        return len
+    }
+
+    fun receiveMessage(index: Int, readData: ByteArray): Int {
+        var ftDev: FT_Device
+        ftDev = when (index) {
+            0 -> ft_device_0
+            1 -> ft_device_1
+            2 -> ft_device_2
+            3 -> ft_device_3
+            else -> ft_device_0
+        }
+        var iavailable = ftDev.queueStatus
+        if (iavailable > 0) {
+            var len = ftDev.read(readData, iavailable)
+            if (len == 0)
+                Log.e(TAG, "receiveMessage read 0 bytes")
+            else
+                Log.i(TAG, "receiveMessage read $readData")
+            return len
+        } else {
+            Log.e(TAG, "receiveMessage queue empty")
+            return 0
+        }
+    }
+
+    override fun run() {
+        while (true) {
+            try {
+                if (inputStream.available() > 0) {
+                    val commandByte = inputStream.read().toByte()
+                    Log.i(TAG, "Received: $commandByte")
+                    setConfig(2, 9600, 8, 1, 0, 0)
+                    setConfig(3, 9600, 8, 1, 0, 0)
+                    val writeData: ByteArray = byteArrayOf(commandByte)
+                    sendMessage(2, writeData)
+                    sleep(2000L)
+                    val readData = ByteArray(1)
+                    receiveMessage(3, readData)
+                    outputStream.write(readData[0].toInt())
+                    sleep(2000L)
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                try {
+                    inputStream.close()
+                    outputStream.close()
+                } catch (ex: IOException) {
+                    ex.printStackTrace()
+                }
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+                try {
+                    inputStream.close()
+                    outputStream.close()
+                } catch (ex: IOException) {
+                    ex.printStackTrace()
+                }
+            }
+        }
+    }
+
+    companion object {
+        private val TAG = TcpClientHandler::class.java.simpleName
+    }
+
 }
