@@ -1,5 +1,6 @@
 package tech.ula.library
 
+import android.R.attr.port
 import android.app.Service
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -31,6 +32,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
+
 
 class ServerService : Service(), CoroutineScope {
 
@@ -98,8 +100,8 @@ class ServerService : Service(), CoroutineScope {
                 if (serverSocket != null) {
                     socket = serverSocket!!.accept()
                     Log.i(TAG, "New client: $socket")
-                    val outputStream = socket.getOutputStream()
-                    val inputStream = socket.getInputStream()
+                    val outputStream = DataOutputStream(socket.getOutputStream())
+                    val inputStream = DataInputStream(socket.getInputStream())
                     // Use threads for each client to communicate with them simultaneously
                     val t: Thread = TcpClientHandler(inputStream, outputStream, ft_device_0, ft_device_1, ft_device_2, ft_device_3)
                     t.start()
@@ -361,19 +363,23 @@ class ServerService : Service(), CoroutineScope {
     }
 }
 
-class TcpClientHandler(private val inputStream: InputStream, private val outputStream: OutputStream, private val ft_device_0: FT_Device, private val ft_device_1: FT_Device, private val ft_device_2: FT_Device, private val ft_device_3: FT_Device) : Thread() {
+class TcpClientHandler(private val inputStream: DataInputStream, private val outputStream: DataOutputStream, private val ft_device_0: FT_Device, private val ft_device_1: FT_Device, private val ft_device_2: FT_Device, private val ft_device_3: FT_Device) : Thread() {
+
+    val SOCK_CMD_GET_UART_DEV_CNT: Byte = 1
+    val SOCK_CMD_SET_UART_CONFIG: Byte = 2
+    val SOCK_CMD_WR_UART_BYTES: Byte = 3
+    val SOCK_CMD_RD_UART_BYTES: Byte = 4
+    val SOCK_RSP_OK: Byte = 0
+    val SOCK_RSP_ERR: Byte = 1
 
     var uart_configured_0 = false
     var uart_configured_1 = false
     var uart_configured_2 = false
     var uart_configured_3 = false
 
-    fun setConfig(index: Int, baud: Int, dataBits: Byte, stopBits: Byte, parity: Byte, flowControl: Byte): Boolean {
-        var dataBits = dataBits
-        var stopBits = stopBits
-        var parity = parity
+    fun setConfig(index: Byte, baud: Int, dataBits: Byte, stopBits: Byte, parity: Byte, flowControl: Short): Boolean {
         var ftDev: FT_Device
-        ftDev = when (index) {
+        ftDev = when (index.toInt()) {
             0 -> ft_device_0
             1 -> ft_device_1
             2 -> ft_device_2
@@ -392,36 +398,9 @@ class TcpClientHandler(private val inputStream: InputStream, private val outputS
         // set 230400 baud rate
         // ftdid2xx.setBaudRate(9600 );
         ftDev.setBaudRate(baud)
-        dataBits = when (dataBits.toInt()) {
-            7 -> D2xxManager.FT_DATA_BITS_7
-            8 -> D2xxManager.FT_DATA_BITS_8
-            else -> D2xxManager.FT_DATA_BITS_8
-        }
-        stopBits = when (stopBits.toInt()) {
-            1 -> D2xxManager.FT_STOP_BITS_1
-            2 -> D2xxManager.FT_STOP_BITS_2
-            else -> D2xxManager.FT_STOP_BITS_1
-        }
-        parity = when (parity.toInt()) {
-            0 -> D2xxManager.FT_PARITY_NONE
-            1 -> D2xxManager.FT_PARITY_ODD
-            2 -> D2xxManager.FT_PARITY_EVEN
-            3 -> D2xxManager.FT_PARITY_MARK
-            4 -> D2xxManager.FT_PARITY_SPACE
-            else -> D2xxManager.FT_PARITY_NONE
-        }
         ftDev.setDataCharacteristics(dataBits, stopBits, parity)
-        val flowCtrlSetting: Short
-        flowCtrlSetting = when (flowControl.toInt()) {
-            0 -> D2xxManager.FT_FLOW_NONE
-            1 -> D2xxManager.FT_FLOW_RTS_CTS
-            2 -> D2xxManager.FT_FLOW_DTR_DSR
-            3 -> D2xxManager.FT_FLOW_XON_XOFF
-            else -> D2xxManager.FT_FLOW_NONE
-        }
-
-        ftDev.setFlowControl(flowCtrlSetting, 0x00.toByte(), 0x00.toByte())
-        when (index) {
+        ftDev.setFlowControl(flowControl, 0x00.toByte(), 0x00.toByte())
+        when (index.toInt()) {
             0 -> {
                 uart_configured_0 = true
             }
@@ -438,9 +417,9 @@ class TcpClientHandler(private val inputStream: InputStream, private val outputS
         return true
     }
 
-    fun sendMessage(index: Int, writeData: ByteArray): Int {
+    fun sendMessage(index: Byte, writeData: ByteArray): Int {
         var ftDev: FT_Device
-        ftDev = when (index) {
+        ftDev = when (index.toInt()) {
             0 -> ft_device_0
             1 -> ft_device_1
             2 -> ft_device_2
@@ -458,9 +437,9 @@ class TcpClientHandler(private val inputStream: InputStream, private val outputS
         return len
     }
 
-    fun receiveMessage(index: Int, readData: ByteArray): Int {
+    fun receiveMessage(index: Byte, readData: ByteArray): Int {
         var ftDev: FT_Device
-        ftDev = when (index) {
+        ftDev = when (index.toInt()) {
             0 -> ft_device_0
             1 -> ft_device_1
             2 -> ft_device_2
@@ -485,8 +464,35 @@ class TcpClientHandler(private val inputStream: InputStream, private val outputS
         while (true) {
             try {
                 if (inputStream.available() > 0) {
-                    val commandByte = inputStream.read().toByte()
-                    Log.i(TAG, "Received: $commandByte")
+                    val commandByte = inputStream.readByte()
+                    Log.i(TAG, "Received command: $commandByte")
+                    if (commandByte == SOCK_CMD_SET_UART_CONFIG) {
+                        val index = inputStream.readByte()
+                        val baud = inputStream.readInt()
+                        val dataBits = inputStream.readByte()
+                        val stopBits = inputStream.readByte()
+                        val parity = inputStream.readByte()
+                        val flowControl = inputStream.readShort()
+                        setConfig(index, baud, dataBits, stopBits, parity, flowControl)
+                        outputStream.writeByte(SOCK_RSP_OK.toInt())
+                    } else if (commandByte == SOCK_CMD_WR_UART_BYTES) {
+                        val index = inputStream.readByte()
+                        val length = inputStream.readInt()
+                        val writeData = ByteArray(length)
+                        inputStream.readFully(writeData)
+                        sendMessage(index, writeData)
+                        outputStream.writeByte(SOCK_RSP_OK.toInt())
+                    } else if (commandByte == SOCK_CMD_RD_UART_BYTES) {
+                        val index = inputStream.readByte()
+                        val length = inputStream.readInt()
+                        val readData = ByteArray(length)
+                        receiveMessage(index, readData)
+                        outputStream.writeByte(SOCK_RSP_OK.toInt())
+                        outputStream.write(readData)
+                    } else {
+                        outputStream.writeByte(SOCK_RSP_ERR.toInt())
+                    }
+                    /*
                     setConfig(2, 9600, 8, 1, 0, 0)
                     setConfig(3, 9600, 8, 1, 0, 0)
                     val writeData: ByteArray = byteArrayOf(commandByte)
@@ -495,6 +501,7 @@ class TcpClientHandler(private val inputStream: InputStream, private val outputS
                     val readData = ByteArray(1)
                     receiveMessage(3, readData)
                     outputStream.write(readData[0].toInt())
+                     */
                     sleep(2000L)
                 }
             } catch (e: IOException) {
