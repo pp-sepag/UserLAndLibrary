@@ -1,6 +1,5 @@
 package tech.ula.library
 
-import android.R.attr.port
 import android.app.Service
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -11,8 +10,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.ftdi.j2xx.D2xxManager
-import com.ftdi.j2xx.D2xxManager.D2xxException
-import com.ftdi.j2xx.D2xxManager.FtDeviceInfoListNode
+import com.ftdi.j2xx.D2xxManager.*
 import com.ftdi.j2xx.FT_Device
 import com.google.mlkit.md.LiveBarcodeScanningActivity
 import com.iiordanov.bVNC.RemoteCanvasActivity
@@ -25,6 +23,7 @@ import tech.ula.library.model.entities.Session
 import tech.ula.library.model.repositories.UlaDatabase
 import tech.ula.library.utils.*
 import java.io.*
+import java.lang.Thread.sleep
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.*
@@ -37,11 +36,6 @@ import kotlin.coroutines.CoroutineContext
 class ServerService : Service(), CoroutineScope {
 
     var ftd2xx: D2xxManager? = null
-
-    var ft_device_0: FT_Device? = null
-    var ft_device_1: FT_Device? = null
-    var ft_device_2: FT_Device? = null
-    var ft_device_3: FT_Device? = null
 
     private val job = Job()
     override val coroutineContext: CoroutineContext
@@ -73,38 +67,83 @@ class ServerService : Service(), CoroutineScope {
         LocalServerManager(this.filesDir.path, busyboxExecutor, this.defaultSharedPreferences)
     }
 
-    private var serverSocket: ServerSocket? = null
+    private fun setConfig(ftDev: FT_Device, baud: Int, dataBits: Byte, stopBits: Byte, parity: Byte, flowControl: Short) {
+        // configure our port
+        // reset to UART mode for 232 devices
+        ftDev.setBitMode(0.toByte(), D2xxManager.FT_BITMODE_RESET)
+
+        // set 230400 baud rate
+        // ftdid2xx.setBaudRate(9600 );
+        ftDev.setBaudRate(baud)
+        ftDev.setDataCharacteristics(dataBits, stopBits, parity)
+        ftDev.setFlowControl(flowControl, 0x00.toByte(), 0x00.toByte())
+    }
+
     private val working = AtomicBoolean(true)
-    private val runnable = Runnable {
-        var socket: Socket? = null
-        try {
-            var devCount = 0
 
-            while (devCount == 0) {
-                devCount = ftd2xx!!.createDeviceInfoList(this)
-                if (devCount == 0)
-                    Thread.sleep(1000L)
+    fun readThread (ftDev: FT_Device, outputStream: DataOutputStream) {
+        var availBytes = 0
+        while (working.get()) {
+            try {
+                sleep(50)
+            } catch (e: InterruptedException) {
             }
-            Log.i("Ftdi", "Device number = " + Integer.toString(devCount))
+            synchronized(ftDev) {
+                availBytes = ftDev.getQueueStatus()
+                if (availBytes > 0) {
+                    var readData = ByteArray(availBytes)
+                    ftDev.read(readData, availBytes)
+                    outputStream.write(readData)
+                }
+            }
+        }
+    }
 
-            val deviceList = arrayOfNulls<FtDeviceInfoListNode>(devCount)
-            ftd2xx!!.getDeviceInfoList(devCount, deviceList)
-            Log.i("Ftdi","Device description =  ${deviceList[0]!!.description}")
+    fun startReadThread(ftDev: FT_Device, outputStream: DataOutputStream) {
+        val t = Thread { readThread (ftDev, outputStream) }
+        t.start()
+    }
 
-            val ft_device_0 = ftd2xx!!.openByIndex(this, 0)
-            val ft_device_1 = ftd2xx!!.openByIndex(this, 1)
-            val ft_device_2 = ftd2xx!!.openByIndex(this, 2)
-            val ft_device_3 = ftd2xx!!.openByIndex(this, 3)
-            serverSocket = ServerSocket(PORT)
+    fun writeThread(ftDev: FT_Device, inputStream: DataInputStream) {
+        var availBytes = 0
+        while (working.get()) {
+            try {
+                sleep(50)
+            } catch (e: InterruptedException) {
+            }
+            synchronized(ftDev) {
+                availBytes = inputStream.available()
+                if (availBytes > 0) {
+                    var readData = ByteArray(availBytes)
+                    inputStream.read(readData)
+                    ftDev.write(readData)
+                }
+            }
+        }
+    }
+
+    fun startWriteThread(ftDev: FT_Device, inputStream: DataInputStream) {
+        val t = Thread { writeThread (ftDev, inputStream) }
+        t.start()
+    }
+
+    fun socketThread(port: Int) {
+        var serverSocket: ServerSocket? = null
+        var socket: Socket? = null
+
+        val ftDev = ftd2xx!!.openByIndex(this, port)
+        setConfig(ftDev, 9600, FT_DATA_BITS_8, FT_STOP_BITS_1, FT_PARITY_NONE, FT_FLOW_NONE)
+
+        try {
+            serverSocket = ServerSocket(PORT + port)
             while (working.get()) {
                 if (serverSocket != null) {
                     socket = serverSocket!!.accept()
                     Log.i(TAG, "New client: $socket")
                     val outputStream = DataOutputStream(socket.getOutputStream())
                     val inputStream = DataInputStream(socket.getInputStream())
-                    // Use threads for each client to communicate with them simultaneously
-                    val t: Thread = TcpClientHandler(inputStream, outputStream, ft_device_0, ft_device_1, ft_device_2, ft_device_3)
-                    t.start()
+                    startReadThread(ftDev, outputStream)
+                    startWriteThread(ftDev, inputStream)
                 } else {
                     Log.e(TAG, "Couldn't create ServerSocket!")
                 }
@@ -116,10 +155,27 @@ class ServerService : Service(), CoroutineScope {
             } catch (ex: IOException) {
                 ex.printStackTrace()
             }
-            ft_device_0!!.close()
-            ft_device_1!!.close()
-            ft_device_2!!.close()
-            ft_device_3!!.close()
+            ftDev!!.close()
+        }
+    }
+
+    fun startSocketThread(port: Int) {
+        val t = Thread { socketThread (port) }
+        t.start()
+    }
+
+    fun startFTDI() {
+        var devCount = ftd2xx!!.createDeviceInfoList(this)
+        Log.i("Ftdi", "Device number = " + Integer.toString(devCount))
+
+        if (devCount > 0) {
+            val deviceList = arrayOfNulls<FtDeviceInfoListNode>(devCount)
+            ftd2xx!!.getDeviceInfoList(devCount, deviceList)
+
+            for (i in 1..devCount) {
+                Log.i("Ftdi", "Device description =  ${deviceList[0]!!.description}")
+                startSocketThread(i - 1)
+            }
         }
     }
 
@@ -215,7 +271,7 @@ class ServerService : Service(), CoroutineScope {
         if (BuildConfig.POLL_FOR_INTENTS) {
             val scheduleTaskExecutor= Executors.newScheduledThreadPool(1)
             scheduleTaskExecutor.scheduleAtFixedRate(java.lang.Runnable { intentRequest() }, 1000, 100, TimeUnit.MILLISECONDS)
-            Thread(runnable).start()
+            startFTDI()
         }
 
         while (!localServerManager.isServerRunning(session)) {
@@ -361,171 +417,4 @@ class ServerService : Service(), CoroutineScope {
             }
         }
     }
-}
-
-class TcpClientHandler(private val inputStream: DataInputStream, private val outputStream: DataOutputStream, private val ft_device_0: FT_Device, private val ft_device_1: FT_Device, private val ft_device_2: FT_Device, private val ft_device_3: FT_Device) : Thread() {
-
-    val SOCK_CMD_GET_UART_DEV_CNT: Byte = 1
-    val SOCK_CMD_SET_UART_CONFIG: Byte = 2
-    val SOCK_CMD_WR_UART_BYTES: Byte = 3
-    val SOCK_CMD_RD_UART_BYTES: Byte = 4
-    val SOCK_RSP_OK: Byte = 0
-    val SOCK_RSP_ERR: Byte = 1
-
-    var uart_configured_0 = false
-    var uart_configured_1 = false
-    var uart_configured_2 = false
-    var uart_configured_3 = false
-
-    fun setConfig(index: Byte, baud: Int, dataBits: Byte, stopBits: Byte, parity: Byte, flowControl: Short): Boolean {
-        var ftDev: FT_Device
-        ftDev = when (index.toInt()) {
-            0 -> ft_device_0
-            1 -> ft_device_1
-            2 -> ft_device_2
-            3 -> ft_device_3
-            else -> ft_device_0
-        }
-        if (ftDev.isOpen == false) {
-            Log.e(TAG, "SetConfig: ftDev not open!!!!!!  index:$index")
-        } else {
-            Log.i(TAG, "SetConfig: ftDev open, index:$index")
-        }
-        // configure our port
-        // reset to UART mode for 232 devices
-        ftDev.setBitMode(0.toByte(), D2xxManager.FT_BITMODE_RESET)
-
-        // set 230400 baud rate
-        // ftdid2xx.setBaudRate(9600 );
-        ftDev.setBaudRate(baud)
-        ftDev.setDataCharacteristics(dataBits, stopBits, parity)
-        ftDev.setFlowControl(flowControl, 0x00.toByte(), 0x00.toByte())
-        when (index.toInt()) {
-            0 -> {
-                uart_configured_0 = true
-            }
-            1 -> {
-                uart_configured_1 = true
-            }
-            2 -> {
-                uart_configured_2 = true
-            }
-            3 -> {
-                uart_configured_3 = true
-            }
-        }
-        return true
-    }
-
-    fun sendMessage(index: Byte, writeData: ByteArray): Int {
-        var ftDev: FT_Device
-        ftDev = when (index.toInt()) {
-            0 -> ft_device_0
-            1 -> ft_device_1
-            2 -> ft_device_2
-            3 -> ft_device_3
-            else -> ft_device_0
-        }
-        ftDev.latencyTimer = 16.toByte()
-
-        // ftDev.Purge(true, true);
-        val len = ftDev.write(writeData, writeData.size)
-        if (len == 0)
-            Log.e(TAG, "sendMessage wrote 0 bytes")
-        else
-            Log.i(TAG, "sendMessage wrote $writeData")
-        return len
-    }
-
-    fun receiveMessage(index: Byte, readData: ByteArray): Int {
-        var ftDev: FT_Device
-        ftDev = when (index.toInt()) {
-            0 -> ft_device_0
-            1 -> ft_device_1
-            2 -> ft_device_2
-            3 -> ft_device_3
-            else -> ft_device_0
-        }
-        var iavailable = ftDev.queueStatus
-        if (iavailable > 0) {
-            var len = ftDev.read(readData, iavailable)
-            if (len == 0)
-                Log.e(TAG, "receiveMessage read 0 bytes")
-            else
-                Log.i(TAG, "receiveMessage read $readData")
-            return len
-        } else {
-            Log.e(TAG, "receiveMessage queue empty")
-            return 0
-        }
-    }
-
-    override fun run() {
-        while (true) {
-            try {
-                if (inputStream.available() > 0) {
-                    val commandByte = inputStream.readByte()
-                    Log.i(TAG, "Received command: $commandByte")
-                    if (commandByte == SOCK_CMD_SET_UART_CONFIG) {
-                        val index = inputStream.readByte()
-                        val baud = inputStream.readInt()
-                        val dataBits = inputStream.readByte()
-                        val stopBits = inputStream.readByte()
-                        val parity = inputStream.readByte()
-                        val flowControl = inputStream.readShort()
-                        setConfig(index, baud, dataBits, stopBits, parity, flowControl)
-                        outputStream.writeByte(SOCK_RSP_OK.toInt())
-                    } else if (commandByte == SOCK_CMD_WR_UART_BYTES) {
-                        val index = inputStream.readByte()
-                        val length = inputStream.readInt()
-                        val writeData = ByteArray(length)
-                        inputStream.readFully(writeData)
-                        sendMessage(index, writeData)
-                        outputStream.writeByte(SOCK_RSP_OK.toInt())
-                    } else if (commandByte == SOCK_CMD_RD_UART_BYTES) {
-                        val index = inputStream.readByte()
-                        val length = inputStream.readInt()
-                        val readData = ByteArray(length)
-                        receiveMessage(index, readData)
-                        outputStream.writeByte(SOCK_RSP_OK.toInt())
-                        outputStream.write(readData)
-                    } else {
-                        outputStream.writeByte(SOCK_RSP_ERR.toInt())
-                    }
-                    /*
-                    setConfig(2, 9600, 8, 1, 0, 0)
-                    setConfig(3, 9600, 8, 1, 0, 0)
-                    val writeData: ByteArray = byteArrayOf(commandByte)
-                    sendMessage(2, writeData)
-                    sleep(2000L)
-                    val readData = ByteArray(1)
-                    receiveMessage(3, readData)
-                    outputStream.write(readData[0].toInt())
-                     */
-                    sleep(2000L)
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-                try {
-                    inputStream.close()
-                    outputStream.close()
-                } catch (ex: IOException) {
-                    ex.printStackTrace()
-                }
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-                try {
-                    inputStream.close()
-                    outputStream.close()
-                } catch (ex: IOException) {
-                    ex.printStackTrace()
-                }
-            }
-        }
-    }
-
-    companion object {
-        private val TAG = TcpClientHandler::class.java.simpleName
-    }
-
 }
