@@ -179,6 +179,26 @@
     <string name="pref_hide_settings_title">Hide this Setting Menu</string>
     <string name="pref_hide_settings_summary">Makes this setting menu inaccessible.</string>
 
+    <string name="pref_rs232_category">RS232 Preferences</string>
+    <string name="pref_rs232_enabled_title">Enable RS232</string>
+    <string name="pref_rs232_enabled_summary">Enable USB to RS232 Communication</string>
+    <string name="pref_rs232_baud_rate_title">Baud Rate</string>
+    <string name="pref_rs232_baud_rate_default">9600</string>
+    <string name="pref_rs232_data_bits_title">Data Bits</string>
+    <string name="pref_rs232_data_bits_summary">Number of Data Bits</string>
+    <string name="pref_rs232_data_bits_default">1</string>
+    <string name="pref_rs232_stop_bits_title">Stop Bits</string>
+    <string name="pref_rs232_stop_bits_summary">Number of Stop Bits</string>
+    <string name="pref_rs232_stop_bits_default">1</string>
+    <string name="pref_rs232_parity_title">Parity</string>
+    <string name="pref_rs232_parity_summary">Parity Type</string>
+    <string name="pref_rs232_parity_default">1</string>
+    <string name="pref_rs232_flow_title">Flow Control</string>
+    <string name="pref_rs232_flow_summary">Flow Control Type</string>
+    <string name="pref_rs232_flow_default">1</string>
+    <string name="pref_rs232_port_title">TCP Port Offset</string>
+    <string name="pref_rs232_port_default">9876</string>
+
     <string name="pref_proot_category">PRoot Preferences</string>
     <string name="pref_proot_debugging_enabled_title">PRoot Debugging Logs Enabled</string>
     <string name="pref_proot_debugging_enabled_summary">Only necessary if having problems with the app. Log file stored at\n/mnt/sdcard/PRoot_Debug_Log</string>

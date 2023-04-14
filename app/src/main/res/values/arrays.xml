@@ -111,4 +111,50 @@
         <item>@string/input_method_touchpad</item>
         <item>@string/input_method_single_handed</item>
     </string-array>
+
+    <string-array name="rs232_data_bits">
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+
+    <string-array name="rs232_stop_bits">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="rs232_stop_bits_values">
+        <item>0</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="rs232_parity">
+        <item>None</item>
+        <item>Odd</item>
+        <item>Even</item>
+        <item>Mark</item>
+        <item>Space</item>
+    </string-array>
+
+    <string-array name="rs232_parity_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <string-array name="rs232_flow">
+        <item>None</item>
+        <item>RTS_CTS</item>
+        <item>DTR_DSR</item>
+        <item>XON_XOFF</item>
+    </string-array>
+
+    <string-array name="rs232_flow_values">
+        <item>0</item>
+        <item>256</item>
+        <item>512</item>
+        <item>1024</item>
+    </string-array>
+
 </resources>
