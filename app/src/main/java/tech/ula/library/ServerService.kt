@@ -44,7 +44,6 @@ class ServerService : Service(), CoroutineScope {
     companion object {
         const val SERVER_SERVICE_RESULT: String = "tech.ula.library.ServerService.RESULT"
         private val TAG = ServerService::class.java.simpleName
-        private const val PORT = 9876
     }
 
     private val activeSessions: MutableMap<Long, Session> = mutableMapOf()
@@ -68,12 +67,7 @@ class ServerService : Service(), CoroutineScope {
     }
 
     private fun setConfig(ftDev: FT_Device, baud: Int, dataBits: Byte, stopBits: Byte, parity: Byte, flowControl: Short) {
-        // configure our port
-        // reset to UART mode for 232 devices
         ftDev.setBitMode(0.toByte(), D2xxManager.FT_BITMODE_RESET)
-
-        // set 230400 baud rate
-        // ftdid2xx.setBaudRate(9600 );
         ftDev.setBaudRate(baud)
         ftDev.setDataCharacteristics(dataBits, stopBits, parity)
         ftDev.setFlowControl(flowControl, 0x00.toByte(), 0x00.toByte())
@@ -127,15 +121,15 @@ class ServerService : Service(), CoroutineScope {
         t.start()
     }
 
-    fun socketThread(port: Int) {
+    fun socketThread(channel: Int, port: String, baudRate: String, dataBits: String, stopBits: String, parity: String, flow: String) {
         var serverSocket: ServerSocket? = null
         var socket: Socket? = null
 
-        val ftDev = ftd2xx!!.openByIndex(this, port)
-        setConfig(ftDev, 9600, FT_DATA_BITS_8, FT_STOP_BITS_1, FT_PARITY_NONE, FT_FLOW_NONE)
+        val ftDev = ftd2xx!!.openByIndex(this, channel)
+        setConfig(ftDev, baudRate.toInt(), dataBits.toByte(), stopBits.toByte(), parity.toByte(), flow.toShort())
 
         try {
-            serverSocket = ServerSocket(PORT + port)
+            serverSocket = ServerSocket(port.toInt() + channel)
             while (working.get()) {
                 if (serverSocket != null) {
                     socket = serverSocket!!.accept()
@@ -159,22 +153,27 @@ class ServerService : Service(), CoroutineScope {
         }
     }
 
-    fun startSocketThread(port: Int) {
-        val t = Thread { socketThread (port) }
+    fun startSocketThread(channel: Int) {
+        val t = Thread { socketThread (channel, this.defaultSharedPreferences.getString("pref_rs232_port", "9876")!!, this.defaultSharedPreferences.getString("pref_rs232_baud_rate", "9600")!!, this.defaultSharedPreferences.getString("pref_rs232_data_bits", FT_DATA_BITS_8.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_stop_bits", FT_STOP_BITS_1.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_parity", FT_PARITY_NONE.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_flow", FT_FLOW_NONE.toString())!!) }
         t.start()
     }
 
     fun startFTDI() {
-        var devCount = ftd2xx!!.createDeviceInfoList(this)
-        Log.i("Ftdi", "Device number = " + Integer.toString(devCount))
+        var devCount = 0
+        while (devCount == 0) {
+            devCount = ftd2xx!!.createDeviceInfoList(this)
+            Log.i("Ftdi", "Device number = " + Integer.toString(devCount))
 
-        if (devCount > 0) {
-            val deviceList = arrayOfNulls<FtDeviceInfoListNode>(devCount)
-            ftd2xx!!.getDeviceInfoList(devCount, deviceList)
+            if (devCount > 0) {
+                val deviceList = arrayOfNulls<FtDeviceInfoListNode>(devCount)
+                ftd2xx!!.getDeviceInfoList(devCount, deviceList)
 
-            for (i in 1..devCount) {
-                Log.i("Ftdi", "Device description =  ${deviceList[0]!!.description}")
-                startSocketThread(i - 1)
+                for (i in 1..devCount) {
+                    Log.i("Ftdi", "Device description =  ${deviceList[0]!!.description}")
+                    startSocketThread(i - 1)
+                }
+            } else {
+                sleep(50)
             }
         }
     }
@@ -271,7 +270,9 @@ class ServerService : Service(), CoroutineScope {
         if (BuildConfig.POLL_FOR_INTENTS) {
             val scheduleTaskExecutor= Executors.newScheduledThreadPool(1)
             scheduleTaskExecutor.scheduleAtFixedRate(java.lang.Runnable { intentRequest() }, 1000, 100, TimeUnit.MILLISECONDS)
-            startFTDI()
+            if (this.defaultSharedPreferences.getBoolean("pref_rs232_enabled", true)) {
+                startFTDI()
+            }
         }
 
         while (!localServerManager.isServerRunning(session)) {
