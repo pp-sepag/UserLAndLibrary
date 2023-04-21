@@ -165,24 +165,20 @@ class ServerService : Service(), CoroutineScope {
 
     fun startFTDI() {
         var devCount = 0
-        while (devCount == 0) {
-            devCount = ftd2xx!!.createDeviceInfoList(this)
-            Log.i("Ftdi", "Device number = " + Integer.toString(devCount))
+        devCount = ftd2xx!!.createDeviceInfoList(this)
+        Log.i("Ftdi", "Device number = " + Integer.toString(devCount))
 
-            if (devCount > 0) {
-                val deviceList = arrayOfNulls<FtDeviceInfoListNode>(devCount)
-                ftd2xx!!.getDeviceInfoList(devCount, deviceList)
-                if (devCount > 4)
-                    devCount = 4 //we only support 4 rs232 ports right now
+        if (devCount > 0) {
+            val deviceList = arrayOfNulls<FtDeviceInfoListNode>(devCount)
+            ftd2xx!!.getDeviceInfoList(devCount, deviceList)
+            if (devCount > 4)
+                devCount = 4 //we only support 4 rs232 ports right now
 
-                for (i in 1..devCount) {
-                    Log.i("Ftdi", "Device description =  ${deviceList[0]!!.description}")
-                    socketThreads[i-1]?.interrupt()
-                    socketThreads[i-1] = Thread { socketThread (i-1, this.defaultSharedPreferences.getString("pref_rs232_port", "9876")!!, this.defaultSharedPreferences.getString("pref_rs232_baud_rate", "9600")!!, this.defaultSharedPreferences.getString("pref_rs232_data_bits", FT_DATA_BITS_8.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_stop_bits", FT_STOP_BITS_1.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_parity", FT_PARITY_NONE.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_flow", FT_FLOW_NONE.toString())!!) }
-                    socketThreads[i-1]?.start()
-                }
-            } else {
-                sleep(50)
+            for (i in 1..devCount) {
+                Log.i("Ftdi", "Device description =  ${deviceList[0]!!.description}")
+                socketThreads[i-1]?.interrupt()
+                socketThreads[i-1] = Thread { socketThread (i-1, this.defaultSharedPreferences.getString("pref_rs232_port", "9876")!!, this.defaultSharedPreferences.getString("pref_rs232_baud_rate", "9600")!!, this.defaultSharedPreferences.getString("pref_rs232_data_bits", FT_DATA_BITS_8.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_stop_bits", FT_STOP_BITS_1.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_parity", FT_PARITY_NONE.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_flow", FT_FLOW_NONE.toString())!!) }
+                socketThreads[i-1]?.start()
             }
         }
     }
