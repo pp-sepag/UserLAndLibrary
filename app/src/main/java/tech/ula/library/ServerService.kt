@@ -36,6 +36,11 @@ import kotlin.coroutines.CoroutineContext
 class ServerService : Service(), CoroutineScope {
 
     var ftd2xx: D2xxManager? = null
+    var serverSockets = Array<ServerSocket?>(4) {null}
+    var tcpSockets = Array<Socket?>(4) {null}
+    var socketThreads = Array<Thread?>(4) {null}
+    var readThreads = Array<Thread?>(4) {null}
+    var writeThreads = Array<Thread?>(4) {null}
 
     private val job = Job()
     override val coroutineContext: CoroutineContext
@@ -77,85 +82,85 @@ class ServerService : Service(), CoroutineScope {
 
     fun readThread (ftDev: FT_Device, outputStream: DataOutputStream) {
         var availBytes = 0
-        while (working.get()) {
-            try {
-                sleep(50)
-            } catch (e: InterruptedException) {
-            }
-            synchronized(ftDev) {
-                availBytes = ftDev.getQueueStatus()
-                if (availBytes > 0) {
-                    var readData = ByteArray(availBytes)
-                    ftDev.read(readData, availBytes)
-                    outputStream.write(readData)
+        try {
+            while (working.get()) {
+                synchronized(ftDev) {
+                    availBytes = ftDev.getQueueStatus()
+                    if (availBytes > 0) {
+                        var readData = ByteArray(availBytes)
+                        ftDev.read(readData, availBytes)
+                        outputStream.write(readData)
+                    } else {
+                        sleep(50)
+                    }
                 }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            outputStream.close()
         }
-    }
-
-    fun startReadThread(ftDev: FT_Device, outputStream: DataOutputStream) {
-        val t = Thread { readThread (ftDev, outputStream) }
-        t.start()
     }
 
     fun writeThread(ftDev: FT_Device, inputStream: DataInputStream) {
         var availBytes = 0
-        while (working.get()) {
-            try {
-                sleep(50)
-            } catch (e: InterruptedException) {
-            }
-            synchronized(ftDev) {
-                availBytes = inputStream.available()
-                if (availBytes > 0) {
-                    var readData = ByteArray(availBytes)
-                    inputStream.read(readData)
-                    ftDev.write(readData)
+        try {
+            while (working.get()) {
+                synchronized(ftDev) {
+                    availBytes = inputStream.available()
+                    if (availBytes > 0) {
+                        var readData = ByteArray(availBytes)
+                        inputStream.read(readData)
+                        ftDev.write(readData)
+                    } else {
+                        sleep(50)
+                    }
                 }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            inputStream.close()
         }
     }
 
-    fun startWriteThread(ftDev: FT_Device, inputStream: DataInputStream) {
-        val t = Thread { writeThread (ftDev, inputStream) }
-        t.start()
-    }
-
     fun socketThread(channel: Int, port: String, baudRate: String, dataBits: String, stopBits: String, parity: String, flow: String) {
-        var serverSocket: ServerSocket? = null
-        var socket: Socket? = null
+        var newSocket: Socket? = null
 
         val ftDev = ftd2xx!!.openByIndex(this, channel)
         setConfig(ftDev, baudRate.toInt(), dataBits.toByte(), stopBits.toByte(), parity.toByte(), flow.toShort())
 
         try {
-            serverSocket = ServerSocket(port.toInt() + channel)
+            serverSockets[channel]?.close()
+            serverSockets[channel] = ServerSocket(port.toInt() + channel)
             while (working.get()) {
-                if (serverSocket != null) {
-                    socket = serverSocket!!.accept()
-                    Log.i(TAG, "New client: $socket")
-                    val outputStream = DataOutputStream(socket.getOutputStream())
-                    val inputStream = DataInputStream(socket.getInputStream())
-                    startReadThread(ftDev, outputStream)
-                    startWriteThread(ftDev, inputStream)
+                if (serverSockets[channel] != null) {
+                    newSocket = serverSockets[channel]!!.accept()
+                    tcpSockets[channel]?.close()
+                    readThreads[channel]?.interrupt()
+                    writeThreads[channel]?.interrupt()
+                    tcpSockets[channel] = newSocket
+                    Log.i(TAG, "New client: ${tcpSockets[channel]}")
+                    val outputStream = DataOutputStream(tcpSockets[channel]!!.getOutputStream())
+                    val inputStream = DataInputStream(tcpSockets[channel]!!.getInputStream())
+                    readThreads[channel] = Thread{ readThread (ftDev, outputStream) }
+                    writeThreads[channel] = Thread{ writeThread (ftDev, inputStream) }
+                    readThreads[channel]!!.start()
+                    writeThreads[channel]!!.start()
                 } else {
                     Log.e(TAG, "Couldn't create ServerSocket!")
                 }
             }
-        } catch (e: IOException) {
+            serverSockets[channel]?.close()
+        } catch (e: Exception) {
             e.printStackTrace()
             try {
-                socket?.close()
+                tcpSockets[channel]?.close()
             } catch (ex: IOException) {
                 ex.printStackTrace()
             }
             ftDev!!.close()
         }
-    }
-
-    fun startSocketThread(channel: Int) {
-        val t = Thread { socketThread (channel, this.defaultSharedPreferences.getString("pref_rs232_port", "9876")!!, this.defaultSharedPreferences.getString("pref_rs232_baud_rate", "9600")!!, this.defaultSharedPreferences.getString("pref_rs232_data_bits", FT_DATA_BITS_8.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_stop_bits", FT_STOP_BITS_1.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_parity", FT_PARITY_NONE.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_flow", FT_FLOW_NONE.toString())!!) }
-        t.start()
     }
 
     fun startFTDI() {
@@ -167,10 +172,14 @@ class ServerService : Service(), CoroutineScope {
             if (devCount > 0) {
                 val deviceList = arrayOfNulls<FtDeviceInfoListNode>(devCount)
                 ftd2xx!!.getDeviceInfoList(devCount, deviceList)
+                if (devCount > 4)
+                    devCount = 4 //we only support 4 rs232 ports right now
 
                 for (i in 1..devCount) {
                     Log.i("Ftdi", "Device description =  ${deviceList[0]!!.description}")
-                    startSocketThread(i - 1)
+                    socketThreads[i-1]?.interrupt()
+                    socketThreads[i-1] = Thread { socketThread (i-1, this.defaultSharedPreferences.getString("pref_rs232_port", "9876")!!, this.defaultSharedPreferences.getString("pref_rs232_baud_rate", "9600")!!, this.defaultSharedPreferences.getString("pref_rs232_data_bits", FT_DATA_BITS_8.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_stop_bits", FT_STOP_BITS_1.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_parity", FT_PARITY_NONE.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_flow", FT_FLOW_NONE.toString())!!) }
+                    socketThreads[i-1]?.start()
                 }
             } else {
                 sleep(50)
@@ -240,6 +249,13 @@ class ServerService : Service(), CoroutineScope {
     override fun onDestroy() {
         super.onDestroy()
         working.set(false)
+        for (i in 0..3) {
+            readThreads[i]?.interrupt()
+            writeThreads[i]?.interrupt()
+            socketThreads[i]?.interrupt()
+            tcpSockets[i]?.close()
+            serverSockets[i]?.close()
+        }
         // Redundancy to ensure no hanging processes, given broad device spectrum.
         this.coroutineContext.cancel()
     }
