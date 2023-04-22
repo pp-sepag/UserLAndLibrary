@@ -132,7 +132,7 @@ class ServerService : Service(), CoroutineScope {
 
         try {
             serverSockets[channel]?.close()
-            serverSockets[channel] = ServerSocket(port.toInt() + channel)
+            serverSockets[channel] = ServerSocket(port.toInt())
             while (working.get()) {
                 if (serverSockets[channel] != null) {
                     newSocket = serverSockets[channel]!!.accept()
@@ -164,21 +164,53 @@ class ServerService : Service(), CoroutineScope {
     }
 
     fun startFTDI() {
-        var devCount = 0
-        devCount = ftd2xx!!.createDeviceInfoList(this)
-        Log.i("Ftdi", "Device number = " + Integer.toString(devCount))
+        if (this.defaultSharedPreferences.getBoolean("pref_rs232_enabled", false)) {
+            var devCount = 0
+            devCount = ftd2xx!!.createDeviceInfoList(this)
+            Log.i("Ftdi", "Device number = " + Integer.toString(devCount))
 
-        if (devCount > 0) {
-            val deviceList = arrayOfNulls<FtDeviceInfoListNode>(devCount)
-            ftd2xx!!.getDeviceInfoList(devCount, deviceList)
-            if (devCount > 4)
-                devCount = 4 //we only support 4 rs232 ports right now
+            if (devCount > 0) {
+                val deviceList = arrayOfNulls<FtDeviceInfoListNode>(devCount)
+                ftd2xx!!.getDeviceInfoList(devCount, deviceList)
+                if (devCount > 4)
+                    devCount = 4 //we only support 4 rs232 ports right now
 
-            for (i in 1..devCount) {
-                Log.i("Ftdi", "Device description =  ${deviceList[0]!!.description}")
-                socketThreads[i-1]?.interrupt()
-                socketThreads[i-1] = Thread { socketThread (i-1, this.defaultSharedPreferences.getString("pref_rs232_port", "9876")!!, this.defaultSharedPreferences.getString("pref_rs232_baud_rate", "9600")!!, this.defaultSharedPreferences.getString("pref_rs232_data_bits", FT_DATA_BITS_8.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_stop_bits", FT_STOP_BITS_1.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_parity", FT_PARITY_NONE.toString())!!, this.defaultSharedPreferences.getString("pref_rs232_flow", FT_FLOW_NONE.toString())!!) }
-                socketThreads[i-1]?.start()
+                for (i in 1..devCount) {
+                    if (this.defaultSharedPreferences.getBoolean("pref_rs232_port${i-1}_enabled", false)) {
+                        Log.i("Ftdi", "Device description =  ${deviceList[0]!!.description}")
+                        socketThreads[i - 1]?.interrupt()
+                        socketThreads[i - 1] = Thread {
+                            socketThread(
+                                i - 1,
+                                this.defaultSharedPreferences.getString(
+                                    "pref_rs232_port${i-1}_port",
+                                    "${9876+i-1}"
+                                )!!,
+                                this.defaultSharedPreferences.getString(
+                                    "pref_rs232_port${i-1}_baud_rate",
+                                    "9600"
+                                )!!,
+                                this.defaultSharedPreferences.getString(
+                                    "pref_rs232_port${i-1}_data_bits",
+                                    FT_DATA_BITS_8.toString()
+                                )!!,
+                                this.defaultSharedPreferences.getString(
+                                    "pref_rs232_port${i-1}_stop_bits",
+                                    FT_STOP_BITS_1.toString()
+                                )!!,
+                                this.defaultSharedPreferences.getString(
+                                    "pref_rs232_port${i-1}_parity",
+                                    FT_PARITY_NONE.toString()
+                                )!!,
+                                this.defaultSharedPreferences.getString(
+                                    "pref_rs232_port${i-1}_flow",
+                                    FT_FLOW_NONE.toString()
+                                )!!
+                            )
+                        }
+                        socketThreads[i - 1]?.start()
+                    }
+                }
             }
         }
     }
@@ -282,9 +314,7 @@ class ServerService : Service(), CoroutineScope {
         if (BuildConfig.POLL_FOR_INTENTS) {
             val scheduleTaskExecutor= Executors.newScheduledThreadPool(1)
             scheduleTaskExecutor.scheduleAtFixedRate(java.lang.Runnable { intentRequest() }, 1000, 100, TimeUnit.MILLISECONDS)
-            if (this.defaultSharedPreferences.getBoolean("pref_rs232_enabled", true)) {
-                startFTDI()
-            }
+            startFTDI()
         }
 
         while (!localServerManager.isServerRunning(session)) {

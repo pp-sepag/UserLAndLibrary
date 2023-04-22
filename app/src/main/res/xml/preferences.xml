@@ -132,55 +132,227 @@
             android:key="pref_rs232_enabled"
             android:title="@string/pref_rs232_enabled_title"
             android:summary="@string/pref_rs232_enabled_summary"
-            android:defaultValue="true"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"/>
+        <CheckBoxPreference
+            android:dependency="pref_rs232_enabled"
+            android:key="pref_rs232_port0_enabled"
+            android:title="@string/pref_rs232_port0_enabled_title"
+            android:summary="@string/pref_rs232_port_enabled_summary"
+            android:defaultValue="false"
             app:iconSpaceReserved="false"/>
         <EditTextPreference
-            android:dependency="pref_rs232_enabled"
-            android:key="pref_rs232_baud_rate"
-            android:title="@string/pref_rs232_baud_rate_title"
+            android:dependency="pref_rs232_port0_enabled"
+            android:key="pref_rs232_port0_baud_rate"
+            android:title="@string/pref_rs232_port0_baud_rate_title"
             android:defaultValue="@string/pref_rs232_baud_rate_default"
             app:iconSpaceReserved="false"/>
         <ListPreference
-            android:dependency="pref_rs232_enabled"
-            android:key="pref_rs232_data_bits"
-            android:title="@string/pref_rs232_data_bits_title"
+            android:dependency="pref_rs232_port0_enabled"
+            android:key="pref_rs232_port0_data_bits"
+            android:title="@string/pref_rs232_port0_data_bits_title"
             android:summary="@string/pref_rs232_data_bits_summary"
             android:entries="@array/rs232_data_bits"
             android:entryValues="@array/rs232_data_bits"
             android:defaultValue="@string/pref_rs232_data_bits_default"
             app:iconSpaceReserved="false"/>
         <ListPreference
-            android:dependency="pref_rs232_enabled"
-            android:key="pref_rs232_stop_bits"
-            android:title="@string/pref_rs232_stop_bits_title"
+            android:dependency="pref_rs232_port0_enabled"
+            android:key="pref_rs232_port0_stop_bits"
+            android:title="@string/pref_rs232_port0_stop_bits_title"
             android:summary="@string/pref_rs232_stop_bits_summary"
             android:entries="@array/rs232_stop_bits"
             android:entryValues="@array/rs232_stop_bits_values"
             android:defaultValue="@string/pref_rs232_stop_bits_default"
             app:iconSpaceReserved="false"/>
         <ListPreference
-            android:dependency="pref_rs232_enabled"
-            android:key="pref_rs232_parity"
-            android:title="@string/pref_rs232_parity_title"
+            android:dependency="pref_rs232_port0_enabled"
+            android:key="pref_rs232_port0_parity"
+            android:title="@string/pref_rs232_port0_parity_title"
             android:summary="@string/pref_rs232_parity_summary"
             android:entries="@array/rs232_parity"
             android:entryValues="@array/rs232_parity_values"
             android:defaultValue="@string/pref_rs232_parity_default"
             app:iconSpaceReserved="false"/>
         <ListPreference
-            android:dependency="pref_rs232_enabled"
-            android:key="pref_rs232_flow"
-            android:title="@string/pref_rs232_flow_title"
+            android:dependency="pref_rs232_port0_enabled"
+            android:key="pref_rs232_port0_flow"
+            android:title="@string/pref_rs232_port0_flow_title"
             android:summary="@string/pref_rs232_flow_summary"
             android:entries="@array/rs232_flow"
             android:entryValues="@array/rs232_flow_values"
             android:defaultValue="@string/pref_rs232_flow_default"
             app:iconSpaceReserved="false"/>
         <EditTextPreference
+            android:dependency="pref_rs232_port0_enabled"
+            android:key="pref_rs232_port0_port"
+            android:title="@string/pref_rs232_port0_port_title"
+            android:defaultValue="@string/pref_rs232_port0_port_default"
+            app:iconSpaceReserved="false"/>
+        <CheckBoxPreference
             android:dependency="pref_rs232_enabled"
-            android:key="pref_rs232_port"
-            android:title="@string/pref_rs232_port_title"
-            android:defaultValue="@string/pref_rs232_port_default"
+            android:key="pref_rs232_port1_enabled"
+            android:title="@string/pref_rs232_port1_enabled_title"
+            android:summary="@string/pref_rs232_port_enabled_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"/>
+        <EditTextPreference
+            android:dependency="pref_rs232_port1_enabled"
+            android:key="pref_rs232_port1_baud_rate"
+            android:title="@string/pref_rs232_port1_baud_rate_title"
+            android:defaultValue="@string/pref_rs232_baud_rate_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port1_enabled"
+            android:key="pref_rs232_port1_data_bits"
+            android:title="@string/pref_rs232_port1_data_bits_title"
+            android:summary="@string/pref_rs232_data_bits_summary"
+            android:entries="@array/rs232_data_bits"
+            android:entryValues="@array/rs232_data_bits"
+            android:defaultValue="@string/pref_rs232_data_bits_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port1_enabled"
+            android:key="pref_rs232_port1_stop_bits"
+            android:title="@string/pref_rs232_port1_stop_bits_title"
+            android:summary="@string/pref_rs232_stop_bits_summary"
+            android:entries="@array/rs232_stop_bits"
+            android:entryValues="@array/rs232_stop_bits_values"
+            android:defaultValue="@string/pref_rs232_stop_bits_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port1_enabled"
+            android:key="pref_rs232_port1_parity"
+            android:title="@string/pref_rs232_port1_parity_title"
+            android:summary="@string/pref_rs232_parity_summary"
+            android:entries="@array/rs232_parity"
+            android:entryValues="@array/rs232_parity_values"
+            android:defaultValue="@string/pref_rs232_parity_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port1_enabled"
+            android:key="pref_rs232_port1_flow"
+            android:title="@string/pref_rs232_port1_flow_title"
+            android:summary="@string/pref_rs232_flow_summary"
+            android:entries="@array/rs232_flow"
+            android:entryValues="@array/rs232_flow_values"
+            android:defaultValue="@string/pref_rs232_flow_default"
+            app:iconSpaceReserved="false"/>
+        <EditTextPreference
+            android:dependency="pref_rs232_port1_enabled"
+            android:key="pref_rs232_port1_port"
+            android:title="@string/pref_rs232_port1_port_title"
+            android:defaultValue="@string/pref_rs232_port1_port_default"
+            app:iconSpaceReserved="false"/>
+        <CheckBoxPreference
+            android:dependency="pref_rs232_enabled"
+            android:key="pref_rs232_port2_enabled"
+            android:title="@string/pref_rs232_port2_enabled_title"
+            android:summary="@string/pref_rs232_port_enabled_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"/>
+        <EditTextPreference
+            android:dependency="pref_rs232_port2_enabled"
+            android:key="pref_rs232_port2_baud_rate"
+            android:title="@string/pref_rs232_port2_baud_rate_title"
+            android:defaultValue="@string/pref_rs232_baud_rate_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port2_enabled"
+            android:key="pref_rs232_port2_data_bits"
+            android:title="@string/pref_rs232_port2_data_bits_title"
+            android:summary="@string/pref_rs232_data_bits_summary"
+            android:entries="@array/rs232_data_bits"
+            android:entryValues="@array/rs232_data_bits"
+            android:defaultValue="@string/pref_rs232_data_bits_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port2_enabled"
+            android:key="pref_rs232_port2_stop_bits"
+            android:title="@string/pref_rs232_port2_stop_bits_title"
+            android:summary="@string/pref_rs232_stop_bits_summary"
+            android:entries="@array/rs232_stop_bits"
+            android:entryValues="@array/rs232_stop_bits_values"
+            android:defaultValue="@string/pref_rs232_stop_bits_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port2_enabled"
+            android:key="pref_rs232_port2_parity"
+            android:title="@string/pref_rs232_port2_parity_title"
+            android:summary="@string/pref_rs232_parity_summary"
+            android:entries="@array/rs232_parity"
+            android:entryValues="@array/rs232_parity_values"
+            android:defaultValue="@string/pref_rs232_parity_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port2_enabled"
+            android:key="pref_rs232_port2_flow"
+            android:title="@string/pref_rs232_port2_flow_title"
+            android:summary="@string/pref_rs232_flow_summary"
+            android:entries="@array/rs232_flow"
+            android:entryValues="@array/rs232_flow_values"
+            android:defaultValue="@string/pref_rs232_flow_default"
+            app:iconSpaceReserved="false"/>
+        <EditTextPreference
+            android:dependency="pref_rs232_port2_enabled"
+            android:key="pref_rs232_port2_port"
+            android:title="@string/pref_rs232_port2_port_title"
+            android:defaultValue="@string/pref_rs232_port2_port_default"
+            app:iconSpaceReserved="false"/>
+        <CheckBoxPreference
+            android:dependency="pref_rs232_enabled"
+            android:key="pref_rs232_port3_enabled"
+            android:title="@string/pref_rs232_port3_enabled_title"
+            android:summary="@string/pref_rs232_port_enabled_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"/>
+        <EditTextPreference
+            android:dependency="pref_rs232_port3_enabled"
+            android:key="pref_rs232_port3_baud_rate"
+            android:title="@string/pref_rs232_port3_baud_rate_title"
+            android:defaultValue="@string/pref_rs232_baud_rate_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port3_enabled"
+            android:key="pref_rs232_port3_data_bits"
+            android:title="@string/pref_rs232_port3_data_bits_title"
+            android:summary="@string/pref_rs232_data_bits_summary"
+            android:entries="@array/rs232_data_bits"
+            android:entryValues="@array/rs232_data_bits"
+            android:defaultValue="@string/pref_rs232_data_bits_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port3_enabled"
+            android:key="pref_rs232_port3_stop_bits"
+            android:title="@string/pref_rs232_port3_stop_bits_title"
+            android:summary="@string/pref_rs232_stop_bits_summary"
+            android:entries="@array/rs232_stop_bits"
+            android:entryValues="@array/rs232_stop_bits_values"
+            android:defaultValue="@string/pref_rs232_stop_bits_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port3_enabled"
+            android:key="pref_rs232_port3_parity"
+            android:title="@string/pref_rs232_port3_parity_title"
+            android:summary="@string/pref_rs232_parity_summary"
+            android:entries="@array/rs232_parity"
+            android:entryValues="@array/rs232_parity_values"
+            android:defaultValue="@string/pref_rs232_parity_default"
+            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:dependency="pref_rs232_port3_enabled"
+            android:key="pref_rs232_port3_flow"
+            android:title="@string/pref_rs232_port3_flow_title"
+            android:summary="@string/pref_rs232_flow_summary"
+            android:entries="@array/rs232_flow"
+            android:entryValues="@array/rs232_flow_values"
+            android:defaultValue="@string/pref_rs232_flow_default"
+            app:iconSpaceReserved="false"/>
+        <EditTextPreference
+            android:dependency="pref_rs232_port3_enabled"
+            android:key="pref_rs232_port3_port"
+            android:title="@string/pref_rs232_port3_port_title"
+            android:defaultValue="@string/pref_rs232_port3_port_default"
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
     <PreferenceCategory
