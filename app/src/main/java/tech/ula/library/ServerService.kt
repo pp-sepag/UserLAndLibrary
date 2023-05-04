@@ -78,21 +78,20 @@ class ServerService : Service(), CoroutineScope {
         ftDev.setFlowControl(flowControl, 0x00.toByte(), 0x00.toByte())
     }
 
-    private val working = AtomicBoolean(true)
-
-    fun readThread (ftDev: FT_Device, outputStream: DataOutputStream) {
+    fun readThread (channel: Int, ftDev: FT_Device, outputStream: DataOutputStream) {
         var availBytes = 0
         try {
-            while (working.get()) {
+            while (true) {
                 synchronized(ftDev) {
                     availBytes = ftDev.getQueueStatus()
                     if (availBytes > 0) {
                         var readData = ByteArray(availBytes)
                         ftDev.read(readData, availBytes)
                         outputStream.write(readData)
-                    } else {
-                        sleep(50)
                     }
+                }
+                if (availBytes == 0) {
+                    sleep(50)
                 }
             }
         } catch (e: Exception) {
@@ -102,24 +101,28 @@ class ServerService : Service(), CoroutineScope {
         }
     }
 
-    fun writeThread(ftDev: FT_Device, inputStream: DataInputStream) {
+    fun writeThread(channel: Int, ftDev: FT_Device, inputStream: DataInputStream) {
         var availBytes = 0
+        var running = true
+        var readData = ByteArray(8096)
         try {
-            while (working.get()) {
-                synchronized(ftDev) {
-                    availBytes = inputStream.available()
-                    if (availBytes > 0) {
-                        var readData = ByteArray(availBytes)
-                        inputStream.read(readData)
-                        ftDev.write(readData)
-                    } else {
-                        sleep(50)
+            while (running) {
+                availBytes = inputStream.read(readData)
+                if (availBytes > 0) {
+                    synchronized(ftDev) {
+                        ftDev.write(readData, availBytes)
                     }
+                } else {
+                    Log.i(TAG, "Client disconnected.")
+                    running = false
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
+            readThreads[channel]?.interrupt() //kill associated read channel
+            tcpSockets[channel]?.close() //close things from our end
+            tcpSockets[channel] = null
             inputStream.close()
         }
     }
@@ -133,20 +136,23 @@ class ServerService : Service(), CoroutineScope {
         try {
             serverSockets[channel]?.close()
             serverSockets[channel] = ServerSocket(port.toInt())
-            while (working.get()) {
+            while (true) {
                 if (serverSockets[channel] != null) {
                     newSocket = serverSockets[channel]!!.accept()
-                    tcpSockets[channel]?.close()
-                    readThreads[channel]?.interrupt()
-                    writeThreads[channel]?.interrupt()
-                    tcpSockets[channel] = newSocket
-                    Log.i(TAG, "New client: ${tcpSockets[channel]}")
-                    val outputStream = DataOutputStream(tcpSockets[channel]!!.getOutputStream())
-                    val inputStream = DataInputStream(tcpSockets[channel]!!.getInputStream())
-                    readThreads[channel] = Thread{ readThread (ftDev, outputStream) }
-                    writeThreads[channel] = Thread{ writeThread (ftDev, inputStream) }
-                    readThreads[channel]!!.start()
-                    writeThreads[channel]!!.start()
+                    val outputStream = DataOutputStream(newSocket.getOutputStream())
+                    val inputStream = DataInputStream(newSocket.getInputStream())
+                    if (tcpSockets[channel] != null) {
+                        Log.i(TAG, "Client already running.")
+                        outputStream.writeByte(1)
+                    } else {
+                        outputStream.writeByte(0)
+                        tcpSockets[channel] = newSocket
+                        Log.i(TAG, "New client: ${tcpSockets[channel]}")
+                        readThreads[channel] = Thread { readThread(channel, ftDev, outputStream) }
+                        writeThreads[channel] = Thread { writeThread(channel, ftDev, inputStream) }
+                        readThreads[channel]?.start()
+                        writeThreads[channel]?.start()
+                    }
                 } else {
                     Log.e(TAG, "Couldn't create ServerSocket!")
                 }
@@ -276,7 +282,6 @@ class ServerService : Service(), CoroutineScope {
 
     override fun onDestroy() {
         super.onDestroy()
-        working.set(false)
         for (i in 0..3) {
             readThreads[i]?.interrupt()
             writeThreads[i]?.interrupt()
