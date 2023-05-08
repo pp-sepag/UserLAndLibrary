@@ -216,10 +216,10 @@
     <string name="pref_rs232_port3_flow_title">Port 3 Flow Control</string>
     <string name="pref_rs232_flow_summary">Flow Control Type</string>
     <string name="pref_rs232_flow_default">0</string>
-    <string name="pref_rs232_port0_port_title">Port 0 TCP Port Offset</string>
-    <string name="pref_rs232_port1_port_title">Port 1 TCP Port Offset</string>
-    <string name="pref_rs232_port2_port_title">Port 2 TCP Port Offset</string>
-    <string name="pref_rs232_port3_port_title">Port 3 TCP Port Offset</string>
+    <string name="pref_rs232_port0_port_title">Port 0 TCP Port</string>
+    <string name="pref_rs232_port1_port_title">Port 1 TCP Port</string>
+    <string name="pref_rs232_port2_port_title">Port 2 TCP Port</string>
+    <string name="pref_rs232_port3_port_title">Port 3 TCP Port</string>
     <string name="pref_rs232_port0_port_default">9876</string>
     <string name="pref_rs232_port1_port_default">9877</string>
     <string name="pref_rs232_port2_port_default">9878</string>
