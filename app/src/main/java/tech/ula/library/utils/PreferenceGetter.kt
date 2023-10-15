@@ -1,6 +1,8 @@
 package tech.ula.library.utils
 
 import android.content.SharedPreferences
+import android.os.Environment
+import android.util.Log
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
@@ -108,32 +110,75 @@ class PreferenceGetter(
     }
 
     fun fetchXML() {
+        //If you uncomment out the next two lines it will only check for the preferences file on the first run, which limits your ability to debug
+        //if (xmlFetch == true)
+            //return
         try {
-            if (xmlFetch == true)
-                return
             var xmlFile = File(ulaFiles.filesDir.absolutePath + "/preferences.xml")
+            Log.d("PreferenceGetter","Checking if " + xmlFile.absolutePath + " exists")
             if (xmlFile.exists()) {
+                Log.d("PreferenceGetter",xmlFile.absolutePath + " exists")
                 parseXml(FileInputStream(xmlFile))
+                Log.d("PreferenceGetter","XML parsing complete")
                 xmlFetch = true
                 return
             }
-            xmlFile = File(ulaFiles.emulatedScopedDir.absolutePath + "/preferences.xml")
+        } catch (e: Exception){
+            Log.e("PreferenceGetter","XML file parsing failed with this exception: " + e.message)
+        }
+        try {
+            var xmlFile = File(ulaFiles.emulatedScopedDir.absolutePath + "/preferences.xml")
+            Log.d("PreferenceGetter","Checking if " + xmlFile.absolutePath + " exists")
             if (xmlFile.exists()) {
+                Log.d("PreferenceGetter",xmlFile.absolutePath + " exists")
                 parseXml(FileInputStream(xmlFile))
+                Log.d("PreferenceGetter","XML parsing complete")
                 xmlFetch = true
                 return
             }
+        } catch (e: Exception){
+            Log.e("PreferenceGetter","XML file parsing failed with this exception: " + e.message)
+        }
+        try {
+            var xmlFile = File(Environment.getExternalStorageDirectory(),"/Relag/preferences.xml")
+            Log.d("PreferenceGetter","Checking if " + xmlFile.absolutePath + " exists")
+            if (xmlFile.exists()) {
+                Log.d("PreferenceGetter",xmlFile.absolutePath + " exists")
+                parseXml(FileInputStream(xmlFile))
+                Log.d("PreferenceGetter","XML parsing complete")
+                xmlFetch = true
+                return
+            }
+        } catch (e: Exception){
+            Log.e("PreferenceGetter","XML file parsing failed with this exception: " + e.message)
+        }
+        try {
+            var xmlFile = File("/sdcard/Relag/preferences.xml")
+            Log.d("PreferenceGetter","Checking if " + xmlFile.absolutePath + " exists")
+            if (xmlFile.exists()) {
+                Log.d("PreferenceGetter",xmlFile.absolutePath + " exists")
+                parseXml(FileInputStream(xmlFile))
+                Log.d("PreferenceGetter","XML parsing complete")
+                xmlFetch = true
+                return
+            }
+        } catch (e: Exception){
+            Log.e("PreferenceGetter","XML file parsing failed with this exception: " + e.message)
+        }
+        try {
             if (ulaFiles.documentsDir != null) {
-                xmlFile = File(ulaFiles.documentsDir.absolutePath + "/Relag/preferences.xml")
+                var xmlFile = File(ulaFiles.documentsDir.absolutePath + "/Relag/preferences.xml")
+                Log.d("PreferenceGetter","Checking if " + xmlFile.absolutePath + " exists")
                 if (xmlFile.exists()) {
+                    Log.d("PreferenceGetter",xmlFile.absolutePath + " exists")
                     parseXml(FileInputStream(xmlFile))
+                    Log.d("PreferenceGetter","XML parsing complete")
                     xmlFetch = true
                     return
                 }
             }
         } catch (e: Exception){
-            xmlFetch = true
-            return
+            Log.e("PreferenceGetter","XML file parsing failed with this exception: " + e.message)
         }
         xmlFetch = true
     }
