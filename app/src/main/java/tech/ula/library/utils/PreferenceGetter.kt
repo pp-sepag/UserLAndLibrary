@@ -87,14 +87,13 @@ class PreferenceGetter(
                                 putBoolean("pref_hide_settings",text.toBoolean())
                                 apply()
                             }
-                        } else if (tagname.equals("pref_rs232_enabled", ignoreCase = true)) {
-                            with(sharedPreferences.edit()) {
-                                putBoolean("pref_rs232_enabled",text.toBoolean())
-                                apply()
-                            }
                         } else if (tagname.startsWith("pref_rs232", ignoreCase = true)) {
                             with(sharedPreferences.edit()) {
-                                putString(tagname,text)
+                                if (tagname.endsWith("_enabled", true)) {
+                                    putBoolean(tagname,text.toBoolean())
+                                } else {
+                                    putString(tagname,text)
+                                }
                                 apply()
                             }
                         } else -> { }
