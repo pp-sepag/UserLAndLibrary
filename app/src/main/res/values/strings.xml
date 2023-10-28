@@ -158,6 +158,10 @@
     <string name="pref_custom_hostname_enabled_title">Use Custom Hostname</string>
     <string name="pref_custom_hostname_enabled_summary">Allows you to specify custom hostname which will be used in /etc/hosts and /etc/hostname.</string>
     <string name="pref_hostname_title">Set Custom Hostsname</string>
+    <string name="pref_hostname_from_http_title">Fetch hostname from server</string>
+    <string name="pref_hostname_from_http_summary">Allows you to specify URL for a network service which will return a hostname for this device when queried.</string>
+    <string name="pref_hostname_http_url_title">Set Hostsname URL</string>
+    <string name="pref_hostname_http_url_default">http://test</string>
     <string name="pref_custom_dns_enabled_title">Use Custom reslov.conf File</string>
     <string name="pref_custom_dns_enabled_summary">Allows you to specify custom contents for the /etc/resolv.conf file.</string>
     <string name="pref_dns_title">Set resolv.conf File Contents</string>
@@ -308,6 +312,8 @@
     <string name="session_unique_name_required">Sessions require a unique name!</string>
     <string name="filesystem_unique_name_required">Filesystems require a unique name!</string>
     <string name="single_session_supported">%1$s currently only supports a single active session!</string>
+    <string name="http_hostname_failure">Getting hostname from server failed!</string>
+
     <string name="debug_log_export_success">Debug log exported successfully!</string>
     <string name="debug_log_export_failure">Exporting debug log failed!</string>
     <string name="debug_log_deleted">Debug log deleted!</string>

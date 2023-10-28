@@ -12,17 +12,15 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.*
-import android.provider.MediaStore
 import android.speech.SpeechRecognizer.isRecognitionAvailable
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.*
 import android.view.animation.AlphaAnimation
 import android.widget.RadioButton
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -33,15 +31,12 @@ import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.NavigationUI.setupWithNavController
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
-import com.google.mlkit.md.LiveBarcodeScanningActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.IOException
-import kotlinx.coroutines.withContext
-import tech.ula.library.R
+import tech.ula.customlibrary.BuildConfig
+import tech.ula.library.model.entities.*
 import tech.ula.library.model.remote.GithubApiClient
 import tech.ula.library.model.repositories.AssetRepository
 import tech.ula.library.model.repositories.DownloadMetadata
@@ -53,14 +48,12 @@ import tech.ula.library.ui.SessionListFragment
 import tech.ula.library.utils.*
 import tech.ula.library.utils.preferences.*
 import tech.ula.library.viewmodel.*
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
 import java.lang.reflect.Method
 import java.net.NetworkInterface
-import java.text.SimpleDateFormat
 import java.util.*
-import tech.ula.customlibrary.BuildConfig
-import tech.ula.library.model.entities.*
-import tech.ula.library.model.state.SessionStartupFsm
-import tech.ula.library.utils.*
 
 class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, AppsListFragment.AppSelection, FilesystemListFragment.FilesystemListProgress {
 
@@ -344,12 +337,16 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                     }
                 } else if (i == 3) {
                     if (!defaultSharedPreferences.contains("unique_id")) {
-                        with(defaultSharedPreferences.edit()) {
-                            if (v != null && !v.trim().isEmpty())
-                                putString("unique_id", v)
-                            else
-                                putString("unique_id", "android-" + UUID.randomUUID().toString())
-                            apply()
+                        if (!defaultSharedPreferences.getBoolean("pref_hostname_from_http", false)) {
+                            with(defaultSharedPreferences.edit()) {
+                                if (v != null && !v.trim().isEmpty())
+                                    putString("unique_id", v)
+                                else
+                                    putString("unique_id", "android-" + UUID.randomUUID().toString())
+                                apply()
+                            }
+                        } else {
+                            getHostnameFromHttp()
                         }
                     }
                 }
@@ -379,11 +376,36 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 }
             }
             if (!defaultSharedPreferences.contains("unique_id")) {
-                with(defaultSharedPreferences.edit()) {
-                    putString("unique_id", "android-" + getMacAddr())
-                    apply()
+                if (!defaultSharedPreferences.getBoolean("pref_hostname_from_http", false)) {
+                    with(defaultSharedPreferences.edit()) {
+                        putString("unique_id", "android-" + getMacAddr())
+                        apply()
+                    }
+                } else {
+                    getHostnameFromHttp()
                 }
             }
+        }
+    }
+
+    private fun getHostnameFromHttp() {
+        if (Build.VERSION.SDK_INT > 9) {
+            val policy: StrictMode.ThreadPolicy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+            StrictMode.setThreadPolicy(policy)
+        }
+        try {
+            val httpStream = HttpStream()
+            val url = defaultSharedPreferences.getString("pref_hostname_http_url", getString(R.string.pref_hostname_http_url_default))
+            val inputStream = httpStream.fromUrl(url!!)
+            val reader = BufferedReader(InputStreamReader(inputStream))
+            val hostname = reader.readText().trim()
+            with(defaultSharedPreferences.edit()) {
+                putString("unique_id", hostname)
+                apply()
+            }
+        } catch (err: Exception) {
+            showToast(getString(R.string.http_hostname_failure))
+            Log.e("getHostnameFromHttp", getString(R.string.http_hostname_failure))
         }
     }
 

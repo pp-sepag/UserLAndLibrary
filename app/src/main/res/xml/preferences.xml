@@ -49,6 +49,18 @@
             android:defaultValue="@string/pref_hostname_default"
             app:iconSpaceReserved="false"/>
         <CheckBoxPreference
+            android:key="pref_hostname_from_http"
+            android:title="@string/pref_hostname_from_http_title"
+            android:summary="@string/pref_hostname_from_http_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"/>
+        <EditTextPreference
+            android:dependency="pref_hostname_from_http"
+            android:key="pref_hostname_http_url"
+            android:title="@string/pref_hostname_http_url_title"
+            android:defaultValue="@string/pref_hostname_http_url_default"
+            app:iconSpaceReserved="false"/>
+        <CheckBoxPreference
             android:key="pref_custom_dns_enabled"
             android:title="@string/pref_custom_dns_enabled_title"
             android:summary="@string/pref_custom_dns_enabled_summary"

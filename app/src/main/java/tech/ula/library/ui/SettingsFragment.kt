@@ -81,6 +81,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
             (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hide_vnc_toolbar"))
             (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hide_vnc_extra_keys"))
             (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_default_vnc_input_mode"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hostname_from_http"))
+            (findPreference("pref_app_category") as PreferenceGroup?)!!.removePreference(findPreference("pref_hostname_http_url"))
             (findPreference("pref_screen") as PreferenceScreen?)!!.removePreference(findPreference("pref_proot_category"))
         }
     }

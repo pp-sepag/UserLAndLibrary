@@ -96,6 +96,16 @@ class PreferenceGetter(
                                 }
                                 apply()
                             }
+                        } else if (tagname.equals("pref_hostname_from_http", ignoreCase = true)) {
+                            with(sharedPreferences.edit()) {
+                                putBoolean("pref_hostname_from_http",text.toBoolean())
+                                apply()
+                            }
+                        } else if (tagname.equals("pref_hostname_http_url", ignoreCase = true)) {
+                            with(sharedPreferences.edit()) {
+                                putString("pref_hostname_http_url",text)
+                                apply()
+                            }
                         } else -> { }
                 }
                 eventType = parser.next()
