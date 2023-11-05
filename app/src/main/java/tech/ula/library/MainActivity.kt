@@ -34,6 +34,7 @@ import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tech.ula.customlibrary.BuildConfig
 import tech.ula.library.model.entities.*
@@ -345,8 +346,6 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                                     putString("unique_id", "android-" + UUID.randomUUID().toString())
                                 apply()
                             }
-                        } else {
-                            getHostnameFromHttp()
                         }
                     }
                 }
@@ -381,18 +380,12 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                         putString("unique_id", "android-" + getMacAddr())
                         apply()
                     }
-                } else {
-                    getHostnameFromHttp()
                 }
             }
         }
     }
 
-    private fun getHostnameFromHttp() {
-        if (Build.VERSION.SDK_INT > 9) {
-            val policy: StrictMode.ThreadPolicy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-            StrictMode.setThreadPolicy(policy)
-        }
+    private fun getHostnameFromHttp(): Boolean {
         try {
             val httpStream = HttpStream()
             val url = defaultSharedPreferences.getString("pref_hostname_http_url", getString(R.string.pref_hostname_http_url_default))
@@ -403,9 +396,9 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 putString("unique_id", hostname)
                 apply()
             }
+            return true
         } catch (err: Exception) {
-            showToast(getString(R.string.http_hostname_failure))
-            Log.e("getHostnameFromHttp", getString(R.string.http_hostname_failure))
+            return false
         }
     }
 
@@ -498,10 +491,7 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         unregisterReceiver(downloadBroadcastReceiver)
     }
 
-    override fun appHasBeenSelected(app: App, autoStart: Boolean) {
-        getNetInfo()
-        getCameraInfo()
-
+    fun appHasBeenSelectedPart2(app: App, autoStart: Boolean) {
         val prefs = getSharedPreferences("apps", Context.MODE_PRIVATE)
         val askConnectType = prefs.getBoolean("askConnectType", false)
         if (askConnectType) {
@@ -519,15 +509,55 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         viewModel.submitAppSelection(app, autoStart, askConnectType)
     }
 
-    override fun sessionHasBeenSelected(session: Session) {
+    override fun appHasBeenSelected(app: App, autoStart: Boolean) {
         getNetInfo()
         getCameraInfo()
+        if (!defaultSharedPreferences.contains("unique_id") && defaultSharedPreferences.getBoolean("pref_hostname_from_http", false)) {
+            GlobalScope.launch(Dispatchers.IO) {
+                if (getHostnameFromHttp()) {
+                    launch(Dispatchers.Main) {
+                        appHasBeenSelectedPart2(app, autoStart)
+                    }
+                } else {
+                    launch(Dispatchers.Main) {
+                        showToast(getString(R.string.http_hostname_failure))
+                        Log.e("getHostnameFromHttp", getString(R.string.http_hostname_failure))
+                    }
+                }
+            }
+        } else {
+            appHasBeenSelectedPart2(app, autoStart)
+        }
+    }
+
+    fun sessionHasBeenSelectedPart2(session: Session) {
         if (!PermissionHandler.permissionsAreGranted(this)) {
             PermissionHandler.showPermissionsNecessaryDialog(this)
             viewModel.waitForPermissions(sessionToContinue = session, askConnectType = false)
             return
         }
         viewModel.submitSessionSelection(session)
+    }
+
+    override fun sessionHasBeenSelected(session: Session) {
+        getNetInfo()
+        getCameraInfo()
+        if (!defaultSharedPreferences.contains("unique_id") && defaultSharedPreferences.getBoolean("pref_hostname_from_http", false)) {
+            GlobalScope.launch(Dispatchers.IO) {
+                if (getHostnameFromHttp()) {
+                    launch(Dispatchers.Main) {
+                        sessionHasBeenSelectedPart2(session)
+                    }
+                } else {
+                    launch(Dispatchers.Main) {
+                        showToast(getString(R.string.http_hostname_failure))
+                        Log.e("getHostnameFromHttp", getString(R.string.http_hostname_failure))
+                    }
+                }
+            }
+        } else {
+            sessionHasBeenSelectedPart2(session)
+        }
     }
 
     private fun handleStateUpdate(newState: State) {

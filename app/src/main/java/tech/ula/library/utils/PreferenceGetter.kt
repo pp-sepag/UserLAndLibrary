@@ -119,9 +119,8 @@ class PreferenceGetter(
     }
 
     fun fetchXML() {
-        //If you uncomment out the next two lines it will only check for the preferences file on the first run, which limits your ability to debug
-        //if (xmlFetch == true)
-            //return
+        if (xmlFetch == true)
+            return
         try {
             var xmlFile = File(ulaFiles.filesDir.absolutePath + "/preferences.xml")
             Log.d("PreferenceGetter","Checking if " + xmlFile.absolutePath + " exists")
