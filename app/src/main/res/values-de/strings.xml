@@ -228,6 +228,7 @@
     <string name="session_unique_name_required">Sitzungen benötigen einen eindeutigen Namen!</string>
     <string name="filesystem_unique_name_required">Dateisysteme benötigen einen eindeutigen Namen!</string>
     <string name="single_session_supported">%1$s unterstützt derzeit nur eine einzige aktive Sitzung!</string>
+    <string name="http_hostname_failure">Ermitteln des Hostnamens durch den Server fehlgeschlagen!</string>
     <string name="debug_log_export_success">Debug-Log erfolgreich exportiert!</string>
     <string name="debug_log_export_failure">Export des Debug-Logs fehlgeschlagen!</string>
     <string name="debug_log_deleted">Debug-Log gelöscht!</string>
@@ -283,6 +284,10 @@
     <string name="pref_custom_hostname_enabled_title">Benutzerdefinierten Hostnamen verwenden</string>
     <string name="pref_custom_hostname_enabled_summary">Erlaubt die Verwendung eines benutzerdefinierten Hostnamen, der in /etc/hosts und /etc/hostname verwendet wird.</string>
     <string name="pref_hostname_title">Benutzerdefinierten Hostnamen setzen</string>
+    <string name="pref_hostname_from_http_title">Hostnamen durch Server bestimmen</string>
+    <string name="pref_hostname_from_http_summary">Ermöglicht die Angabe einer URL zu einem Netzwerkdienst, der den Hostnamen für dieses Gerät ermittelt.</string>
+    <string name="pref_hostname_http_url_title">URL für den Hostsnamen festlegen</string>
+    <string name="pref_hostname_http_url_default">http://test</string>
     <string name="pref_custom_dns_enabled_title">Benutzerdefinierte DNS Einstellungen verwenden</string>
     <string name="pref_custom_dns_enabled_summary">Erlaubt die Angabe benutzerdefinierter Inhalten für die Datei /etc/resolv.conf.</string>
     <string name="pref_dns_title">Inhalte für die Datei resolv.conf festlegen</string>
