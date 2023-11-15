@@ -456,6 +456,10 @@ class ServerService : Service(), CoroutineScope {
                 recodeSpeechIntent.type = "record_speech"
                 recodeSpeechIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 this.startActivity(recodeSpeechIntent)
+            } else if (cameraRequestText.endsWith("kill_sessions")) {
+                activeSessions.forEach { (_, session) ->
+                    killSession(session)
+                }
             } else {
                 val cameraIntent = Intent(this, CameraActivity::class.java)
                 cameraIntent.type = "take_picture"
