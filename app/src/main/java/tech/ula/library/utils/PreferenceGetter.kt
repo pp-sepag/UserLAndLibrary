@@ -106,6 +106,16 @@ class PreferenceGetter(
                                 putString("pref_hostname_http_url",text)
                                 apply()
                             }
+                        } else if (tagname.equals("pref_auto_start_named_app", ignoreCase = true)) {
+                            with(sharedPreferences.edit()) {
+                                putBoolean("pref_auto_start_named_app",text.toBoolean())
+                                apply()
+                            }
+                        } else if (tagname.equals("pref_auto_start_app_name", ignoreCase = true)) {
+                            with(sharedPreferences.edit()) {
+                                putString("pref_auto_start_app_name",text)
+                                apply()
+                            }
                         } else -> { }
                 }
                 eventType = parser.next()

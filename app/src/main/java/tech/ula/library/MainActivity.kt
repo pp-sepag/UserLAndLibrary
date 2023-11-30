@@ -173,6 +173,8 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         if (intent?.type.equals("settings")) {
             if (!defaultSharedPreferences.getBoolean("pref_hide_settings", BuildConfig.DEFAULT_HIDE_SETTINGS))
                 navController.navigate(R.id.settings_fragment)
+        } else if (intent?.type.equals("no_auto_start")) {
+            return
         } else {
             if (intent != null) {
                 checkForAppIntent(intent)
@@ -197,12 +199,10 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         PreferenceGetter(ulaFiles, defaultSharedPreferences).fetchXML()
 
         if (intent?.type.equals("settings")) {
-            if (!defaultSharedPreferences.getBoolean(
-                    "pref_hide_settings",
-                    BuildConfig.DEFAULT_HIDE_SETTINGS
-                )
-            )
+            if (!defaultSharedPreferences.getBoolean("pref_hide_settings", BuildConfig.DEFAULT_HIDE_SETTINGS))
                 navController.navigate(R.id.settings_fragment)
+        } else if (intent?.type.equals("no_auto_start")) {
+            return
         } else {
             checkForAppIntent(intent)
             autoStart()
@@ -402,6 +402,17 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
         }
     }
 
+    private fun autoStartNamedApp(context: Context, name: String) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val autoApp = UlaDatabase.getInstance(context).appsDao().getAppByName(name)
+            if (autoApp != null) {
+                launch(Dispatchers.Main) {
+                    appHasBeenSelected(autoApp, true)
+                }
+            }
+        }
+    }
+
     private fun autoStart() {
         if (defaultSharedPreferences.getBoolean("photo_pending", false)) {
             val storageDir: File? = File(getExternalFilesDir(null),"Intents")
@@ -414,15 +425,24 @@ class MainActivity : AppCompatActivity(), SessionListFragment.SessionSelection, 
                 apply()
             }
         }
+
         val prefs = getSharedPreferences("apps", Context.MODE_PRIVATE)
         val json = prefs.getString("AutoApp", " ")
-        if (json != null)
+        if (json != null) {
             if (json.compareTo(" ") != 0) {
                 val gson = Gson()
                 val autoApp = gson.fromJson(json, App::class.java)
-                autoStarted=true
+                autoStarted = true
                 appHasBeenSelected(autoApp, true)
             }
+        }
+        if (defaultSharedPreferences.getBoolean("pref_auto_start_named_app", false)) {
+            val name = defaultSharedPreferences.getString("pref_auto_start_app_name", "")
+            if (name != null) {
+                autoStarted = true
+                autoStartNamedApp(this, name)
+            }
+        }
     }
 
     override fun onStart() {

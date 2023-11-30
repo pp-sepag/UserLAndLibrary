@@ -12,6 +12,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.ftdi.j2xx.D2xxManager
 import com.ftdi.j2xx.D2xxManager.*
 import com.ftdi.j2xx.FT_Device
+import com.google.gson.Gson
 import com.google.mlkit.md.LiveBarcodeScanningActivity
 import com.iiordanov.bVNC.RemoteCanvasActivity
 import com.termux.app.TermuxActivity
@@ -28,6 +29,7 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.util.*
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
@@ -41,6 +43,8 @@ class ServerService : Service(), CoroutineScope {
     var socketThreads = Array<Thread?>(4) {null}
     var readThreads = Array<Thread?>(4) {null}
     var writeThreads = Array<Thread?>(4) {null}
+    var scheduleTaskExecutor: ScheduledExecutorService? = null
+
 
     private val job = Job()
     override val coroutineContext: CoroutineContext
@@ -306,6 +310,7 @@ class ServerService : Service(), CoroutineScope {
     }
 
     private fun killSession(session: Session) {
+        scheduleTaskExecutor!!.shutdownNow()
         localServerManager.stopService(session)
         removeSession(session)
         session.active = false
@@ -317,8 +322,8 @@ class ServerService : Service(), CoroutineScope {
         session.pid = localServerManager.startServer(session)
 
         if (BuildConfig.POLL_FOR_INTENTS) {
-            val scheduleTaskExecutor= Executors.newScheduledThreadPool(1)
-            scheduleTaskExecutor.scheduleAtFixedRate(java.lang.Runnable { intentRequest() }, 1000, 100, TimeUnit.MILLISECONDS)
+            scheduleTaskExecutor= Executors.newScheduledThreadPool(1)
+            scheduleTaskExecutor!!.scheduleAtFixedRate(java.lang.Runnable { intentRequest() }, 1000, 100, TimeUnit.MILLISECONDS)
             startFTDI()
         }
 
@@ -456,6 +461,25 @@ class ServerService : Service(), CoroutineScope {
                 recodeSpeechIntent.type = "record_speech"
                 recodeSpeechIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 this.startActivity(recodeSpeechIntent)
+            } else if (cameraRequestText.endsWith("kill_sessions")) {
+                activeSessions.forEach { (_, session) ->
+                    killSession(session)
+                }
+            } else if (cameraRequestText.endsWith("restart_app")) {
+                activeSessions.forEach { (_, session) ->
+                    killSession(session)
+                }
+                val mainIntent = Intent(this, MainActivity::class.java)
+                mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                this.startActivity(mainIntent)
+            } else if (cameraRequestText.endsWith("restart_app_no_auto_start")) {
+                activeSessions.forEach { (_, session) ->
+                    killSession(session)
+                }
+                val mainIntent = Intent(this, MainActivity::class.java)
+                mainIntent.type = "no_auto_start"
+                mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                this.startActivity(mainIntent)
             } else {
                 val cameraIntent = Intent(this, CameraActivity::class.java)
                 cameraIntent.type = "take_picture"
