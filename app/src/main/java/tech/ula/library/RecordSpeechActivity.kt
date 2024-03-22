@@ -35,7 +35,7 @@ class RecordSpeechActivity : AppCompatActivity() {
         val storageDir: File? = File(getExternalFilesDir(null),"Intents")
         val speechFile = File(storageDir, "record_speech.txt")
         speechFile.createNewFile()
-        speechFile.writeText("$voiceResult")
+        speechFile.writeText("$voiceResult", Charsets.UTF_8)
         return speechFile
     }
 
