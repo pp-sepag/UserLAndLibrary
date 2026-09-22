@@ -36,8 +36,15 @@ class GithubApiClient(
     @Throws(IOException::class)
     suspend fun getAssetsListDownloadUrl(repo: String): String = withContext(Dispatchers.IO) {
         val result = latestResults[repo] ?: queryLatestRelease(repo)
+        val assetName = "${ulaFiles.getArchType()}-assets.txt"
 
-        return@withContext result.assets.find { it.name == "${ulaFiles.getArchType()}-assets.txt" }!!.downloadUrl
+        val asset = result.assets.find { it.name == assetName }
+        if (asset == null) {
+            val err = IOException("Release asset not found: $assetName in UserLAnd-Assets-$repo")
+            logger.addExceptionBreadcrumb(err)
+            throw err
+        }
+        return@withContext asset.downloadUrl
     }
 
     @Throws(IOException::class)
@@ -48,11 +55,17 @@ class GithubApiClient(
     }
 
     @Throws(IOException::class)
-    suspend fun getAssetEndpoint(assetType: String, repo: String): String = withContext(Dispatchers.IO) {
+    suspend fun getAssetEndpoint(assetType: String, repo: String, archPrefix: Boolean = true): String = withContext(Dispatchers.IO) {
         val result = latestResults[repo] ?: queryLatestRelease(repo)
-        val assetName = "${ulaFiles.getArchType()}-$assetType"
+        val assetName = if (archPrefix) "${ulaFiles.getArchType()}-$assetType" else assetType
 
-        return@withContext result.assets.find { it.name == assetName }!!.downloadUrl
+        val asset = result.assets.find { it.name == assetName }
+        if (asset == null) {
+            val err = IOException("Release asset not found: $assetName in UserLAnd-Assets-$repo")
+            logger.addExceptionBreadcrumb(err)
+            throw err
+        }
+        return@withContext asset.downloadUrl
     }
 
     // Query latest release data and memoize results.

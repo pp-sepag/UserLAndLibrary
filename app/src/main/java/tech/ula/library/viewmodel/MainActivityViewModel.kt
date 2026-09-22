@@ -330,6 +330,9 @@ class MainActivityViewModel(
             is RemoteUnreachableForGeneration -> {
                 postIllegalStateWithLog(ErrorGeneratingDownloads(R.string.illegal_state_remote_unreachable_during_generation))
             }
+            is AssetGenerationFailed -> {
+                postIllegalStateWithLog(FailedToGenerateDownloadRequirements(newState.reason))
+            }
             is DownloadsRequired -> {
                 if (newState.largeDownloadRequired) {
                     state.postValue(LargeDownloadRequired(newState.downloadsRequired))
@@ -465,6 +468,7 @@ object ErrorCopyingAppScript : IllegalState()
 object NoSessionSelectedWhenTransitionNecessary : IllegalState()
 object ErrorFetchingAssetLists : IllegalState()
 data class ErrorGeneratingDownloads(val errorId: Int) : IllegalState()
+data class FailedToGenerateDownloadRequirements(val reason: String) : IllegalState()
 data class DownloadsDidNotCompleteSuccessfully(val reason: DownloadFailureLocalizationData) : IllegalState()
 object DownloadCacheAccessedWhileEmpty : IllegalState()
 object FailedToCopyAssetsToLocalStorage : IllegalState()
