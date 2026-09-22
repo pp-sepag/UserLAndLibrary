@@ -263,6 +263,7 @@ class DownloadManagerWrapper(private val downloadManager: DownloadManager, priva
 
     private var nextQueueEntry : Long = 0
     private var downloadQueue : HashMap<Long, Int> = HashMap<Long, Int> ()
+    private var downloadFailureReason : String = ""
     private val START = 0
     private val SUCCESS = 1
     private val FAIL = 2
@@ -289,7 +290,9 @@ class DownloadManagerWrapper(private val downloadManager: DownloadManager, priva
             try {
                 httpStream.toFile(url, destination)
             } catch (err: Exception) {
+                downloadFailureReason = "${destination.name}: ${err.localizedMessage ?: err.toString()}"
                 downloadQueue[index] = FAIL
+                activity.runOnUiThread { activity.viewModel.submitCompletedDownloadId(index) }
                 return@async
             }
             downloadQueue[index] = SUCCESS
@@ -350,6 +353,11 @@ class DownloadManagerWrapper(private val downloadManager: DownloadManager, priva
     }
 
     fun getDownloadFailureReason(id: Long): DownloadFailureLocalizationData {
+        if (!BuildConfig.USE_DOWNLOAD_MANAGER) {
+            if (downloadFailureReason.isEmpty())
+                return DownloadFailureLocalizationData(R.string.download_failure_reason_not_found)
+            return DownloadFailureLocalizationData(R.string.download_failure_http_error, listOf(downloadFailureReason))
+        }
         val query = generateQuery(id)
         val cursor = generateCursor(query)
         if (cursor.moveToFirst()) {

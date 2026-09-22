@@ -31,6 +31,8 @@ object IllegalStateHandler {
                 LocalizationData(state.errorId)
             is DownloadsDidNotCompleteSuccessfully ->
                 state.reason
+            is FailedToGenerateDownloadRequirements ->
+                LocalizationData(R.string.illegal_state_downloads_did_not_complete_successfully, listOf(state.reason))
             is FailedToCopyAssetsToLocalStorage ->
                 LocalizationData(R.string.illegal_state_failed_to_copy_assets_to_local)
             is AssetsHaveNotBeenDownloaded ->

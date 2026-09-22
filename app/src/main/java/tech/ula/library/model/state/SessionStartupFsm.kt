@@ -15,6 +15,7 @@ import tech.ula.library.model.repositories.DownloadMetadata
 import tech.ula.library.utils.*
 import tech.ula.library.model.repositories.UlaDatabase
 import tech.ula.library.utils.* // ktlint-disable no-wildcard-imports
+import java.io.IOException
 import java.net.UnknownHostException
 
 class SessionStartupFsm(
@@ -167,6 +168,9 @@ class SessionStartupFsm(
         } catch (err: UnknownHostException) {
             state.postValue(RemoteUnreachableForGeneration)
             return
+        } catch (err: IOException) {
+            state.postValue(AssetGenerationFailed(err.localizedMessage ?: err.toString()))
+            return
         }
 
         if (downloadRequirements.isEmpty()) {
@@ -313,6 +317,7 @@ object GeneratingDownloadRequirements : DownloadRequirementsGenerationState()
 data class DownloadsRequired(val downloadsRequired: List<DownloadMetadata>, val largeDownloadRequired: Boolean) : DownloadRequirementsGenerationState()
 object NoDownloadsRequired : DownloadRequirementsGenerationState()
 object RemoteUnreachableForGeneration : DownloadRequirementsGenerationState()
+data class AssetGenerationFailed(val reason: String) : DownloadRequirementsGenerationState()
 
 // Downloading asset states
 sealed class DownloadingAssetsState : SessionStartupState()

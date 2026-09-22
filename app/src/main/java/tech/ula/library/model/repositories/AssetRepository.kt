@@ -187,7 +187,7 @@ class AssetRepository(
             versionCode = githubApiClient.getLatestReleaseVersion(repo)
             url = githubApiClient.getAssetEndpoint(filename, repo)
             if (BuildConfig.CHECK_FILESYSTEM_MD5) {
-                urlMD5 = githubApiClient.getAssetEndpoint(filenameMD5, repo)
+                urlMD5 = githubApiClient.getAssetEndpoint(filenameMD5, repo, archPrefix = false)
             }
         }
         val downloadFsMetadata = DownloadMetadata(filename, repo, versionCode, url)
